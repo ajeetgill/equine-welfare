@@ -1,0 +1,557 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		5F3AF8742D666FB2005349B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5F3AF8592D666FB1005349B4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5F3AF8602D666FB1005349B4;
+			remoteInfo = "equine-welfare";
+		};
+		5F3AF87E2D666FB2005349B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5F3AF8592D666FB1005349B4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5F3AF8602D666FB1005349B4;
+			remoteInfo = "equine-welfare";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		5F3AF8612D666FB1005349B4 /* equine-welfare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "equine-welfare.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "equine-welfareTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "equine-welfareUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		5F3AF8632D666FB1005349B4 /* equine-welfare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "equine-welfare";
+			sourceTree = "<group>";
+		};
+		5F3AF8762D666FB2005349B4 /* equine-welfareTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "equine-welfareTests";
+			sourceTree = "<group>";
+		};
+		5F3AF8802D666FB2005349B4 /* equine-welfareUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "equine-welfareUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5F3AF85E2D666FB1005349B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F3AF8702D666FB2005349B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F3AF87A2D666FB2005349B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5F3AF8582D666FB1005349B4 = {
+			isa = PBXGroup;
+			children = (
+				5F3AF8632D666FB1005349B4 /* equine-welfare */,
+				5F3AF8762D666FB2005349B4 /* equine-welfareTests */,
+				5F3AF8802D666FB2005349B4 /* equine-welfareUITests */,
+				5F3AF8622D666FB1005349B4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5F3AF8622D666FB1005349B4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5F3AF8612D666FB1005349B4 /* equine-welfare.app */,
+				5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */,
+				5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5F3AF8602D666FB1005349B4 /* equine-welfare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5F3AF8872D666FB2005349B4 /* Build configuration list for PBXNativeTarget "equine-welfare" */;
+			buildPhases = (
+				5F3AF85D2D666FB1005349B4 /* Sources */,
+				5F3AF85E2D666FB1005349B4 /* Frameworks */,
+				5F3AF85F2D666FB1005349B4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5F3AF8632D666FB1005349B4 /* equine-welfare */,
+			);
+			name = "equine-welfare";
+			packageProductDependencies = (
+			);
+			productName = "equine-welfare";
+			productReference = 5F3AF8612D666FB1005349B4 /* equine-welfare.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5F3AF8722D666FB2005349B4 /* equine-welfareTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5F3AF88A2D666FB2005349B4 /* Build configuration list for PBXNativeTarget "equine-welfareTests" */;
+			buildPhases = (
+				5F3AF86F2D666FB2005349B4 /* Sources */,
+				5F3AF8702D666FB2005349B4 /* Frameworks */,
+				5F3AF8712D666FB2005349B4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5F3AF8752D666FB2005349B4 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5F3AF8762D666FB2005349B4 /* equine-welfareTests */,
+			);
+			name = "equine-welfareTests";
+			packageProductDependencies = (
+			);
+			productName = "equine-welfareTests";
+			productReference = 5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5F3AF87C2D666FB2005349B4 /* equine-welfareUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5F3AF88D2D666FB2005349B4 /* Build configuration list for PBXNativeTarget "equine-welfareUITests" */;
+			buildPhases = (
+				5F3AF8792D666FB2005349B4 /* Sources */,
+				5F3AF87A2D666FB2005349B4 /* Frameworks */,
+				5F3AF87B2D666FB2005349B4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5F3AF87F2D666FB2005349B4 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5F3AF8802D666FB2005349B4 /* equine-welfareUITests */,
+			);
+			name = "equine-welfareUITests";
+			packageProductDependencies = (
+			);
+			productName = "equine-welfareUITests";
+			productReference = 5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5F3AF8592D666FB1005349B4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					5F3AF8602D666FB1005349B4 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					5F3AF8722D666FB2005349B4 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 5F3AF8602D666FB1005349B4;
+					};
+					5F3AF87C2D666FB2005349B4 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 5F3AF8602D666FB1005349B4;
+					};
+				};
+			};
+			buildConfigurationList = 5F3AF85C2D666FB1005349B4 /* Build configuration list for PBXProject "equine-welfare" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5F3AF8582D666FB1005349B4;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 5F3AF8622D666FB1005349B4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5F3AF8602D666FB1005349B4 /* equine-welfare */,
+				5F3AF8722D666FB2005349B4 /* equine-welfareTests */,
+				5F3AF87C2D666FB2005349B4 /* equine-welfareUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5F3AF85F2D666FB1005349B4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F3AF8712D666FB2005349B4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F3AF87B2D666FB2005349B4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5F3AF85D2D666FB1005349B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F3AF86F2D666FB2005349B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F3AF8792D666FB2005349B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5F3AF8752D666FB2005349B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5F3AF8602D666FB1005349B4 /* equine-welfare */;
+			targetProxy = 5F3AF8742D666FB2005349B4 /* PBXContainerItemProxy */;
+		};
+		5F3AF87F2D666FB2005349B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5F3AF8602D666FB1005349B4 /* equine-welfare */;
+			targetProxy = 5F3AF87E2D666FB2005349B4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5F3AF8852D666FB2005349B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		5F3AF8862D666FB2005349B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5F3AF8882D666FB2005349B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"equine-welfare/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Code-of-Practice.equine-welfare";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5F3AF8892D666FB2005349B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"equine-welfare/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Code-of-Practice.equine-welfare";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5F3AF88B2D666FB2005349B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Code-of-Practice.equine-welfareTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/equine-welfare.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/equine-welfare";
+			};
+			name = Debug;
+		};
+		5F3AF88C2D666FB2005349B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Code-of-Practice.equine-welfareTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/equine-welfare.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/equine-welfare";
+			};
+			name = Release;
+		};
+		5F3AF88E2D666FB2005349B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Code-of-Practice.equine-welfareUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "equine-welfare";
+			};
+			name = Debug;
+		};
+		5F3AF88F2D666FB2005349B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Code-of-Practice.equine-welfareUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "equine-welfare";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5F3AF85C2D666FB1005349B4 /* Build configuration list for PBXProject "equine-welfare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F3AF8852D666FB2005349B4 /* Debug */,
+				5F3AF8862D666FB2005349B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5F3AF8872D666FB2005349B4 /* Build configuration list for PBXNativeTarget "equine-welfare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F3AF8882D666FB2005349B4 /* Debug */,
+				5F3AF8892D666FB2005349B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5F3AF88A2D666FB2005349B4 /* Build configuration list for PBXNativeTarget "equine-welfareTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F3AF88B2D666FB2005349B4 /* Debug */,
+				5F3AF88C2D666FB2005349B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5F3AF88D2D666FB2005349B4 /* Build configuration list for PBXNativeTarget "equine-welfareUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F3AF88E2D666FB2005349B4 /* Debug */,
+				5F3AF88F2D666FB2005349B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5F3AF8592D666FB1005349B4 /* Project object */;
+}
