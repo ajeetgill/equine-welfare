@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct MainScreen: View {
-    @Binding var vetName : String
-    @Binding var farmName : String
-    @Binding var visitDate : Date
+    @Binding var vetName: String
+    @Binding var farmName: String
+    @Binding var visitDate: Date
+    var navigationState: NavigationState
     
     var isFormValid: Bool {
         !vetName.isEmpty && !farmName.isEmpty
@@ -36,7 +37,12 @@ struct MainScreen: View {
                 )
                 
                 Button(action: {
-                    // Start assessment action
+                    // Use navigationState to transition to the section selection screen
+                    navigationState.startNewAssessment(
+                        vetName: vetName,
+                        farmName: farmName,
+                        visitDate: visitDate
+                    )
                 }) {
                     Text("Start Assessment")
                         .frame(maxWidth: .infinity)
@@ -50,7 +56,6 @@ struct MainScreen: View {
             .padding()
             .background(Color(.systemGray6))
             .cornerRadius(12)
-            
         }
     }
 }
@@ -59,8 +64,11 @@ struct MainScreen: View {
     @Previewable @State var vetName = ""
     @Previewable @State var farmName = ""
     @Previewable @State var visitDate = Date()
-       
-    MainScreen(vetName: $vetName,
-               farmName: $farmName,
-               visitDate: $visitDate)
+    
+    MainScreen(
+        vetName: $vetName,
+        farmName: $farmName,
+        visitDate: $visitDate,
+        navigationState: NavigationState()
+    )
 }

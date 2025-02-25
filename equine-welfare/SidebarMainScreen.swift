@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct SidebarMainScreen: View {
+    @EnvironmentObject private var navigationState: NavigationState
+    
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
             HStack {
                 Text("Report")
                     .font(.title)
@@ -17,6 +20,18 @@ struct SidebarMainScreen: View {
                 Spacer()
             }
             .padding()
+            
+            // Home button (disabled since we're already on home screen)
+            SidebarButton(
+                title: "Home",
+                icon: "house.fill",
+                isActive: false,
+                action: {}
+            )
+            .padding(.horizontal)
+            .padding(.top, 16)
+            .disabled(true)
+            
             Spacer()
         }
         .background(Color(.systemBackground))
@@ -25,4 +40,5 @@ struct SidebarMainScreen: View {
 
 #Preview {
     SidebarMainScreen()
+        .environmentObject(NavigationState())
 }
