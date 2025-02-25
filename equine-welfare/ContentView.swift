@@ -11,51 +11,118 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
-
+    
+    @StateObject private var navigationState = NavigationState()
+    @State private var vetName = ""
+    @State private var farmName = ""
+    @State private var visitDate = Date()
+    @StateObject private var sectionViewModel: SectionSelectionViewModel
+    
+    // MARK: - Initialization
+    
+    init(previewMode: Bool = false) {
+        let modelContext = ModelContainer.shared.mainContext
+        _sectionViewModel = StateObject(wrappedValue: SectionSelectionViewModel(modelContext: modelContext))
+        
+        if previewMode {
+            // Initialize preview state
+            let previewState = NavigationState()
+            previewState.currentScreen = .sectionSelection(assessmentId: nil)
+            _navigationState = StateObject(wrappedValue: previewState)
+            _vetName = State(initialValue: "Dr. Smith")
+            _farmName = State(initialValue: "Green Acres Farm")
+            _visitDate = State(initialValue: Date())
+        }
+    }
+    
+    // MARK: - Body
+    
     var body: some View {
         NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
+            // MARK: Sidebar Content
+            sidebarContent
         } detail: {
-            Text("Select an item")
+            // MARK: Detail Content
+            detailContent
+        }
+        .environmentObject(navigationState)
+    }
+    
+    // MARK: - View Components
+    
+    @ViewBuilder
+    private var sidebarContent: some View {
+        switch navigationState.currentScreen {
+        case .main:
+            SidebarMainScreen()
+        case .sectionSelection(let assessmentId):
+            AssessmentSidebarView(viewModel: sectionViewModel)
+                .onAppear {
+                    handleAssessmentAppearance(assessmentId: assessmentId)
+                }
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    
+    @ViewBuilder
+    private var detailContent: some View {
+        switch navigationState.currentScreen {
+        case .main:
+            VStack(alignment: .leading, spacing: 24) {
+                MainScreen(
+                    vetName: $vetName,
+                    farmName: $farmName,
+                    visitDate: $visitDate,
+                    navigationState: navigationState
+                )
+                
+                ScrollView {
+                    PreviousAssessments()
+                }
             }
+            .padding()
+            
+        case .sectionSelection:
+            if let sectionId = navigationState.selectedSectionId,
+               let section = sectionViewModel.sections.first(where: { $0.id == sectionId }) {
+                // Show the section detail view
+                SectionDetailView(section: section)
+            } else {
+                // Show the section selection view
+                SectionSelectionView(viewModel: sectionViewModel)
+            }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func handleAssessmentAppearance(assessmentId: UUID?) {
+        if let id = assessmentId {
+            // Load existing assessment
+            sectionViewModel.loadAssessment(id: id)
+        } else {
+            // Create new assessment with form data
+            sectionViewModel.createNewAssessment(
+                vetName: vetName,
+                farmName: farmName,
+                visitDate: visitDate
+            )
+            
+            // Reset input fields after creating new assessment
+            vetName = ""
+            farmName = ""
+            visitDate = Date()
         }
     }
 }
+
+// MARK: - Previews
 
 #Preview {
     ContentView()
         .modelContainer(for: Item.self, inMemory: true)
 }
+
+#Preview("Section Selection") {
+    ContentView(previewMode: true)
+        .modelContainer(for: Item.self, inMemory: true)
+} 

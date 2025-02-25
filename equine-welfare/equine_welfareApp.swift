@@ -13,11 +13,15 @@ struct equine_welfareApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
+            Assessment.self,
+            SectionSelection.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            ModelContainer.shared = container
+            return container
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
@@ -29,4 +33,8 @@ struct equine_welfareApp: App {
         }
         .modelContainer(sharedModelContainer)
     }
+}
+
+extension ModelContainer {
+    static var shared: ModelContainer!
 }
