@@ -1,0 +1,30 @@
+{
+    "horseBreeds": [
+      "Quarter Horse",
+      "Appendix Quarter Horse",
+      "Quarter Horse cross",
+      "Standardbred",
+      "Pony",
+      "Halflinger",
+      "Paint",
+      "Appaloosa",
+      "Miniature Horse",
+      "Percheron",
+      "Belgian",
+      "Clydesdale",
+      "Hannoverian",
+      "Warmblood",
+      "Warmblood cross",
+      "Draft cross",
+      "Arabian",
+      "Arabian cross",
+      "Thoroughbred",
+      "Thoroughbred cross",
+      "Saddlebred",
+      "Morgan",
+      "Cross",
+      "Donkey",
+      "Unknown"
+    ]
+  }
+  
