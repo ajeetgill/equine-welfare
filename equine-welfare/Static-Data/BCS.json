@@ -1,7 +1,7 @@
 {
   "BCS 1": {
     "score": 1,
-    "photo": "images/bcs/bcs1.svg",
+    "photo": "BC1",
     "WHOLE BODY": {
       "description": [
         "Poor condition",
@@ -30,7 +30,7 @@
   },
   "BCS 2": {
     "score": 2,
-    "photo": "images/bcs/bcs2.svg",
+    "photo": "BC2",
     "WHOLE BODY": {
       "description": [
         "Very thin",
@@ -62,7 +62,7 @@
   },
   "BCS 3": {
     "score": 3,
-    "photo": "images/bcs/bcs3.svg",
+    "photo": "BC3",
     "WHOLE BODY": {
       "description": ["Thin"]
     },
@@ -97,7 +97,7 @@
   },
   "BCS 4": {
     "score": 4,
-    "photo": "images/bcs/bcs4.svg",
+    "photo": "BC4",
     "WHOLE BODY": {
       "description": ["Moderately thin"]
     },
@@ -126,7 +126,7 @@
   },
   "BCS 5": {
     "score": 5,
-    "photo": "images/bcs/bcs5.svg",
+    "photo": "BC5",
     "WHOLE BODY": {
       "description": ["Moderate condition"]
     },
@@ -151,7 +151,7 @@
   },
   "BCS 6": {
     "score": 6,
-    "photo": "images/bcs/bcs6.svg",
+    "photo": "BC6",
     "WHOLE BODY": {
       "description": ["Moderately fleshy"]
     },
@@ -179,7 +179,7 @@
   },
   "BCS 7": {
     "score": 7,
-    "photo": "images/bcs/bcs7.svg",
+    "photo": "BC7",
     "WHOLE BODY": {
       "description": ["Fleshy"]
     },
@@ -207,7 +207,7 @@
   },
   "BCS 8": {
     "score": 8,
-    "photo": "images/bcs/bcs8.svg",
+    "photo": "BC8",
     "WHOLE BODY": {
       "description": [
         "Fat",
@@ -235,7 +235,7 @@
   },
   "BCS 9": {
     "score": 9,
-    "photo": "images/bcs/bcs9.svg",
+    "photo": "BC9",
     "WHOLE BODY": {
       "description": [
         "Extremely fat",
