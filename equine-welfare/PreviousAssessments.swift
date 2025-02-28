@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct PreviousAssessments: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Assessment.visitDate, order: .reverse) var assessments: [Assessment]
     
     var body: some View {
@@ -24,7 +25,10 @@ struct PreviousAssessments: View {
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(assessments) { assessment in
-                        PreviousAssessmentRow(assessment: assessment)
+                        PreviousAssessmentRow(
+                            assessment: assessment,
+                            modelContext: modelContext
+                        )
                     }
                 }
             }

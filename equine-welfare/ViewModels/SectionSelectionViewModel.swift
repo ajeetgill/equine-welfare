@@ -2,159 +2,123 @@ import SwiftUI
 import SwiftData
 
 class SectionSelectionViewModel: ObservableObject {
-    @Published var sections: [AssessmentSection] = []
+    @Published var sections: [Section] = []
     @Published var vetName: String = ""
     @Published var farmName: String = ""
     @Published var visitDate: Date = Date()
     @Published var currentAssessmentId: UUID?
     
     private let modelContext: ModelContext
+    private let assessmentHelper: AssessmentHelper
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
+        self.assessmentHelper = AssessmentHelper(modelContext: modelContext)
         loadDefaultSections()
     }
     
     private func loadDefaultSections() {
-        sections = [
-            AssessmentSection(id: 1, title: "Duty of Care"),
-            AssessmentSection(id: 2, title: "Facilities and Housing"),
-            AssessmentSection(id: 3, title: "Feed and Water"),
-            AssessmentSection(id: 4, title: "Health Management"),
-            AssessmentSection(id: 5, title: "Feedlot Management"),
-            AssessmentSection(id: 6, title: "Husbandry Practices"),
-            AssessmentSection(id: 7, title: "Reproductive Management"),
-            AssessmentSection(id: 8, title: "Transportation"),
-            AssessmentSection(id: 9, title: "Change or End of Career"),
-            AssessmentSection(id: 10, title: "Euthanasia")
-        ]
+        sections = COPService.loadSections()
+    }
+    
+    private func createFreshSections() -> [Section] {
+        let defaultSections = COPService.loadSections()
+        var freshSections: [Section] = []
+        
+        for section in defaultSections {
+            let newSection = Section(id: section.id, title: section.title)
+            
+            for subsection in section.subsections {
+                let newSubsection = Subsection(name: subsection.name)
+                
+                for requirement in subsection.requirements {
+                    let newRequirement = Requirement(text: requirement.text)
+                    newSubsection.requirements.append(newRequirement)
+                }
+                
+                newSection.subsections.append(newSubsection)
+            }
+            
+            freshSections.append(newSection)
+        }
+        
+        return freshSections
     }
     
     // Reset and prepare for a new assessment
     func createNewAssessment(vetName: String, farmName: String, visitDate: Date) {
-        // Reset the current assessment ID to ensure we create a new one
-        currentAssessmentId = nil
+        let freshSections = createFreshSections()
         
-        // Set form data
+        let newAssessment = assessmentHelper.createAssessment(
+            vetName: vetName,
+            farmName: farmName,
+            visitDate: visitDate,
+            sections: freshSections,
+            horses: []
+        )
+        
         self.vetName = vetName
         self.farmName = farmName
         self.visitDate = visitDate
+        self.currentAssessmentId = newAssessment.id
+        self.sections = freshSections
         
-        // Reset all sections to not applicable
-        for i in 0..<sections.count {
-            sections[i].isApplicable = false
+        for section in sections {
+            section.isApplicable = false
         }
+        
+        // Save the assessment
+        saveAssessment()
     }
     
     // Load data for an existing assessment
     func loadAssessment(id: UUID) {
-        let descriptor = FetchDescriptor<Assessment>(
-            predicate: #Predicate { $0.id == id }
-        )
-        
-        do {
-            if let assessment = try modelContext.fetch(descriptor).first {
-                vetName = assessment.vetName
-                farmName = assessment.farmName
-                visitDate = assessment.visitDate
-                currentAssessmentId = assessment.id
-                
-                // Reset sections first
-                for i in 0..<sections.count {
-                    sections[i].isApplicable = false
-                }
-                
-                // Update sections with stored selections
-                for selection in assessment.sectionSelections {
-                    if let index = sections.firstIndex(where: { $0.id == selection.sectionId }) {
-                        sections[index].isApplicable = selection.isApplicable
-                    }
-                }
-            }
-        } catch {
-            print("Failed to load assessment: \(error)")
+        if let assessment = assessmentHelper.loadAssessment(id: id) {
+            vetName = assessment.vetName
+            farmName = assessment.farmName
+            visitDate = assessment.visitDate
+            currentAssessmentId = assessment.id
+            
+            sections = assessment.sections
         }
     }
     
     // Save current assessment
     func saveAssessment() {
-        if let id = currentAssessmentId {
-            // Update existing assessment
-            let descriptor = FetchDescriptor<Assessment>(
-                predicate: #Predicate { $0.id == id }
-            )
-            
-            do {
-                if let assessment = try modelContext.fetch(descriptor).first {
-                    assessment.vetName = vetName
-                    assessment.farmName = farmName
-                    assessment.visitDate = visitDate
-                    
-                    // Remove existing selections
-                    assessment.sectionSelections.removeAll()
-                    
-                    // Add new selections
-                    for section in sections {
-                        let selection = SectionSelection(
-                            sectionId: section.id,
-                            title: section.title,
-                            isApplicable: section.isApplicable
-                        )
-                        assessment.sectionSelections.append(selection)
-                        modelContext.insert(selection)
-                    }
-                    
-                    try modelContext.save()
-                }
-            } catch {
-                print("Failed to update assessment: \(error)")
-            }
-        } else {
-            // Create a completely new assessment
-            let newAssessment = Assessment(
-                vetName: vetName,
-                farmName: farmName,
-                visitDate: visitDate
-            )
-            
-            // Add sections
-            for section in sections {
-                let selection = SectionSelection(
-                    sectionId: section.id,
-                    title: section.title,
-                    isApplicable: section.isApplicable
-                )
-                newAssessment.sectionSelections.append(selection)
-            }
-            
-            modelContext.insert(newAssessment)
-            currentAssessmentId = newAssessment.id
-            
-            try? modelContext.save()
+        guard let id = currentAssessmentId,
+              let assessment = assessmentHelper.loadAssessment(id: id) else {
+            return // Don't create new assessment here
         }
+        
+        // Only update existing assessment
+        assessmentHelper.updateAssessment(
+            assessment: assessment,
+            vetName: vetName,
+            farmName: farmName,
+            visitDate: visitDate,
+            sections: sections,
+            horses: assessment.horses
+        )
     }
     
     // MARK: - Section Management
     
-    var applicableSections: [AssessmentSection] {
-        sections.filter { $0.isApplicable }
+    var applicableSections: [Section] {
+        sections.sorted { $0.id < $1.id }.filter { $0.isApplicable }
     }
     
-    var nonApplicableSections: [AssessmentSection] {
-        sections.filter { !$0.isApplicable }
+    var nonApplicableSections: [Section] {
+        sections.sorted { $0.id < $1.id }.filter { !$0.isApplicable }
     }
     
     func toggleSection(_ id: Int) {
-        if let index = sections.firstIndex(where: { $0.id == id }) {
-            sections[index].isApplicable.toggle()
+        if let section = sections.first(where: { $0.id == id }) {
+            section.isApplicable.toggle()
         }
     }
     
     func isSectionApplicable(_ id: Int) -> Bool {
-        if let section = sections.first(where: { $0.id == id }) {
-            return section.isApplicable
-        }
-        return false
+        sections.first(where: { $0.id == id })?.isApplicable ?? false
     }
     
     // Save when returning to home

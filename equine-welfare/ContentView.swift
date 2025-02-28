@@ -10,7 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var assessments: [Assessment]
     
     @StateObject private var navigationState = NavigationState()
     @State private var vetName = ""
@@ -99,18 +99,6 @@ struct ContentView: View {
         if let id = assessmentId {
             // Load existing assessment
             sectionViewModel.loadAssessment(id: id)
-        } else {
-            // Create new assessment with form data
-            sectionViewModel.createNewAssessment(
-                vetName: vetName,
-                farmName: farmName,
-                visitDate: visitDate
-            )
-            
-            // Reset input fields after creating new assessment
-            vetName = ""
-            farmName = ""
-            visitDate = Date()
         }
     }
 }
@@ -119,10 +107,10 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Assessment.self, inMemory: true)
 }
 
 #Preview("Section Selection") {
     ContentView(previewMode: true)
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Assessment.self, inMemory: true)
 } 

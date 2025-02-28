@@ -10,10 +10,17 @@ import SwiftUI
 import SwiftData
 
 struct PreviousAssessmentRow: View {
-    let assessment: Assessment
-    @EnvironmentObject private var navigationState: NavigationState
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var navigationState: NavigationState
     @State private var showingDeleteConfirmation = false
+    
+    let assessment: Assessment
+    private let assessmentHelper: AssessmentHelper
+    
+    init(assessment: Assessment, modelContext: ModelContext) {
+        self.assessment = assessment
+        self.assessmentHelper = AssessmentHelper(modelContext: modelContext)
+    }
     
     var body: some View {
         HStack {
@@ -64,7 +71,7 @@ struct PreviousAssessmentRow: View {
                     titleVisibility: .visible
                 ) {
                     Button("Delete", role: .destructive) {
-                        deleteAssessment()
+                        assessmentHelper.deleteAssessment(assessment: assessment)
                     }
                     Button("Cancel", role: .cancel) {}
                 } message: {
@@ -75,11 +82,5 @@ struct PreviousAssessmentRow: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(8)
-    }
-    
-    private func deleteAssessment() {
-        // Delete the assessment from SwiftData
-        modelContext.delete(assessment)
-        try? modelContext.save()
     }
 }

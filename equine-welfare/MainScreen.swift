@@ -6,15 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainScreen: View {
+    @Environment(\.modelContext) private var modelContext
     @Binding var vetName: String
     @Binding var farmName: String
     @Binding var visitDate: Date
     var navigationState: NavigationState
     
-    var isFormValid: Bool {
-        !vetName.isEmpty && !farmName.isEmpty
+    @State private var assessmentHelper: AssessmentHelper?
+    @State private var sectionViewModel: SectionSelectionViewModel?
+    
+    init(vetName: Binding<String>, farmName: Binding<String>, 
+         visitDate: Binding<Date>, navigationState: NavigationState) {
+        self._vetName = vetName
+        self._farmName = farmName
+        self._visitDate = visitDate
+        self.navigationState = navigationState
     }
     
     var body: some View {
@@ -24,10 +33,10 @@ struct MainScreen: View {
                 .fontWeight(.bold)
             
             VStack(spacing: 16) {
-                TextField("Name", text: $vetName)
+                TextField("Vet Name", text: $vetName)
                     .textFieldStyle(.roundedBorder)
                 
-                TextField("Location Name", text: $farmName)
+                TextField("Farm Name", text: $farmName)
                     .textFieldStyle(.roundedBorder)
                 
                 DatePicker(
@@ -36,14 +45,7 @@ struct MainScreen: View {
                     displayedComponents: [.date]
                 )
                 
-                Button(action: {
-                    // Use navigationState to transition to the section selection screen
-                    navigationState.startNewAssessment(
-                        vetName: vetName,
-                        farmName: farmName,
-                        visitDate: visitDate
-                    )
-                }) {
+                Button(action: startNewAssessment) {
                     Text("Start Assessment")
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -57,6 +59,37 @@ struct MainScreen: View {
             .background(Color(.systemGray6))
             .cornerRadius(12)
         }
+        .onAppear {
+            assessmentHelper = AssessmentHelper(modelContext: modelContext)
+            sectionViewModel = SectionSelectionViewModel(modelContext: modelContext)
+        }
+    }
+    
+    var isFormValid: Bool {
+        !vetName.isEmpty && !farmName.isEmpty
+    }
+    
+    private func startNewAssessment() {
+        guard let viewModel = sectionViewModel else { return }
+        
+        // Create new assessment
+        viewModel.createNewAssessment(
+            vetName: vetName,
+            farmName: farmName,
+            visitDate: visitDate
+        )
+        
+        // Reset form fields
+        vetName = ""
+        farmName = ""
+        visitDate = Date()
+        
+        // Handle navigation
+        navigationState.startNewAssessment(
+            vetName: vetName,
+            farmName: farmName,
+            visitDate: visitDate
+        )
     }
 }
 
@@ -71,4 +104,5 @@ struct MainScreen: View {
         visitDate: $visitDate,
         navigationState: NavigationState()
     )
+    .modelContainer(for: Assessment.self, inMemory: true)
 }
