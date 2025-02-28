@@ -1,0 +1,265 @@
+{
+  "BCS 1": {
+    "score": 1,
+    "photo": "BC1",
+    "WHOLE BODY": {
+      "description": [
+        "Poor condition",
+        "Extremely emaciated",
+        "No fat tissue felt"
+      ]
+    },
+    "NECK": {
+      "description": ["Bone structure visible"]
+    },
+    "WITHERS": {
+      "description": ["Bone structure easily visible"]
+    },
+    "BACK": {
+      "description": ["Spinous processes project prominently"]
+    },
+    "TAIL HEAD": {
+      "description": ["Tail head, point of the buttocks and point of the hip project prominently"]
+    },
+    "RIBS": {
+      "description": ["Project prominently"]
+    },
+    "SHOULDER": {
+      "description": ["Bone structure easily noticeable"]
+    }
+  },
+  "BCS 2": {
+    "score": 2,
+    "photo": "BC2",
+    "WHOLE BODY": {
+      "description": [
+        "Very thin",
+        "Emaciated"
+      ]
+    },
+    "NECK": {
+      "description": ["Bone faintly discernible"]
+    },
+    "WITHERS": {
+      "description": ["Bone structure faintly noticeable"]
+    },
+    "BACK": {
+      "description": [
+        "Spinous processes prominent",
+        "Slight fat covering over base of spinous processes",
+        "Transverse processes of lumbar vertebrae feel rounded"
+      ]
+    },
+    "TAIL HEAD": {
+      "description": ["Prominent"]
+    },
+    "RIBS": {
+      "description": ["Prominent"]
+    },
+    "SHOULDER": {
+      "description": ["Faintly discernible"]
+    }
+  },
+  "BCS 3": {
+    "score": 3,
+    "photo": "BC3",
+    "WHOLE BODY": {
+      "description": ["Thin"]
+    },
+    "NECK": {
+      "description": ["Accentuated"]
+    },
+    "WITHERS": {
+      "description": ["Accentuated"]
+    },
+    "BACK": {
+      "description": [
+        "Fat build up halfway on spinous processes, but easily discernible",
+        "Can't feel transverse processes"
+      ]
+    },
+    "TAIL HEAD": {
+      "description": [
+        "Prominent but individual vertebrae can't be visually identified",
+        "Point of the hip rounded, but easily discernible",
+        "Point of the buttocks not distinguishable"
+      ]
+    },
+    "RIBS": {
+      "description": [
+        "Slight fat cover",
+        "Individual ribs discernible"
+      ]
+    },
+    "SHOULDER": {
+      "description": ["Accentuated"]
+    }
+  },
+  "BCS 4": {
+    "score": 4,
+    "photo": "BC4",
+    "WHOLE BODY": {
+      "description": ["Moderately thin"]
+    },
+    "NECK": {
+      "description": ["Not obviously thin"]
+    },
+    "WITHERS": {
+      "description": ["Not obviously thin"]
+    },
+    "BACK": {
+      "description": ["Negative crease along back"]
+    },
+    "TAIL HEAD": {
+      "description": [
+        "Prominence depends on conformation",
+        "Fat palpable",
+        "Point of the hip not discernible"
+      ]
+    },
+    "RIBS": {
+      "description": ["Faint outline discernible"]
+    },
+    "SHOULDER": {
+      "description": ["Not obviously thin"]
+    }
+  },
+  "BCS 5": {
+    "score": 5,
+    "photo": "BC5",
+    "WHOLE BODY": {
+      "description": ["Moderate condition"]
+    },
+    "NECK": {
+      "description": ["Blends smoothly into body"]
+    },
+    "WITHERS": {
+      "description": ["Rounded over spinous processes"]
+    },
+    "BACK": {
+      "description": ["Back is level"]
+    },
+    "TAIL HEAD": {
+      "description": ["Fat around tail head beginning to feel spongy"]
+    },
+    "RIBS": {
+      "description": ["Individual ribs can be felt, but not visually distinguished"]
+    },
+    "SHOULDER": {
+      "description": ["Blends smoothly into body"]
+    }
+  },
+  "BCS 6": {
+    "score": 6,
+    "photo": "BC6",
+    "WHOLE BODY": {
+      "description": ["Moderately fleshy"]
+    },
+    "NECK": {
+      "description": ["Fat beginning to be deposited"]
+    },
+    "WITHERS": {
+      "description": ["Fat beginning to be deposited"]
+    },
+    "BACK": {
+      "description": ["May have slight positive crease down back"]
+    },
+    "TAIL HEAD": {
+      "description": ["Fat around tail head feels soft"]
+    },
+    "RIBS": {
+      "description": ["Fat over ribs feels spongy"]
+    },
+    "SHOULDER": {
+      "description": [
+        "Fat beginning to be deposited",
+        "Point-of-shoulder not discernible"
+      ]
+    }
+  },
+  "BCS 7": {
+    "score": 7,
+    "photo": "BC7",
+    "WHOLE BODY": {
+      "description": ["Fleshy"]
+    },
+    "NECK": {
+      "description": ["Fat deposited along neck"]
+    },
+    "WITHERS": {
+      "description": ["Fat deposited along withers"]
+    },
+    "BACK": {
+      "description": ["May have positive crease down back, behind shoulder"]
+    },
+    "TAIL HEAD": {
+      "description": ["Fat around tail head is soft"]
+    },
+    "RIBS": {
+      "description": [
+        "Individual ribs can be felt",
+        "Noticeable fat fillings between ribs"
+      ]
+    },
+    "SHOULDER": {
+      "description": ["Fat deposited behind shoulder"]
+    }
+  },
+  "BCS 8": {
+    "score": 8,
+    "photo": "BC8",
+    "WHOLE BODY": {
+      "description": [
+        "Fat",
+        "Fat deposited along inner buttocks"
+      ]
+    },
+    "NECK": {
+      "description": ["Noticeable thickening of neck"]
+    },
+    "WITHERS": {
+      "description": ["Area along withers filled with fat"]
+    },
+    "BACK": {
+      "description": ["Positive crease down back"]
+    },
+    "TAIL HEAD": {
+      "description": ["Tail head fat very soft"]
+    },
+    "RIBS": {
+      "description": ["Difficult to feel individual ribs"]
+    },
+    "SHOULDER": {
+      "description": ["Area behind shoulder filled in, flush with body"]
+    }
+  },
+  "BCS 9": {
+    "score": 9,
+    "photo": "BC9",
+    "WHOLE BODY": {
+      "description": [
+        "Extremely fat",
+        "Fat along inner buttocks may rub together",
+        "Flank filled in flush"
+      ]
+    },
+    "NECK": {
+      "description": ["Bulging fat"]
+    },
+    "WITHERS": {
+      "description": ["Bulging fat"]
+    },
+    "BACK": {
+      "description": ["Obvious positive crease down back"]
+    },
+    "TAIL HEAD": {
+      "description": ["Building fat around tail head"]
+    },
+    "RIBS": {
+      "description": ["Patchy fat appearing over ribs"]
+    },
+    "SHOULDER": {
+      "description": ["Bulging fat"]
+    }
+  }
+}

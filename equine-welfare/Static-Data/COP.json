@@ -1,0 +1,390 @@
+{
+    "Section 1 - Duty of care": {
+        "Requirements": {
+            "1": "Owners must have the resources for and knowledge of the basics of care as stated in this Code and ensure such care is provided.",
+            "2": "Principle caregivers must be familiar with and provide the basics of care as stated in this Code."
+        }
+    },
+    "Section 2  - Facilities and Housing": {
+        "Subsections":{
+            "2.1 Pastures and Yards": {
+                "Requirements": {
+                    "1": "At a minimum, each horse must have enough space to move easily, walk forward, turn around with ease and lie down in a normal resting posture. There must also be sufficient space for subordinate horses to escape aggression.",
+                    "2": "In muddy conditions horses must, at a minimum, have access to a mud-free, well-drained area in the pasture/yard on which to stand and lie down.",
+                    "3": "The application of fertilizers, pesticides, herbicides and farm manure must be timed to prevent any health risks to grazing horses or contamination of ground water."
+                }
+            },
+            "2.1.2 Shade and Outdoor Shelter": {
+                "Requirements": {
+                    "1": "Horses must have access to shelter (constructed or natural) that protects them from the harmful effects of extreme weather conditions.",
+                    "2": "Promptly assist individual horses that are showing signs of heat or cold stress.",
+                    "3": "If blankets are used, the condition of the horse beneath the blankets must be examined at least weekly.",
+                    "4": "Blankets must be appropriate for the weather conditions and not result in heat stress."
+                }
+            },
+            "2.1.3 Mixing and New Arrivals":{
+                "Requirements": {
+                    "1": "Horses kept in groups must be managed in a way that minimizes the risk of injury."
+                }
+            },
+            "2.1.4 Fences and Gates": {
+                "Requirements": {
+                    "1": "Fences must be constructed and maintained to minimize the risk of injury and must be strong enough to contain horses. Refer to municipal fencing by-laws, if applicable.",
+                    "2": "Electric fences must be installed according to the manufacturer's specifications. All power units for electric fences must be designed to prevent short circuits and/or stray voltage.",
+                    "3": "Temporary electric fences used for strip grazing or pasture rotation are not an acceptable permanent perimeter fence for horses."
+                }
+            },
+            "2.2.3 Sick or Injured Horses": {
+                "Requirements": {
+                    "1": "Owners must have the ability to segregate sick or injured horses for treatment.",
+                    "2": "If sick pens or stalls are used, they must be equipped with a source of feed and water and be cleaned between uses."
+                }
+            },
+            "2.3 Indoor Housing": {
+                "Requirements": {
+                    "1": "Facilities must be designed and maintained to minimize the risk of injury."
+                }
+            },
+            "2.3.1 Indoor Space Allowance": {
+                "Requirements": {
+                    "1": "For indoor facilities: each horse must have enough space to lie down in a normal resting posture, stand with the head fully raised, walk forward and turn around with ease. For tie stalls, each horse must have enough space to lie down in a normal resting posture, stand with the head fully raised and step forward in comfort.",
+                    "2": "For group housing, there must also be sufficient space for subordinate horses to escape aggression"
+                }
+            },
+            "2.3.2 Indoor Lighting":{
+                "Requirements": {
+                    "1": "For horses kept indoors without natural light, artificial lighting must be provided during the day. Keeping horses in continuous darkness is not acceptable."
+                }
+            },
+            "2.3.3 Indoor Flooring": {
+                "Requirements": {
+                    "1": "Provide non-slip surfaces in stalls and alleyways to reduce the risk of horses slipping or falling."
+                }
+            },
+            "2.3.4 Indoor Bedding": {
+                "Requirements": {
+                    "1": "Ensure stalls are kept clean. Horses must be provided with a dry lying area. The area must also be of a design or texture that will not bruise, cut or otherwise injure the horse. Concrete or hard rubber mats without bedding are not acceptable surfaces.",
+                    "2": "Bedding must be non-toxic."
+                }
+            },
+            "2.3.5 Indoor Air Quality and Humidity": {
+                "Requirements": {
+                    "1": "Air quality in barns must be maintained to prevent the buildup of noxious gases, dust and moisture.",
+                    "2": "Ventilation must effectively maintain good indoor air quality.",
+                    "3": "The concentration of ammonia in the air must not exceed 25ppm. Refer to the above information on options for assessing ammonia concentration."
+                }
+            },
+            "2.4 Safety and Emergencies": {
+                "Requirements": {
+                    "1": "Develop an emergency action plan for emergencies that may occur in your area.",
+                    "2": "Toxic materials must be securely stored such that horses cannot gain access to them."
+                }
+            }
+        }
+    },
+    "Section 3 - Feed and Water": {
+        "Subsections": {
+            "3.1 Water": {
+                "Requirements": {
+                    "1": "Horses must have access to safe, palatable and clean water in quantities to maintain health and vigour.",
+                    "2": "In extreme weather conditions (cold or hot), special attention must be paid to ensure water availability, access and intake.",
+                    "3": "Water troughs, containers and any automatic watering devices must be cleaned regularly and maintained in working order with no sharp or abrasive edges."
+                }
+            },
+            "3.2 Safety of Feedstuffs": {
+                "Requirements": {
+                    "1": "Horses must have daily access to forage that is free from visible mould and has minimal dust.",
+                    "2": "Horses must only receive feedstuffs that are appropriate for the species.",
+                    "3": "Concentrates must be stored in a secure manner that prevents horses from overeating."
+                }
+            },
+            "3.4 Nutritional Content and Feed Management": {
+                "Requirements": {
+                    "1": "Horses must receive a diet that is adequate for maintaining health and vigour.",
+                    "2": "The daily ration must address the horse's maintenance and activity needs and other factors relevant to individual horses and the environment.",
+                    "3": "Horses must have access to salt either provided in the ration or free access (a block or loose salt)."
+                }
+            },
+            "3.4.2 Growing Horses": {
+                "Requirements": {
+                    "1": "Growing horses must receive a diet that is adequate for maintaining health, growth and vigour."
+                }
+            },
+            "3.4.3 Horses in Work": {
+                "Requirements": {
+                    "1": "Horses in work must receive a diet that is adequate for maintaining health and vigour."
+                }
+            },
+            "3.4.4 Stallions": {
+                "Requirements": {
+                    "1": "Stallions must receive a diet that is adequate for maintaining health and vigour."
+                }
+            },
+            "3.4.5 Reproductive Mares and Jennets": {
+                "Requirements": {
+                    "1": "Pregnant and lactating mares/jennets must receive a diet that is adequate for maintaining health and vigour and that allows the mares/jennets to provide adequate nutrition to the foal."
+                }
+            },
+            "3.4.6 Geriatric Horses": {
+                "Requirements": {
+                    "1": "Geriatric horses must receive a diet that is adequate for maintaining health and vigour.",
+                    "2": "Refer to Section 4.5-Body Condition Scoring for other relevant Requirements."
+                }
+            }
+        }
+    },
+    "Section 4 - Health Management": {
+        "Subsections": {
+            "4.1 Health Management Plans": {
+                "Requirements": {
+                    "1": "Horses must be observed as often as required to maintain their health and well-being.",
+                    "2": "Purchase medications and veterinary pharmaceuticals from regulated, reputable sources. Refer to provincial and federal regulations.",
+                    "3": "Records or receipts of treatments provided must be available."
+                }
+            },
+            "4.1.3 Parasite Management": {
+                "Requirements": {
+                    "1": "A parasite control program to prevent parasite related disease must be in place. This Requirement applies to internal and external parasites."
+                }
+            },
+            "4.2 Sick, Injured or Compromised Horses": {
+                "Requirements": {
+                    "1": "Equines that are sick, injured or in pain must receive appropriate treatment without delay or be euthanized without delay. Refer also to Section 10-Euthanasia.",
+                    "2": "For sick, injured or compromised horses that are not showing improvement, horse owners or caregivers must, without delay, obtain veterinary advice on appropriate care and treatment or make arrangements for euthanasia.",
+                    "3": "Records or receipts for treatments provided must be available.",
+                    "4": "Appropriate authorities must be advised of suspected or confirmed cases of federally reportable disease, such as Equine Infectious Anemia. Refer to the Canadian Food Inspection Agency (www.inspection.gc.ca)."
+                }
+            },
+            "4.3 Dental Care": {
+                "Requirements": {
+                    "1": "Horses showing signs of dental problems must be examined and treated.",
+                    "2": "Dental care procedures must only be performed by a veterinarian or competent individual working under direct veterinary supervision. Refer to provincial regulations."
+                }
+            },
+            "4.4 Lameness": {
+                "Requirements": {
+                    "1": "Lameness must be addressed either through specific therapies or changes in management or workload."
+                }
+            },
+            "4.4.1 Laminitis (Founder)": {
+                "Requirements": {
+                    "1": "Horses with laminitis must receive appropriate lifelong management and treatment, which may include medications, dietary management and hoof care."
+                }
+            },
+            "4.5 Body Condition Scoring": {
+                "Requirements": {
+                    "1": "For horses and ponies: corrective action must be taken at a BCS of 3 or lower and at a BCS of 8 or higher (on the 1-9 scale).* Veterinary advice must be obtained if animals do not respond to the corrective action. Refer to Appendix D.",
+                    "2": "For donkeys and mules: corrective action must be taken at a BCS of 2 or lower and at a BCS of 4 or higher (on the 1-5 scale). Veterinary advice must be obtained if animals do not respond to the corrective action. Refer to Appendix E.",
+                    "3": "Veterinary advice must be obtained for geriatric equines that are emaciated (i.e. BCS of 1 or 2 out of 9 for horses and ponies; BCS of 1 out of 5 for donkeys and mules).",
+                    "4": "Equines must not be starved or prevented from eating for prolonged periods in order to reduce BCS - the change in feed to reduce BCS must be gradual."
+                }
+            }
+        }
+    },
+    "Section 5 - Feedlot Management": {
+        "Subsections": {
+            "5.1 Handling at Loading and Unloading": {
+                "Requirements": {
+                    "1": "The ground in the holding pen must be well-drained and non-slip.",
+                    "2": "Horses must be handled in a manner that does not subject them to avoidable pain or avoidable injury."
+                }
+            },
+            "5.2 New Arrivals": {
+                "Requirements": {
+                    "1": "Upon arrival to the feedlot, horses must be individually assessed for health and well-being and must be provided with water and good quality forage.",
+                    "2": "Horses in groups must be managed in a way to minimize the risk of injury."
+                }
+            },
+            "5.3 Feeding": {
+                "Requirements": {
+                    "1": "Feedlot horses must receive a diet that is adequate for maintaining health and vigour.",
+                    "2": "Feedlot horses must have daily access to forage that is free from visible mould and has minimal dust."
+                }
+            },
+            "5.4 Health Management in the Feedlot": {
+                "Requirements": {
+                    "1": "Feedlot owners must establish and maintain a Veterinary-Client-Patient Relationship (VCPR) with a practicing veterinarian.",
+                    "2": "A written biosecurity and disease management plan must be in place and developed with a veterinarian.",
+                    "3": "Feedlot horses must be observed at least once a day for health and well-being.",
+                    "4": "Feedlot horses requiring medical treatment must receive such treatment and be identified. Feedlot horses to be held over for a drug residue withdrawal period must be sufficiently healthy and sound to withstand this period without undue suffering.",
+                    "5": "Records or receipts of treatments provided must be available.",
+                    "6": "Drug withdrawal periods must be observed. For information on drug withdrawal periods, consult a veterinarian or the Meat Hygiene Manual of Procedures (Appendix K provides a reference for this manual).",
+                    "7": "Hospital pens must be available and must provide shelter, bedding, dryness, and a source of feed and water. Hospital pens must also be cleaned between uses."
+                }
+            },
+            "5.5 Pen Condition and Shelter": {
+                "Requirements": {
+                    "1": "Feedlot owners must have a plan for mud management and access to any equipment necessary to implement the plan.",
+                    "2": "A dry lying area must be available in each pen."
+                }
+            },
+            "5.5.1 Stocking Density": {
+                "Requirements": {
+                    "1": "At a minimum, each horse must have enough space to move easily, walk forward, turn around with ease and lie down in a normal resting posture. There must also be sufficient space for subordinate horses to escape aggression."
+                }
+            }
+        }
+    },
+    "Section 6 - Husbandry Practices": {
+        "Subsections": {
+            "6.1 Turnout, Exercise and Social Opportunities": {
+                "Requirements": {
+                    "1": "Horses must have some form of exercise or turnout unless under stall rest for medical reasons or severe environmental conditions make this temporarily impossible."
+                }
+            },
+            "6.2 Behaviour and Handling": {
+                "Requirements": {
+                    "1": "Handlers must be familiar with equine behaviour and competent in humane handling techniques either through training, experience or mentorship.",
+                    "2": "Horses must be handled in a manner that does not subject them to avoidable pain or avoidable injury."
+                }
+            },
+            "6.2.1 Handling and Restraint Equipment": {
+                "Requirements": {
+                    "1": "Corrective action must be taken if restraint devices or equipment cause injury to horses.",
+                    "2": "Tethering must not cause injury and must only be used if the horse is under supervision. The person applying the tether must be knowledgeable in its use.",
+                    "3": "Electric cattle prods must not be used for the routine movement or handling of horses on-farm. Discretion must be used in an individual extreme situation when animal or human safety is at immediate risk, but prods must never be used repeatedly or used on the face, anus or reproductive organs of horses."
+                }
+            },
+            "6.3 Principles in Training and Learning Theory": {
+                "Requirements": {
+                    "1": "Horses must not be trained in a manner that subjects them to avoidable pain or that causes them injury as a direct result of the training method used. They must never be subjected to training methods which are abusive or intentionally injure the horse. This includes, but is not limited to, soring, excessive use of whips or forcing the horse's head position by tying the horse to a fixed object.",
+                    "2": "Horses must only undergo training that matches their physical capabilities and level of maturity.",
+                    "3": "Equipment in use must be maintained in good repair and must fit the horse correctly."
+                }
+            },
+            "6.4 Methods of Identification": {
+                "Requirements": {
+                    "1": "Animal identification must be performed in a manner that causes the minimum of handling stress and pain, regardless of the method used.",
+                    "2": "If branding is necessary, do not brand horses on the jaw/cheek.",
+                    "3": "When registering new brands, select an approved site other than the jaw/cheek. Consult the appropriate provincial regulatory authorities, breed registry or sport council for more information.",
+                    "4": "Horses must never be branded when they are wet."
+                }
+            },
+            "6.5 Castration": {
+                "Requirements": {
+                    "1": "Castration of donkeys, mules and mature horses must only be performed by a veterinarian.",
+                    "2": "Horses with one or more retained testicle or other scrotal abnormalities (e.g. hernias) must only be castrated by a veterinarian.",
+                    "3": "Provincial regulations that restrict castration of horses to licensed veterinarians must be followed.",
+                    "4": "Where it is not prohibited by law, castration by a person who is not a licensed veterinarian must only be performed by a skilled operator and must meet the following requirements: there is a valid Veterinary-Client-Patient Relationship with a licensed veterinarian who is willing to supply training (on the procedure and pain management), prescribe the required drugs for pain control and provide interventions if needed; the scrotal area must be examined to ensure normal scrotal anatomy; the handling and restraint methods must not cause injury or unnecessary suffering; pain control must be provided; the horse must be monitored during and after the procedure."
+                }
+            },
+            "6.6 Alterations of the Tail": {
+                "Requirements": {
+                    "1": "Tail nicking and blocking are unacceptable and must not be performed.",
+                    "2": "Tail docking for cosmetic purposes is unacceptable and must not be performed. Refer also to provincial regulations on tail docking, if applicable."
+                }
+            },
+            "6.7 Hoof Care": {
+                "Requirements": {
+                    "1": "Hooves must be trimmed and/or shod as often as is necessary to maintain hooves in functional condition. Whether shod or unshod, hooves must not be allowed to grow to excessive lengths causing injury or discomfort to the horse."
+                }
+            },
+            "6.8 Grooming": {
+                "Requirements": {
+                    "1": "Horses must be free of debris where the saddle and harness are placed. The tack must also be free from debris before being placed on the horse.",
+                    "2": "Burdocks causing discomfort or injury must be removed without delay."
+                }
+            }
+        }
+    },
+    "Section 7 - Reproductive Management": {
+        "Subsections": {
+            "7.1 Responsible Breeding": {
+                "Requirements": {
+                    "1": "Do not breed horses unless you are familiar with and able to provide the basics of care as outlined in this Code for both the mares/jennets and foals."
+                }
+            },
+            "7.3 Care of the Pregnant Mare or Jennet": {
+                "Requirements": {
+                    "1": "Mares/jennets requiring medical care during gestation must receive such care.",
+                    "2": "Pregnant mares/jennets must have some form of exercise or turnout, unless under stall rest for medical reasons or severe environmental conditions make this temporarily impossible."
+                }
+            },
+            "7.4 Foaling": {
+                "Requirements": {
+                    "1": "A plan must be in place for the foaling process, including a plan for getting prompt expert advice or help if needed.",
+                    "2": "Mares and jennets close to foaling must be observed at least twice a day for health, well-being and signs of foaling."
+                }
+            },
+            "7.5 Care of the Newborn Foal": {
+                "Requirements": {
+                    "1": "Newborn foals must be monitored to ensure they can rise and suck unassisted.",
+                    "2": "Appropriate care must be provided without delay if abnormalities in the foal are observed."
+                }
+            },
+            "7.5.1 Colostrum": {
+                "Requirements": {
+                    "1": "Foals must receive colostrum or alternative care to maintain their health and vigour."
+                }
+            },
+            "7.5.2 Weaning": {
+                "Requirements": {
+                    "1": "Facilities or fencing used during weaning must be safe and made of strong materials free from protrusions.",
+                    "2": "Corrective action must be taken if the foal or mare/jennet injures themselves attempting to reunite during weaning."
+                }
+            }
+        }
+    },
+    "Section 8 - Transportation": {
+        "Subsections": {
+            "8.1.1 Fitness for Transport": {
+                "Requirements": {
+                    "1": "Horses must be individually assessed for fitness for transport before being transported. Evaluate fitness for transport in the context of each trip and all relevant factors (e.g. anticipated total trip duration from farm to final destination and prevailing weather conditions).",
+                    "2": "Unfit horses must not be transported, except for veterinary diagnosis or treatment and only if special provisions are met."
+                }
+            },
+            "8.1.2 Preparing Horses for Transport": {
+                "Requirements": {
+                    "1": "If the expected duration of the horse's time without access to feed or water is longer than 24 hours, the horse must be fed and watered within four hours before being loaded. Horses must not be without access to feed, water, or rest for more than 28 hours."
+                }
+            },
+            "8.2 Loading and Unloading": {
+                "Requirements": {
+                    "1": "The requirements for loading and unloading procedures and equipment as described in the Health of Animals Regulations must be complied with.",
+                    "2": "Mares and jennets that are in the last 10% of their gestation periods must not be transported.",
+                    "3": "Every mare with its suckling offspring must be segregated from all other animals during transport.",
+                    "4": "Every mature stallion must be segregated from all other animals during transport.",
+                    "5": "Horses must be individually assessed before loading and upon arrival back to the farm."
+                }
+            },
+            "8.2.2 On-Farm Management Post-Transport": {
+                "Requirements": {
+                    "1": "Horses must be provided with water upon arrival to the farm."
+                }
+            }
+        }
+    },
+    "Section 9 - Change or End of Career": {
+        "Subsections": {
+            "9.1 Change or End of Career Options": {
+                "Requirements": {
+                    "1": "The welfare of the horse must be of paramount importance when making change or end of career decisions."
+                }
+            }
+        }
+    },
+    "Section 10 - Euthanasia": {
+        "Subsections": {
+            "10.1 Timelines for Euthanasia": {
+                "Requirements": {
+                    "1": "Equines that are sick, injured, or in pain must receive appropriate treatment without delay or be euthanized without delay.",
+                    "2": "For sick, injured or compromised horses that are not showing improvement, horse owners or caregivers must, without delay, obtain veterinary advice on appropriate care and treatment or make arrangements for euthanasia."
+                }
+            },
+            "10.2 Methods": {
+                "Requirements": {
+                    "1": "An acceptable method of euthanasia must be used.",
+                    "2": "Euthanasia must be performed by persons knowledgeable in the method used for equines.",
+                    "3": "Disposal must be in accordance with provincial and municipal regulations."
+                }
+            },
+            "10.3 Confirmation of Death": {
+                "Requirements": {
+                    "1": "Confirm unconsciousness immediately when it is safe to do so.",
+                    "2": "Have a secondary euthanasia step or method available.",
+                    "3": "Confirm death before moving or leaving the animal."
+                }
+            }
+        }
+    }
+}
