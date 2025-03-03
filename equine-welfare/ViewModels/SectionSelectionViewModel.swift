@@ -46,7 +46,7 @@ class SectionSelectionViewModel: ObservableObject {
     }
     
     // Reset and prepare for a new assessment
-    func createNewAssessment(vetName: String, farmName: String, visitDate: Date) {
+    func createNewAssessment(vetName: String, farmName: String, visitDate: Date) -> UUID {
         let freshSections = createFreshSections()
         
         let newAssessment = assessmentHelper.createAssessment(
@@ -69,6 +69,8 @@ class SectionSelectionViewModel: ObservableObject {
         
         // Save the assessment
         saveAssessment()
+        
+        return newAssessment.id
     }
     
     // Load data for an existing assessment
