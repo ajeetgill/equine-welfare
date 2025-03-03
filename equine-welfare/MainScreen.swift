@@ -73,7 +73,17 @@ struct MainScreen: View {
         guard let viewModel = sectionViewModel else { return }
         
         // Create new assessment
-        viewModel.createNewAssessment(
+        let newAssessment = viewModel.createNewAssessment(
+            vetName: vetName,
+            farmName: farmName,
+            visitDate: visitDate
+        )
+        
+        // Store the assessment ID in navigation state before resetting form
+        navigationState.currentAssessmentId = newAssessment
+        
+        // Handle navigation
+        navigationState.startNewAssessment(
             vetName: vetName,
             farmName: farmName,
             visitDate: visitDate
@@ -83,13 +93,6 @@ struct MainScreen: View {
         vetName = ""
         farmName = ""
         visitDate = Date()
-        
-        // Handle navigation
-        navigationState.startNewAssessment(
-            vetName: vetName,
-            farmName: farmName,
-            visitDate: visitDate
-        )
     }
 }
 

@@ -23,9 +23,8 @@ class NavigationState: ObservableObject {
     
     /// Start a new assessment and navigate to section selection
     func startNewAssessment(vetName: String, farmName: String, visitDate: Date) {
-        // Explicitly clear any existing assessment ID to ensure we create a new one
-        currentAssessmentId = nil
-        currentScreen = .sectionSelection(assessmentId: nil)
+        // Note: currentAssessmentId should already be set before calling this method
+        currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
         selectedSectionId = nil // Clear any selected section
     }
     

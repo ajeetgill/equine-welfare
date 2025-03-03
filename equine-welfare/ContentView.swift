@@ -96,7 +96,7 @@ struct ContentView: View {
     // MARK: - Helper Methods
     
     private func handleAssessmentAppearance(assessmentId: UUID?) {
-        if let id = assessmentId {
+        if let id = assessmentId ?? navigationState.currentAssessmentId {
             // Load existing assessment
             sectionViewModel.loadAssessment(id: id)
         }
