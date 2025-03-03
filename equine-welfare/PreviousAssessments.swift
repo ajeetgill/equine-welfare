@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct PreviousAssessments: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Assessment.visitDate, order: .reverse) var assessments: [Assessment]
     
     var body: some View {
@@ -17,15 +18,37 @@ struct PreviousAssessments: View {
                 .font(.title2)
                 .fontWeight(.bold)
             
-            if assessments.isEmpty {
-                Text("No previous assessments")
-                    .foregroundColor(.secondary)
-                    .padding(.top, 8)
-            } else {
-                LazyVStack(spacing: 12) {
-                    ForEach(assessments) { assessment in
-                        PreviousAssessmentRow(assessment: assessment)
-                    }
+            assessmentsList
+        }
+        .padding()
+    }
+    
+    // MARK: - Private Views
+    
+    @ViewBuilder
+    private var assessmentsList: some View {
+        if assessments.isEmpty {
+            emptyStateView
+        } else {
+            assessmentsListView
+        }
+    }
+    
+    private var emptyStateView: some View {
+        Text("No previous assessments")
+            .foregroundColor(.secondary)
+            .padding(.top, 8)
+            .frame(maxWidth: .infinity, alignment: .center)
+    }
+    
+    private var assessmentsListView: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(assessments) { assessment in
+                    PreviousAssessmentRow(
+                        assessment: assessment,
+                        modelContext: modelContext
+                    )
                 }
             }
         }

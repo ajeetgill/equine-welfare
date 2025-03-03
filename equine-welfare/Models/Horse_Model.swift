@@ -15,6 +15,8 @@ class Horse {
     var weight: Int
     var photoPath: String? // Path to the saved image
     
+    @Relationship(inverse: \Assessment.horses) var assessment: Assessment?
+    
     init(name: String, age: Int, color: String, sex: String, breed: String, bodyConditionScore: Int, timeOnFarm: Int, comments: String, healthManagement: String, weight: Int) {
         self.name = name
         self.age = age

@@ -14,7 +14,7 @@ struct SectionSelectionView: View {
             
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    ForEach(viewModel.sections) { section in
+                    ForEach(viewModel.sections.sorted(by: { $0.id < $1.id })) { section in
                         SectionToggleRow(
                             section: section,
                             toggleAction: {

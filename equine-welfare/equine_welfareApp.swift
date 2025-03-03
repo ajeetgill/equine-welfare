@@ -12,9 +12,11 @@ import SwiftData
 struct equine_welfareApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
             Assessment.self,
-            SectionSelection.self
+            Section.self,
+            Subsection.self,
+            Requirement.self,
+            Horse.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
