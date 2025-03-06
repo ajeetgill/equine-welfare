@@ -91,6 +91,9 @@ struct ContentView: View {
                let section = sectionViewModel.sections.first(where: { $0.id == sectionId }) {
                 // Show the section detail view
                 SectionDetailView(section: section)
+            } else if navigationState.showingGallery {
+                // Show the gallery view
+                GalleryView(viewModel: GalleryViewModel(sectionViewModel: sectionViewModel))
             } else {
                 // Show the section selection view
                 SectionSelectionView(viewModel: sectionViewModel)

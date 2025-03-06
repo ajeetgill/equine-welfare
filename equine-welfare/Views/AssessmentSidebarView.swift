@@ -4,6 +4,12 @@ struct AssessmentSidebarView: View {
     @ObservedObject var viewModel: SectionSelectionViewModel
     @State private var isApplicableSectionsExpanded: Bool = true
     @EnvironmentObject private var navigationState: NavigationState
+    @StateObject private var galleryViewModel: GalleryViewModel
+    
+    init(viewModel: SectionSelectionViewModel) {
+        self.viewModel = viewModel
+        self._galleryViewModel = StateObject(wrappedValue: GalleryViewModel(sectionViewModel: viewModel))
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -55,7 +61,7 @@ struct AssessmentSidebarView: View {
             SidebarButton(
                 title: "Section Selection",
                 icon: "checklist",
-                isActive: navigationState.selectedSectionId == nil && !isHorsesScreen() && !isHorseDetailScreen() && !isHorseInfoScreen(),
+                isActive: navigationState.selectedSectionId == nil && !isHorsesScreen() && !isHorseDetailScreen() && !isHorseInfoScreen() && !navigationState.showingGallery,
                 action: {
                     navigationState.showSectionSelection()
                 }
@@ -70,6 +76,16 @@ struct AssessmentSidebarView: View {
                     navigationState.showHorses()
                 }
             )
+            // Gallery Button
+            SidebarButton(
+                title: "Gallery",
+                icon: "photo.on.rectangle",
+                isActive: navigationState.showingGallery,
+                action: {
+                    galleryViewModel.refreshGallery()
+                    navigationState.showGallery()
+                }
+            )
         }
     }
     
@@ -81,10 +97,12 @@ struct AssessmentSidebarView: View {
                     ForEach(viewModel.applicableSections, id: \.id) { section in
                         SidebarButton(
                             title: "\(section.id). \(section.title)",
-                            isActive: navigationState.selectedSectionId == section.id,
+                            isActive: navigationState.selectedSectionId == section.id && !navigationState.showingGallery,
                             isPrimary: false,
                             action: {
                                 navigationState.navigateToSection(sectionId: section.id)
+                                navigationState.selectedSectionId = section.id
+                                navigationState.showingGallery = false
                             }
                         )
                     }
@@ -215,6 +233,8 @@ struct SubsectionView: View {
 
 struct RequirementView: View {
     let requirement: Requirement
+    @State private var showingMediaPicker = false
+    @State private var showingMediaPreview: MediaAttachment?
     
     private var selectableStatuses: [ComplianceStatus] {
         [.compliant, .notCompliant, .notApplicable]
@@ -236,6 +256,8 @@ struct RequirementView: View {
                                 requirement.nonComplianceReason = ""
                             } else {
                                 requirement.nonComplianceReason = nil
+                                // Clear media attachments when not non-compliant
+                                requirement.mediaAttachments.removeAll()
                             }
                         }
                     )
@@ -249,9 +271,75 @@ struct RequirementView: View {
                 ))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.top, 4)
+                
+                // Media attachments section
+                VStack(alignment: .leading, spacing: 8) {
+                    if !requirement.mediaAttachments.isEmpty {
+                        Text("Evidence:")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(requirement.mediaAttachments, id: \.id) { attachment in
+                                    MediaThumbnail(attachment: attachment, size: 80)
+                                        .onTapGesture {
+                                            showingMediaPreview = attachment
+                                        }
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                if let index = requirement.mediaAttachments.firstIndex(where: { $0.id == attachment.id }) {
+                                                    requirement.mediaAttachments.remove(at: index)
+                                                }
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
+                                        }
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    
+                    MediaPicker(isPresented: $showingMediaPicker) { imageData in
+                        let attachment = MediaAttachment(imageData: imageData)
+                        requirement.mediaAttachments.append(attachment)
+                    }
+                }
+                .padding(.top, 8)
             }
         }
         .padding(.vertical, 8)
+        .sheet(item: $showingMediaPreview) { attachment in
+            MediaPreviewView(attachment: attachment)
+        }
+    }
+}
+
+struct MediaPreviewView: View {
+    let attachment: MediaAttachment
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            if let uiImage = UIImage(data: attachment.imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                Text("Unable to load image")
+            }
+        }
+            .navigationTitle("Image Preview")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        
     }
 }
 
