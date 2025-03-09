@@ -60,7 +60,7 @@ struct ContentView: View {
                 .onAppear {
                     handleAssessmentAppearance(assessmentId: assessmentId)
                 }
-        case .horseDetail:
+        case .horseDetail, .horseInfo:
             AssessmentSidebarView(viewModel: sectionViewModel)
                 .onAppear {
                     handleAssessmentAppearance(assessmentId: navigationState.currentAssessmentId)
@@ -99,6 +99,10 @@ struct ContentView: View {
         case .horses:
             // Show the horses view
             HorsesView()
+            
+        case .horseInfo(let horseId):
+            // Show the horse info view
+            HorseInfoView(horseId: horseId)
             
         case .horseDetail(let horseId):
             // We need to fetch the horse with the given ID and show its detail view

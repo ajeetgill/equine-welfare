@@ -17,6 +17,15 @@ class Horse {
     var ageUnit: AgeUnit
     var timeUnit: TimeUnit
     
+    // Add these properties for body photos
+    var frontPhotoData: Data?
+    var rightPhotoData: Data?
+    var backPhotoData: Data?
+    var leftPhotoData: Data?
+    
+    // Add this property for abnormal findings photos
+    var abnormalPhotosData: [Data] = []
+    
     init(
         name: String,
         age: Int,
@@ -29,7 +38,12 @@ class Horse {
         photoData: Data? = nil,
         notes: String? = nil,
         ageUnit: AgeUnit = .years,
-        timeUnit: TimeUnit = .days
+        timeUnit: TimeUnit = .days,
+        frontPhotoData: Data? = nil,
+        rightPhotoData: Data? = nil,
+        backPhotoData: Data? = nil,
+        leftPhotoData: Data? = nil,
+        abnormalPhotosData: [Data] = []
     ) {
         self.uuid = UUID()
         self.name = name
@@ -44,6 +58,11 @@ class Horse {
         self.notes = notes
         self.ageUnit = ageUnit
         self.timeUnit = timeUnit
+        self.frontPhotoData = frontPhotoData
+        self.rightPhotoData = rightPhotoData
+        self.backPhotoData = backPhotoData
+        self.leftPhotoData = leftPhotoData
+        self.abnormalPhotosData = abnormalPhotosData
     }
 }
 

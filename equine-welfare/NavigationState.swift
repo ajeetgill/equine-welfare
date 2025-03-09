@@ -9,6 +9,7 @@ class NavigationState: ObservableObject {
         case main
         case sectionSelection(assessmentId: UUID?)
         case horses(assessmentId: UUID?)
+        case horseInfo(horseId: UUID)
         case horseDetail(horseId: UUID?)
     }
     
@@ -61,7 +62,13 @@ class NavigationState: ObservableObject {
         currentScreen = .horses(assessmentId: currentAssessmentId)
     }
     
-    /// Show details for a specific horse
+    /// Show info for a specific horse
+    func showHorseInfo(horseId: UUID) {
+        selectedHorseId = horseId
+        currentScreen = .horseInfo(horseId: horseId)
+    }
+    
+    /// Show details for a specific horse (edit mode)
     func showHorseDetail(horseId: UUID?) {
         selectedHorseId = horseId
         currentScreen = .horseDetail(horseId: horseId)

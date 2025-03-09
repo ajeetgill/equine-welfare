@@ -17,7 +17,7 @@ struct HorsesView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Horses")
                     .font(.title)
@@ -37,30 +37,31 @@ struct HorsesView: View {
             .padding()
             
             if horses.isEmpty {
-                VStack {
-                    Spacer()
-                    Text("No horses added yet")
-                        .foregroundColor(.gray)
-                        .italic()
-                    Spacer()
-                }
+                Spacer()
+                Text("No horses added yet")
+                    .foregroundColor(.gray)
+                    .italic()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Spacer()
             } else {
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(horses) { horse in
-                            HorseListItem(horse: horse)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    navigationState.showHorseDetail(horseId: horse.uuid)
-                                }
-                                .background(Color.white)
-                                .cornerRadius(8)
-                                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                                .padding(.horizontal)
+                List {
+                    ForEach(horses) { horse in
+                        HorseListItem(horse: horse)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                navigationState.showHorseInfo(horseId: horse.uuid)
+                            }
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                            .listRowBackground(Color.white)
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            deleteHorse(horses[index])
                         }
                     }
-                    .padding(.vertical)
                 }
+                .listStyle(PlainListStyle())
+                .background(Color(.systemGray6))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -70,6 +71,20 @@ struct HorsesView: View {
     private func addHorse() {
         // Navigate to the horse detail screen without specifying a horse ID
         navigationState.showAddHorse()
+    }
+    
+    private func deleteHorse(_ horse: Horse) {
+        // Remove the horse from the current assessment
+        if let currentAssessmentId = navigationState.currentAssessmentId,
+           let assessment = assessments.first(where: { $0.id == currentAssessmentId }) {
+            if let index = assessment.horses.firstIndex(where: { $0.uuid == horse.uuid }) {
+                assessment.horses.remove(at: index)
+            }
+        }
+        
+        // Delete the horse from the database
+        modelContext.delete(horse)
+        try? modelContext.save()
     }
 }
 
@@ -125,7 +140,6 @@ struct HorseListItem: View {
                 .foregroundColor(.gray)
         }
         .padding(.vertical, 8)
-        .padding(.horizontal, 12)
     }
 }
 
