@@ -51,32 +51,34 @@ class NavigationState: ObservableObject {
     
     /// Show the section selection screen for the current assessment
     func showSectionSelection() {
-        selectedSectionId = nil // Clear any selected section
+        selectedSectionId = nil  // Clear the selected section ID
         currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
     }
     
     /// Show the horses screen for the current assessment
     func showHorses() {
-        selectedSectionId = nil
-        selectedHorseId = nil
+        selectedSectionId = nil  // Clear the selected section ID
         currentScreen = .horses(assessmentId: currentAssessmentId)
     }
     
-    /// Show info for a specific horse
-    func showHorseInfo(horseId: UUID) {
-        selectedHorseId = horseId
-        currentScreen = .horseInfo(horseId: horseId)
-    }
-    
-    /// Show details for a specific horse (edit mode)
-    func showHorseDetail(horseId: UUID?) {
-        selectedHorseId = horseId
+    /// Show the horse detail screen for a specific horse
+    func showHorseDetail(horseId: UUID? = nil) {
         currentScreen = .horseDetail(horseId: horseId)
     }
     
-    /// Show the screen to add a new horse
+    /// Show the horse info screen for a specific horse
+    func showHorseInfo(horseId: UUID) {
+        currentScreen = .horseInfo(horseId: horseId)
+    }
+    
+    /// Show the add horse screen
     func showAddHorse() {
-        selectedHorseId = nil
         currentScreen = .horseDetail(horseId: nil)
+    }
+    
+    /// Navigate to a specific section
+    func navigateToSection(sectionId: Int) {
+        selectedSectionId = sectionId
+        currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
     }
 } 

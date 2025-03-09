@@ -46,13 +46,15 @@ struct HorsesView: View {
             } else {
                 List {
                     ForEach(horses) { horse in
-                        HorseListItem(horse: horse)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
+                        VStack(alignment: .leading, spacing: 0) {
+                            HorseInfoRow(horse: horse, onTap: {
                                 navigationState.showHorseInfo(horseId: horse.uuid)
-                            }
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                            .listRowBackground(Color.white)
+                            })
+                            
+                            HorseNotesSection(horse: horse)
+                        }
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .listRowBackground(Color.white)
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
@@ -88,8 +90,10 @@ struct HorsesView: View {
     }
 }
 
-struct HorseListItem: View {
+// Horse info row - tappable to navigate to horse details
+struct HorseInfoRow: View {
     let horse: Horse
+    let onTap: () -> Void
     
     var body: some View {
         HStack {
@@ -139,7 +143,73 @@ struct HorseListItem: View {
             Image(systemName: "chevron.right")
                 .foregroundColor(.gray)
         }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
         .padding(.vertical, 8)
+    }
+}
+
+// Horse notes section - not tappable for navigation
+struct HorseNotesSection: View {
+    let horse: Horse
+    @Environment(\.modelContext) private var modelContext
+    @State private var isEditingNotes = false
+    @State private var notes: String
+    
+    init(horse: Horse) {
+        self.horse = horse
+        self._notes = State(initialValue: horse.notes ?? "")
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Findings or Extra Details")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                
+                Spacer()
+                
+                if isEditingNotes {
+                    Button("Done") {
+                        isEditingNotes = false
+                        saveNotes(notes)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                }
+            }
+            
+            if isEditingNotes {
+                TextEditor(text: $notes)
+                    .frame(minHeight: 100)
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                    .onChange(of: notes) { _, newValue in
+                        saveNotes(newValue)
+                    }
+            } else {
+                Text(notes.isEmpty ? "Tap to add notes" : notes)
+                    .font(.caption)
+                    .foregroundColor(notes.isEmpty ? .gray : .primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                    .onTapGesture {
+                        isEditingNotes = true
+                    }
+            }
+        }
+        .padding(.top, 4)
+    }
+    
+    private func saveNotes(_ newNotes: String) {
+        horse.notes = newNotes
+        try? modelContext.save()
     }
 }
 

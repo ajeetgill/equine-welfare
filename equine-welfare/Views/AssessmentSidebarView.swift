@@ -55,7 +55,7 @@ struct AssessmentSidebarView: View {
             SidebarButton(
                 title: "Section Selection",
                 icon: "checklist",
-                isActive: navigationState.selectedSectionId == nil && !isHorsesScreen() && !isHorseDetailScreen(),
+                isActive: navigationState.selectedSectionId == nil && !isHorsesScreen() && !isHorseDetailScreen() && !isHorseInfoScreen(),
                 action: {
                     navigationState.showSectionSelection()
                 }
@@ -84,7 +84,7 @@ struct AssessmentSidebarView: View {
                             isActive: navigationState.selectedSectionId == section.id,
                             isPrimary: false,
                             action: {
-                                navigationState.selectedSectionId = section.id
+                                navigationState.navigateToSection(sectionId: section.id)
                             }
                         )
                     }
@@ -107,6 +107,13 @@ struct AssessmentSidebarView: View {
     
     private func isHorseDetailScreen() -> Bool {
         if case .horseDetail = navigationState.currentScreen {
+            return true
+        }
+        return false
+    }
+    
+    private func isHorseInfoScreen() -> Bool {
+        if case .horseInfo = navigationState.currentScreen {
             return true
         }
         return false

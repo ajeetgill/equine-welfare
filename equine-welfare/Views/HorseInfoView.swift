@@ -211,10 +211,6 @@ struct HorseInfoView: View {
             }
             
             Spacer()
-            
-            // Chevron for navigation
-            Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
         }
         .padding()
         .background(Color.white)
