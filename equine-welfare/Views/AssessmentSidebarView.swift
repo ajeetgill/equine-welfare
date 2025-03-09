@@ -55,9 +55,19 @@ struct AssessmentSidebarView: View {
             SidebarButton(
                 title: "Section Selection",
                 icon: "checklist",
-                isActive: navigationState.selectedSectionId == nil,
+                isActive: navigationState.selectedSectionId == nil && !isHorsesScreen(),
                 action: {
                     navigationState.showSectionSelection()
+                }
+            )
+            
+            // Horses Button
+            SidebarButton(
+                title: "Horses",
+                icon: "horse",
+                isActive: isHorsesScreen(),
+                action: {
+                    navigationState.showHorses()
                 }
             )
         }
@@ -86,6 +96,13 @@ struct AssessmentSidebarView: View {
                     .fontWeight(.medium)
             }
         )
+    }
+    
+    private func isHorsesScreen() -> Bool {
+        if case .horses = navigationState.currentScreen {
+            return true
+        }
+        return false
     }
 }
 
@@ -173,6 +190,7 @@ struct SubsectionView: View {
             
             ForEach(subsection.requirements, id: \.text) { requirement in
                 RequirementView(requirement: requirement)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .padding()

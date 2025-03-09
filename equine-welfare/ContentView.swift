@@ -55,10 +55,15 @@ struct ContentView: View {
         switch navigationState.currentScreen {
         case .main:
             SidebarMainScreen()
-        case .sectionSelection(let assessmentId):
+        case .sectionSelection(let assessmentId), .horses(let assessmentId):
             AssessmentSidebarView(viewModel: sectionViewModel)
                 .onAppear {
                     handleAssessmentAppearance(assessmentId: assessmentId)
+                }
+        case .horseDetail:
+            AssessmentSidebarView(viewModel: sectionViewModel)
+                .onAppear {
+                    handleAssessmentAppearance(assessmentId: navigationState.currentAssessmentId)
                 }
         }
     }
@@ -89,6 +94,22 @@ struct ContentView: View {
             } else {
                 // Show the section selection view
                 SectionSelectionView(viewModel: sectionViewModel)
+            }
+            
+        case .horses:
+            // Show the horses view
+            HorsesView()
+            
+        case .horseDetail(let horseId):
+            // We need to fetch the horse with the given ID and show its detail view
+            if let id = horseId,
+               let horse = try? modelContext.fetch(
+                FetchDescriptor<Horse>(predicate: #Predicate { $0.uuid == id })
+               ).first {
+                HorseDetailView(horse: horse)
+            } else {
+                // For adding a new horse
+                HorseDetailView()
             }
         }
     }

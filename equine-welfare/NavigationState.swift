@@ -8,6 +8,8 @@ class NavigationState: ObservableObject {
     enum Screen {
         case main
         case sectionSelection(assessmentId: UUID?)
+        case horses(assessmentId: UUID?)
+        case horseDetail(horseId: UUID?)
     }
     
     /// Current screen being displayed
@@ -18,6 +20,9 @@ class NavigationState: ObservableObject {
     
     /// Currently selected section ID (nil when on section selection screen)
     @Published var selectedSectionId: Int? = nil
+    
+    /// Currently selected horse ID
+    @Published var selectedHorseId: UUID? = nil
     
     // MARK: - Navigation Methods
     
@@ -47,5 +52,24 @@ class NavigationState: ObservableObject {
     func showSectionSelection() {
         selectedSectionId = nil // Clear any selected section
         currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
+    }
+    
+    /// Show the horses screen for the current assessment
+    func showHorses() {
+        selectedSectionId = nil
+        selectedHorseId = nil
+        currentScreen = .horses(assessmentId: currentAssessmentId)
+    }
+    
+    /// Show details for a specific horse
+    func showHorseDetail(horseId: UUID?) {
+        selectedHorseId = horseId
+        currentScreen = .horseDetail(horseId: horseId)
+    }
+    
+    /// Show the screen to add a new horse
+    func showAddHorse() {
+        selectedHorseId = nil
+        currentScreen = .horseDetail(horseId: nil)
     }
 } 
