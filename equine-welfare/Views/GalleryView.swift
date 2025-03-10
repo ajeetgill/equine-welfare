@@ -83,13 +83,16 @@ struct GalleryImageView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            if let uiImage = UIImage(data: image.attachment.imageData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: 120)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
+            if image.attachment.mediaType == .image {
+                if let uiImage = UIImage(data: image.attachment.data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 120)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+             else {
                 Image(systemName: "photo")
                     .resizable()
                     .scaledToFit()
@@ -115,7 +118,7 @@ struct ImageDetailView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    if let uiImage = UIImage(data: image.attachment.imageData) {
+                    if let uiImage = UIImage(data: image.attachment.data) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()

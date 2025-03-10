@@ -335,8 +335,6 @@ struct RequirementPreviewView: View {
 }
 
 #Preview {
-    let modelContext = ModelContext(try! ModelContainer(for: Assessment.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
-    
     let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
     let section = Section(id: 1, title: "Housing", isApplicable: true)
     let subsection = Subsection(name: "1.1 Shelter")

@@ -5,17 +5,20 @@ struct MediaThumbnail: View {
     let size: CGFloat
     
     var body: some View {
-        if let uiImage = UIImage(data: attachment.imageData) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFill()
-                .frame(width: size, height: size)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-        } else {
+        if attachment.mediaType == .image {
+            if let uiImage = UIImage(data: attachment.data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size, height: size)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+            }
+        }
+        else {
             Image(systemName: "photo")
                 .resizable()
                 .scaledToFit()

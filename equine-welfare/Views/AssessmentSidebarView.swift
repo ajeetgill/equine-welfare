@@ -301,8 +301,9 @@ struct RequirementView: View {
                         }
                     }
                     
-                    MediaPicker(isPresented: $showingMediaPicker) { imageData in
-                        let attachment = MediaAttachment(imageData: imageData)
+                    MediaPicker(isPresented: $showingMediaPicker) { mediaData, mediaType  in
+                        let attachment = mediaType == .image ?  MediaAttachment(imageData: mediaData) :
+                        MediaAttachment(videoData: mediaData)
                         requirement.mediaAttachments.append(attachment)
                     }
                 }
@@ -322,13 +323,17 @@ struct MediaPreviewView: View {
     
     var body: some View {
         NavigationStack {
-            if let uiImage = UIImage(data: attachment.imageData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                Text("Unable to load image")
+            if attachment.mediaType == .image {
+                if let uiImage = UIImage(data: attachment.data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                }
             }
+            else{
+                Text("Unsupported media type")
+            }
+            
         }
             .navigationTitle("Image Preview")
             .navigationBarTitleDisplayMode(.inline)

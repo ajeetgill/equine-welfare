@@ -1,17 +1,26 @@
-import SwiftData
 import Foundation
+import SwiftData
 import SwiftUI
 
 @Model
-class MediaAttachment {
+class MediaAttachment : Identifiable{
     var id: UUID
-    var imageData: Data
-    var createdAt: Date
+    var data: Data
+    var mediaType: MediaType
+    var creationDate: Date
     
     init(imageData: Data) {
         self.id = UUID()
-        self.imageData = imageData
-        self.createdAt = Date()
+        self.data = imageData
+        self.mediaType = .image
+        self.creationDate = Date()
+    }
+    
+    init(videoData: Data) {
+        self.id = UUID()
+        self.data = videoData
+        self.mediaType = .video
+        self.creationDate = Date()
     }
 }
 

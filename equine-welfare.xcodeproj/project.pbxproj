@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5F9D95A72D7EA6D100F9934A /* MijickCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 5F9D95A62D7EA6D100F9934A /* MijickCamera */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		5F3AF8742D666FB2005349B4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F9D95A72D7EA6D100F9934A /* MijickCamera in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = "equine-welfare";
 			packageProductDependencies = (
+				5F9D95A62D7EA6D100F9934A /* MijickCamera */,
 			);
 			productName = "equine-welfare";
 			productReference = 5F3AF8612D666FB1005349B4 /* equine-welfare.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 5F3AF8582D666FB1005349B4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5F3AF8622D666FB1005349B4 /* Products */;
 			projectDirPath = "";
@@ -321,6 +330,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Also need to record your horse";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -378,6 +389,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Also need to record your horse";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -554,6 +567,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Mijick/Camera.git";
+			requirement = {
+				kind = exactVersion;
+				version = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5F9D95A62D7EA6D100F9934A /* MijickCamera */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */;
+			productName = MijickCamera;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5F3AF8592D666FB1005349B4 /* Project object */;
 }
