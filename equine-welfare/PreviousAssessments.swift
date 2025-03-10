@@ -47,7 +47,10 @@ struct PreviousAssessments: View {
                 ForEach(assessments) { assessment in
                     PreviousAssessmentRow(
                         assessment: assessment,
-                        modelContext: modelContext
+                        onUpload: { syncedAssessment in
+                            // Handle sync operation here
+                            print("Syncing assessment: \(syncedAssessment.displayName)")
+                        }
                     )
                 }
             }

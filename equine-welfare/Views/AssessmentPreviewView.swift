@@ -6,7 +6,7 @@ struct AssessmentPreviewView: View {
     
     // MARK: - Helper Methods for Content Generation
     
-    // Function to get non-compliant sections - used in multiple places
+//    Function to get non-compliant sections - used in multiple places
     private func getNonCompliantSections() -> [Section] {
         assessment.sections
             .filter { section in
@@ -19,7 +19,7 @@ struct AssessmentPreviewView: View {
             .sorted(by: { $0.id < $1.id })
     }
     
-    // Function to get non-compliant subsections for a section
+//    Function to get non-compliant subsections for a section
     private func getNonCompliantSubsections(for section: Section) -> [Subsection] {
         section.subsections.filter { subsection in
             subsection.requirements.contains { requirement in

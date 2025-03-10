@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		5F9D95A72D7EA6D100F9934A /* MijickCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 5F9D95A62D7EA6D100F9934A /* MijickCamera */; };
+		5FB51FA02D7F6EE000F48002 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB51F9F2D7F6EE000F48002 /* Auth */; };
+		5FB51FA22D7F6EE000F48002 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB51FA12D7F6EE000F48002 /* Storage */; };
+		5FB51FA42D7F6EE000F48002 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB51FA32D7F6EE000F48002 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +59,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5FB51FA42D7F6EE000F48002 /* Supabase in Frameworks */,
+				5FB51FA22D7F6EE000F48002 /* Storage in Frameworks */,
+				5FB51FA02D7F6EE000F48002 /* Auth in Frameworks */,
 				5F9D95A72D7EA6D100F9934A /* MijickCamera in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -118,6 +124,9 @@
 			name = "equine-welfare";
 			packageProductDependencies = (
 				5F9D95A62D7EA6D100F9934A /* MijickCamera */,
+				5FB51F9F2D7F6EE000F48002 /* Auth */,
+				5FB51FA12D7F6EE000F48002 /* Storage */,
+				5FB51FA32D7F6EE000F48002 /* Supabase */,
 			);
 			productName = "equine-welfare";
 			productReference = 5F3AF8612D666FB1005349B4 /* equine-welfare.app */;
@@ -203,6 +212,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */,
+				5FB51F9E2D7F6EE000F48002 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5F3AF8622D666FB1005349B4 /* Products */;
@@ -577,6 +587,14 @@
 				version = 3.0.0;
 			};
 		};
+		5FB51F9E2D7F6EE000F48002 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -584,6 +602,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */;
 			productName = MijickCamera;
+		};
+		5FB51F9F2D7F6EE000F48002 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5FB51F9E2D7F6EE000F48002 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		5FB51FA12D7F6EE000F48002 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5FB51F9E2D7F6EE000F48002 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		5FB51FA32D7F6EE000F48002 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5FB51F9E2D7F6EE000F48002 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
