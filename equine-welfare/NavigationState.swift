@@ -11,6 +11,7 @@ class NavigationState: ObservableObject {
         case horses(assessmentId: UUID?)
         case horseInfo(horseId: UUID)
         case horseDetail(horseId: UUID?)
+        case gallery(assessmentId: UUID?)
     }
     
     /// Current screen being displayed
@@ -22,12 +23,8 @@ class NavigationState: ObservableObject {
     /// Currently selected section ID (nil when on section selection screen)
     @Published var selectedSectionId: Int? = nil
     
-
     /// Currently selected horse ID
     @Published var selectedHorseId: UUID? = nil
-    /// Flag to show gallery view instead of section selection or section detail
-    @Published var showingGallery: Bool = false
-    
     // MARK: - Navigation Methods
     
     /// Start a new assessment and navigate to section selection
@@ -35,7 +32,6 @@ class NavigationState: ObservableObject {
         // Note: currentAssessmentId should already be set before calling this method
         currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
         selectedSectionId = nil // Clear any selected section
-        showingGallery = false // Reset gallery view
     }
     
     /// Edit an existing assessment
@@ -43,7 +39,6 @@ class NavigationState: ObservableObject {
         currentAssessmentId = assessmentId
         currentScreen = .sectionSelection(assessmentId: assessmentId)
         selectedSectionId = nil // Clear any selected section
-        showingGallery = false // Reset gallery view
     }
     
     /// Return to the main screen
@@ -52,7 +47,6 @@ class NavigationState: ObservableObject {
         currentAssessmentId = nil
         currentScreen = .main
         selectedSectionId = nil // Clear any selected section
-        showingGallery = false // Reset gallery view
     }
     
     /// Show the section selection screen for the current assessment
@@ -85,14 +79,20 @@ class NavigationState: ObservableObject {
     /// Navigate to a specific section
     func navigateToSection(sectionId: Int) {
         selectedSectionId = sectionId
-        showingGallery = false // Reset gallery view
         currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
     }
     
     /// Show the gallery view
     func showGallery() {
         selectedSectionId = nil // Clear any selected section when showing gallery
-        showingGallery = true
-        currentScreen = .sectionSelection(assessmentId: currentAssessmentId)
+        currentScreen = .gallery(assessmentId: currentAssessmentId)
+    }
+    
+    /// Check if currently showing gallery
+    var showingGallery: Bool {
+        if case .gallery = currentScreen {
+            return true
+        }
+        return false
     }
 } 

@@ -1,6 +1,7 @@
 import MijickCamera
 import PhotosUI
 import SwiftUI
+import AVFoundation
 
 struct MediaPicker: View {
     @Binding var isPresented: Bool
@@ -22,10 +23,12 @@ struct MediaPicker: View {
             )
             .onChange(of: selectedItem) { _, newValue in
                 Task {
-                    if let data = try? await newValue?.loadTransferable(
-                        type: Data.self)
-                    {
-                        onMediaSelected(data, .image)
+                    if let data = try? await newValue?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        // Convert to JPEG format with 0.8 compression quality
+                        if let jpegData = uiImage.jpegData(compressionQuality: 0.8) {
+                            onMediaSelected(jpegData, .image)
+                        }
                     }
                 }
             }
@@ -43,7 +46,9 @@ struct MediaPicker: View {
                         //                                    controller.reopenCameraScreen()
                     }
                     .onVideoCaptured { videoURL, controller in
-                        saveVideoInGallery(videoURL)
+                        Task {
+                            await convertAndSaveVideo(videoURL)
+                        }
                         showCameraSheet = false
                         //                                    controller.reopenCameraScreen()
                     }
@@ -62,15 +67,43 @@ struct MediaPicker: View {
             onMediaSelected(imageData, .image)
         }
     }
-    private func saveVideoInGallery(_ videoURL: URL) {
-        print("saveVideoInGallery")
 
+    private func convertAndSaveVideo(_ sourceURL: URL) async {
+        print("Converting and saving video")
+        
         do {
-            // Read the video file data - be careful with large videos!
-            let videoData = try Data(contentsOf: videoURL)
-            onMediaSelected(videoData, .video)
+            let asset = AVAsset(url: sourceURL)
+            
+            // Create a temporary file URL for the exported video
+            let tempDir = FileManager.default.temporaryDirectory
+            let outputURL = tempDir.appendingPathComponent("converted_video_\(UUID().uuidString).mp4")
+            
+            // Configure export session
+            guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetMediumQuality) else {
+                print("Failed to create export session")
+                return
+            }
+            
+            exportSession.outputURL = outputURL
+            exportSession.outputFileType = .mp4
+            exportSession.shouldOptimizeForNetworkUse = true
+            
+            // Export the video
+            await exportSession.export()
+            
+            // Check export status
+            if exportSession.status == .completed {
+                // Read the converted video data
+                let videoData = try Data(contentsOf: outputURL)
+                onMediaSelected(videoData, .video)
+                
+                // Clean up temporary file
+                try? FileManager.default.removeItem(at: outputURL)
+            } else if let error = exportSession.error {
+                print("Video conversion failed: \(error.localizedDescription)")
+            }
         } catch {
-            print("Error loading video data: \(error.localizedDescription)")
+            print("Error processing video: \(error.localizedDescription)")
         }
     }
 }
@@ -82,7 +115,7 @@ struct MediaPicker: View {
     MediaPicker(
         isPresented: $isPresented,
         onMediaSelected: { data, type in
-            print("Image selected with \(data.count) bytes of type:\(type)")
+            print("Media selected with \(data.count) bytes of type:\(type)")
         }
     )
 }

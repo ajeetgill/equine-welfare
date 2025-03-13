@@ -55,7 +55,7 @@ struct ContentView: View {
         switch navigationState.currentScreen {
         case .main:
             SidebarMainScreen()
-        case .sectionSelection(let assessmentId), .horses(let assessmentId):
+        case .sectionSelection(let assessmentId), .horses(let assessmentId), .gallery(let assessmentId):
             AssessmentSidebarView(viewModel: sectionViewModel)
                 .onAppear {
                     handleAssessmentAppearance(assessmentId: assessmentId)
@@ -91,13 +91,14 @@ struct ContentView: View {
                let section = sectionViewModel.sections.first(where: { $0.id == sectionId }) {
                 // Show the section detail view
                 SectionDetailView(section: section)
-            } else if navigationState.showingGallery {
-                // Show the gallery view
-                GalleryView(viewModel: GalleryViewModel(sectionViewModel: sectionViewModel))
             } else {
                 // Show the section selection view
                 SectionSelectionView(viewModel: sectionViewModel)
             }
+            
+        case .gallery:
+            // Show the gallery view
+            GalleryView(viewModel: GalleryViewModel(sectionViewModel: sectionViewModel))
             
         case .horses:
             // Show the horses view

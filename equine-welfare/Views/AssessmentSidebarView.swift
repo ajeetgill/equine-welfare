@@ -102,7 +102,6 @@ struct AssessmentSidebarView: View {
                             action: {
                                 navigationState.navigateToSection(sectionId: section.id)
                                 navigationState.selectedSectionId = section.id
-                                navigationState.showingGallery = false
                             }
                         )
                     }
