@@ -9,7 +9,6 @@ import Foundation
 import Supabase
 import SwiftUI
 import SwiftData
-import Combine
 
 /// Service class to handle all Supabase interactions
 class SupabaseService {
@@ -31,33 +30,6 @@ class SupabaseService {
     private init() {}
     
     // MARK: - Public Methods
-    
-    /// Uploads an assessment to Supabase
-    /// - Parameter assessment: The assessment to upload
-    /// - Returns: A result with a success message or an error
-    func uploadAssessment(_ assessment: Assessment) async -> Void {
-        // First, print the assessment data for debugging
-        // assessment.getNonCompliantSections().forEach{ section in
-        //     print(section.title)
-        // }
-//        printAssessmentData(assessment.getNonCompliantSections())
-        
-        // do {
-        //     // Convert assessment to a dictionary for upload
-        //     let assessmentData = try convertAssessmentToDict(assessment)
-            
-        //     // Upload to Supabase
-        //     let response = try await supabase.database
-        //         .from("assessments")
-        //         .insert(assessmentData)
-        //         .execute()
-            
-        //     return .success("Assessment uploaded successfully")
-        // } catch {
-        //     print("Error uploading assessment: \(error.localizedDescription)")
-        //     return .failure(error)
-        // }
-    }
     
     /// Uploads an RTF file to Supabase Storage
     /// - Parameters:
@@ -87,12 +59,7 @@ class SupabaseService {
                     options: FileOptions(contentType: "application/rtf")
                 )
             
-            // Generate a public URL for the uploaded file
-            let publicURL = try await supabase.storage
-                .from("assessments")
-                .createSignedURL(path: "\(sanitizedFolderName)/\(fileName)", expiresIn: 3600 * 24 * 7) // 7 days expiry
-            
-            return .success("Assessment document uploaded successfully: \(publicURL)")
+            return .success("Assessment document uploaded successfully 🎉 yeehaw 🐴")
         } catch {
             print("Error uploading RTF document: \(error.localizedDescription)")
             return .failure(error)
@@ -135,23 +102,20 @@ class SupabaseService {
             // Use a simple approach with a loop instead of task groups for better control
             for (index, attachment) in allMediaAttachments.enumerated() {
                 do {
-                    // Only process attachments that have imageData
-                    guard let imageData = attachment.data as? Data else {
-                        errorCount += 1
-                        continue
-                    }
-                    
-                    // Create a unique filename based on attachment ID and timestamp
-                    let fileName = "media_\(attachment.id)_\(Int(Date().timeIntervalSince1970)).jpg"
+                    // Create a unique filename based on attachment ID, timestamp, and media type
+                    let timestamp = Int(Date().timeIntervalSince1970)
+                    let fileName = "media_\(attachment.id)_\(timestamp).\(attachment.mediaType.fileExtension)"
                     let path = "\(sanitizedFolderName)/media/\(fileName)"
                     
-                    // Upload the file to Supabase
+                    print("Uploading media file: \(fileName) with type: \(attachment.mediaType.mimeType)")
+                    
+                    // Upload the file to Supabase with correct content type
                     _ = try await supabase.storage
                         .from("assessments")
                         .upload(
                             path: path,
-                            file: imageData,
-                            options: FileOptions(contentType: "image/jpeg")
+                            file: attachment.data,
+                            options: FileOptions(contentType: attachment.mediaType.mimeType)
                         )
                     
                     // Increment success counter
@@ -169,11 +133,128 @@ class SupabaseService {
             
             // If all failed, throw an error
             if errorCount == totalCount && totalCount > 0 {
-                return .failure(NSError(domain: "SupabaseService", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Failed to upload all media attachments"]))
+                return .failure(NSError(
+                    domain: "SupabaseService",
+                    code: 1001,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to upload all media attachments. Total attempts: \(totalCount)"]
+                ))
             }
             
             return .success(successCount)
         } catch {
+            print("Error in upload process: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
+    /// Uploads horse media to Supabase Storage
+    /// - Parameters:
+    ///   - assessment: The assessment containing horses with media attachments
+    ///   - progressHandler: Optional closure to handle upload progress updates (0.0 to 1.0)
+    /// - Returns: A result containing the number of successfully uploaded files or an error
+    func uploadHorseMedia(assessment: Assessment, progressHandler: ((Double) -> Void)? = nil) async -> Result<Int, Error> {
+        var successCount = 0
+        var errorCount = 0
+        let totalHorses = assessment.horses.count
+        
+        do {
+            // Create a sanitized folder name based on assessment name (same naming convention as RTF upload)
+            let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
+            
+            for (index, horse) in assessment.horses.enumerated() {
+                // Create a sanitized folder name for the horse
+                let sanitizedHorseName = horse.name.replacingOccurrences(of: "/", with: "-")
+                var horsePhotosUploaded = 0
+                
+                // Upload main photo if exists
+                if let photoData = horse.photoData {
+                    do {
+                        let fileName = "main_photo.jpg"
+                        let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/\(fileName)"
+                        
+                        _ = try await supabase.storage
+                            .from("assessments")
+                            .upload(
+                                path: path,
+                                file: photoData,
+                                options: FileOptions(contentType: "image/jpeg")
+                            )
+                        successCount += 1
+                        horsePhotosUploaded += 1
+                    } catch {
+                        print("Error uploading main horse photo: \(error.localizedDescription)")
+                        errorCount += 1
+                    }
+                }
+                
+                // Upload body view photos if they exist
+                let bodyPhotos: [(Data?, String)] = [
+                    (horse.frontPhotoData, "front"),
+                    (horse.rightPhotoData, "right"),
+                    (horse.backPhotoData, "back"),
+                    (horse.leftPhotoData, "left")
+                ]
+                
+                for (photoData, view) in bodyPhotos {
+                    if let data = photoData {
+                        do {
+                            let fileName = "\(view)_view.jpg"
+                            let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/\(fileName)"
+                            
+                            _ = try await supabase.storage
+                                .from("assessments")
+                                .upload(
+                                    path: path,
+                                    file: data,
+                                    options: FileOptions(contentType: "image/jpeg")
+                                )
+                            successCount += 1
+                            horsePhotosUploaded += 1
+                        } catch {
+                            print("Error uploading \(view) view photo: \(error.localizedDescription)")
+                            errorCount += 1
+                        }
+                    }
+                }
+                
+                // Upload abnormal photos if they exist
+                for (abnormalIndex, abnormalData) in horse.abnormalPhotosData.enumerated() {
+                    do {
+                        let fileName = "abnormal_\(abnormalIndex + 1).jpg"
+                        let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/abnormal/\(fileName)"
+                        
+                        _ = try await supabase.storage
+                            .from("assessments")
+                            .upload(
+                                path: path,
+                                file: abnormalData,
+                                options: FileOptions(contentType: "image/jpeg")
+                            )
+                        successCount += 1
+                        horsePhotosUploaded += 1
+                    } catch {
+                        print("Error uploading abnormal photo: \(error.localizedDescription)")
+                        errorCount += 1
+                    }
+                }
+                
+                // Calculate progress based on current horse
+                let progress = Double(index + 1) / Double(totalHorses)
+                progressHandler?(progress)
+            }
+            
+            // If all uploads failed and there were attempts
+            if errorCount > 0 && successCount == 0 {
+                return .failure(NSError(
+                    domain: "SupabaseService",
+                    code: 1002,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to upload all horse media attachments."]
+                ))
+            }
+            
+            return .success(successCount)
+        } catch {
+            print("Error in horse media upload process: \(error.localizedDescription)")
             return .failure(error)
         }
     }
@@ -216,90 +297,6 @@ class SupabaseService {
         
         print("===== END ASSESSMENT DATA =====")
     }
+   
     
-    // MARK: - Private Helper Methods
-    
-    /// Converts an assessment to a dictionary for Supabase upload
-    /// - Parameter assessment: The assessment to convert
-    /// - Returns: A dictionary representation of the assessment
-    private func convertAssessmentToDict(_ assessment: Assessment) throws -> [String: Any] {
-        // Basic assessment data
-        var assessmentDict: [String: Any] = [
-            "id": assessment.id.uuidString,
-            "vet_name": assessment.vetName,
-            "farm_name": assessment.farmName,
-            "visit_date": ISO8601DateFormatter().string(from: assessment.visitDate),
-            "is_complete": assessment.isComplete
-        ]
-        
-        // Convert sections to JSON
-        let sectionsData = try JSONSerialization.data(withJSONObject: convertSectionsToDict(assessment.sections))
-        if let sectionsString = String(data: sectionsData, encoding: .utf8) {
-            assessmentDict["sections"] = sectionsString
-        }
-        
-        // Convert horses to JSON
-//        let horsesData = try JSONSerialization.data(withJSONObject: convertHorsesToDict(assessment.horses))
-//        if let horsesString = String(data: horsesData, encoding: .utf8) {
-//            assessmentDict["horses"] = horsesString
-//        }
-        
-        return assessmentDict
-    }
-    
-    /// Converts sections to an array of dictionaries
-    /// - Parameter sections: The sections to convert
-    /// - Returns: An array of dictionaries representing the sections
-    private func convertSectionsToDict(_ sections: [Section]) -> [[String: Any]] {
-        return sections.map { section in
-            var sectionDict: [String: Any] = [
-                "id": section.id,
-                "title": section.title,
-                "is_applicable": section.isApplicable
-            ]
-            
-            // Convert subsections
-            sectionDict["subsections"] = section.subsections.map { subsection in
-                var subsectionDict: [String: Any] = [
-                    "id": subsection.id,
-                    "name": subsection.name
-                ]
-                
-                // Convert requirements
-                subsectionDict["requirements"] = subsection.requirements.map { requirement in
-                    var requirementDict: [String: Any] = [
-                        "id": requirement.id,
-                        "text": requirement.text,
-                        "compliance_status": requirement.complianceStatus?.rawValue ?? "not_evaluated"
-                    ]
-                    
-                    if let reason = requirement.nonComplianceReason {
-                        requirementDict["non_compliance_reason"] = reason
-                    }
-                    
-                    return requirementDict
-                }
-                
-                return subsectionDict
-            }
-            
-            return sectionDict
-        }
-    }
-    
-    /// Converts horses to an array of dictionaries
-    /// - Parameter horses: The horses to convert
-    /// - Returns: An array of dictionaries representing the horses
-//    private func convertHorsesToDict(_ horses: [Horse]) -> [[String: Any]] {
-//        return horses.map { horse in
-//            var horseDict: [String: Any] = [
-//                "id": horse.id.uuidString,
-//                "name": horse.name
-//            ]
-//            
-//            // Add more horse properties as needed
-//            
-//            return horseDict
-//        }
-//    }
 }
