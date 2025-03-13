@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AssessmentSidebarView: View {
-    @ObservedObject var viewModel: SectionSelectionViewModel
+    @State var viewModel: SectionSelectionViewModel
     @State private var isApplicableSectionsExpanded: Bool = true
     @EnvironmentObject private var navigationState: NavigationState
     @StateObject private var galleryViewModel: GalleryViewModel

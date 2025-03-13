@@ -19,3 +19,16 @@ class Section {
         self.infoIconClicks = 0
     }
 }
+
+// For sections or any other model used in navigation
+extension Section: Identifiable, Hashable {
+    // If id is already a property, Identifiable may be automatic
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    public static func == (lhs: Section, rhs: Section) -> Bool {
+        lhs.id == rhs.id
+    }
+}

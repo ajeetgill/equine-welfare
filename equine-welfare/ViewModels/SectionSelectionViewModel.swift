@@ -1,12 +1,12 @@
 import SwiftUI
 import SwiftData
 
-class SectionSelectionViewModel: ObservableObject {
-    @Published var sections: [Section] = []
-    @Published var vetName: String = ""
-    @Published var farmName: String = ""
-    @Published var visitDate: Date = Date()
-    @Published var currentAssessmentId: UUID?
+@Observable class SectionSelectionViewModel {
+    var sections: [Section] = []
+    var vetName: String = ""
+    var farmName: String = ""
+    var visitDate: Date = Date()
+    var currentAssessmentId: UUID?
     
     private let modelContext: ModelContext
     private let assessmentHelper: AssessmentHelper

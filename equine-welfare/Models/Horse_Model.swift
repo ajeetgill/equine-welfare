@@ -79,3 +79,17 @@ enum TimeUnit: String, CaseIterable, Codable {
     case weeks = "weeks"
     case days = "days"
 }
+
+// For horses and other model objects that will be passed to NavigationLinks
+extension Horse: Identifiable, Hashable {
+    // If using SwiftData, Identifiable may already be implemented
+    
+    // Add hashable conformance
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
+    }
+    
+    public static func == (lhs: Horse, rhs: Horse) -> Bool {
+        lhs.uuid == rhs.uuid
+    }
+}

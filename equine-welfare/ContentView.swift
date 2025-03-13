@@ -16,13 +16,13 @@ struct ContentView: View {
     @State private var vetName = ""
     @State private var farmName = ""
     @State private var visitDate = Date()
-    @StateObject private var sectionViewModel: SectionSelectionViewModel
+    @State private var sectionViewModel: SectionSelectionViewModel
     
     // MARK: - Initialization
     
     init(previewMode: Bool = false) {
         let modelContext = ModelContainer.shared.mainContext
-        _sectionViewModel = StateObject(wrappedValue: SectionSelectionViewModel(modelContext: modelContext))
+        _sectionViewModel = State(wrappedValue: SectionSelectionViewModel(modelContext: modelContext))
         
         if previewMode {
             // Initialize preview state

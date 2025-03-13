@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SectionSelectionView: View {
-    @ObservedObject var viewModel: SectionSelectionViewModel
+    @State var viewModel: SectionSelectionViewModel
     
     var body: some View {
         VStack(alignment: .leading) {

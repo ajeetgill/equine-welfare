@@ -27,9 +27,6 @@ struct SectionToggleRow: View {
             
             Toggle("", isOn: $isApplicable)
                 .toggleStyle(SwitchToggleStyle(tint: .green))
-                .onChange(of: isApplicable) { _, _ in
-                    toggleAction()
-                }
         }
         .padding()
         .background(Color.white)
