@@ -70,7 +70,7 @@ struct AssessmentSidebarView: View {
             // Horses Button
             SidebarButton(
                 title: "Horses",
-                icon: "horse",
+                icon: "pawprint.fill",
                 isActive: isHorsesScreen(),
                 action: {
                     navigationState.showHorses()

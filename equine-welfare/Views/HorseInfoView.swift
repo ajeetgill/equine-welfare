@@ -173,7 +173,7 @@ struct HorseInfoView: View {
                     .frame(width: 80, height: 80)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "horse")
+                Image(systemName: "pawprint.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 60, height: 60)
@@ -232,7 +232,7 @@ struct HorseInfoView: View {
                     .fill(Color(.systemGray5))
                     .frame(width: 70, height: 70)
                     .overlay(
-                        Image(systemName: "horse")
+                        Image(systemName: "pawprint.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 40, height: 40)

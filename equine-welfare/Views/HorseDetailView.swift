@@ -361,7 +361,7 @@ struct HorseDetailView: View {
                     .frame(width: 120, height: 120)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "horse") // Corrected: lowercase "horse"
+                Image(systemName: "pawprint.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)

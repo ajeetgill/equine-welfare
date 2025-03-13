@@ -105,7 +105,7 @@ struct HorseInfoRow: View {
                     .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "horse")
+                Image(systemName: "pawprint.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
