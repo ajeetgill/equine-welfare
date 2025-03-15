@@ -1,8 +1,8 @@
 import SwiftUI
 import SwiftData
 
-class GalleryViewModel: ObservableObject {
-    @Published var galleryItems: [GallerySection] = []
+@Observable class GalleryViewModel {
+    var galleryItems: [GallerySection] = []
     
     private let sectionViewModel: SectionSelectionViewModel
     

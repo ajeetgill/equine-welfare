@@ -34,13 +34,6 @@ class NavigationState: ObservableObject {
         selectedSectionId = nil // Clear any selected section
     }
     
-    /// Edit an existing assessment
-    func editAssessment(assessmentId: UUID) {
-        currentAssessmentId = assessmentId
-        currentScreen = .sectionSelection(assessmentId: assessmentId)
-        selectedSectionId = nil // Clear any selected section
-    }
-    
     /// Return to the main screen
     func returnToMain() {
         // Clear the assessment ID when returning to main

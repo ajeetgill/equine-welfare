@@ -25,8 +25,7 @@ struct SidebarMainScreen: View {
             SidebarButton(
                 title: "Home",
                 icon: "house.fill",
-                isActive: false,
-                action: {}
+                isActive: false
             )
             .padding(.horizontal)
             .padding(.top, 16)

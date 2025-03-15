@@ -13,18 +13,11 @@ struct MainScreen: View {
     @Binding var vetName: String
     @Binding var farmName: String
     @Binding var visitDate: Date
-    var navigationState: NavigationState
+    // Replace NavigationState with callback function
+    var onStartNewAssessment: (UUID) -> Void
     
     @State private var assessmentHelper: AssessmentHelper?
     @State private var sectionViewModel: SectionSelectionViewModel?
-    
-    init(vetName: Binding<String>, farmName: Binding<String>, 
-         visitDate: Binding<Date>, navigationState: NavigationState) {
-        self._vetName = vetName
-        self._farmName = farmName
-        self._visitDate = visitDate
-        self.navigationState = navigationState
-    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -33,7 +26,7 @@ struct MainScreen: View {
                 .fontWeight(.bold)
             
             VStack(spacing: 16) {
-                TextField("Vet Name", text: $vetName)
+                TextField("Veterinarian Name", text: $vetName)
                     .textFieldStyle(.roundedBorder)
                 
                 TextField("Farm Name", text: $farmName)
@@ -42,7 +35,7 @@ struct MainScreen: View {
                 DatePicker(
                     "Visit Date",
                     selection: $visitDate,
-                    displayedComponents: [.date]
+                    displayedComponents: .date
                 )
                 
                 Button(action: startNewAssessment) {
@@ -59,6 +52,7 @@ struct MainScreen: View {
             .background(Color(.systemGray6))
             .cornerRadius(12)
         }
+        .padding()
         .onAppear {
             assessmentHelper = AssessmentHelper(modelContext: modelContext)
             sectionViewModel = SectionSelectionViewModel(modelContext: modelContext)
@@ -73,22 +67,13 @@ struct MainScreen: View {
         guard let viewModel = sectionViewModel else { return }
         
         // Create new assessment
-        let newAssessment = viewModel.createNewAssessment(
+        let newAssessmentId = viewModel.createNewAssessment(
             vetName: vetName,
             farmName: farmName,
             visitDate: visitDate
         )
-        
-        // Store the assessment ID in navigation state before resetting form
-        navigationState.currentAssessmentId = newAssessment
-        
-        // Handle navigation
-        navigationState.startNewAssessment(
-            vetName: vetName,
-            farmName: farmName,
-            visitDate: visitDate
-        )
-        
+        onStartNewAssessment(newAssessmentId)
+
         // Reset form fields
         vetName = ""
         farmName = ""
@@ -105,7 +90,7 @@ struct MainScreen: View {
         vetName: $vetName,
         farmName: $farmName,
         visitDate: $visitDate,
-        navigationState: NavigationState()
+        onStartNewAssessment: { _ in }
     )
     .modelContainer(for: Assessment.self, inMemory: true)
 }

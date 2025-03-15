@@ -1,18 +1,11 @@
 import SwiftUI
 
 struct GalleryView: View {
-    @ObservedObject var viewModel: GalleryViewModel
+    var viewModel: GalleryViewModel
     @State private var selectedImage: GalleryImage?
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Assessment Gallery")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding(.horizontal)
-                .padding(.top)
-                .padding(.bottom, 8)
-            
             if viewModel.galleryItems.isEmpty {
                 emptyGalleryView
             } else {
@@ -27,6 +20,7 @@ struct GalleryView: View {
         .sheet(item: $selectedImage) { image in
             ImageDetailView(image: image)
         }
+        .navigationTitle(LocalizedStringKey("Assessment Sections Gallery"))
     }
     
     private var emptyGalleryView: some View {

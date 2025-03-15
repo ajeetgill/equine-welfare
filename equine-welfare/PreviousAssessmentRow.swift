@@ -19,7 +19,6 @@ extension UIFont {
 
 struct PreviousAssessmentRow: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var navigationState: NavigationState
     
     // MARK: - State Properties
     @State private var showingDeleteConfirmation = false
@@ -33,14 +32,20 @@ struct PreviousAssessmentRow: View {
     @State private var uploadSuccessMessage: String?
     @State private var uploadProgress: Double = 0.0
     @State private var isUploadingMedia: Bool = false
+    @State private var sectionViewModel: SectionSelectionViewModel
     
     // MARK: - Properties
     let assessment: Assessment
-    let onUpload: (Assessment) -> Void
-    
-    // MARK: - Computed Properties
-    private var assessmentHelper: AssessmentHelper {
-        AssessmentHelper(modelContext: modelContext)
+    var onSelectAssessment: ((UUID) -> Void)?
+    private let assessmentHelper: AssessmentHelper
+
+    // MARK: - Initialization
+    init(assessment: Assessment, modelContext: ModelContext, onSelectAssessment: ((UUID) -> Void)? = nil) {
+        self.assessment = assessment
+        self.assessmentHelper = AssessmentHelper(modelContext: modelContext)
+        self.sectionViewModel = SectionSelectionViewModel(
+            modelContext: modelContext)
+        self.onSelectAssessment = onSelectAssessment
     }
     
     // MARK: - Helper Methods
@@ -151,7 +156,7 @@ struct PreviousAssessmentRow: View {
                     uploadSuccessMessage = "\(rtfMessage) \(mediaMessage) successfully."
                     
                     // Call the onUpload callback to notify parent views
-                    onUpload(assessment)
+//                    onUpload(assessment)
                     
                 case .failure(let error):
                     // Horse media upload failed but RTF and assessment media succeeded
@@ -320,26 +325,19 @@ struct PreviousAssessmentRow: View {
     }
     
     private var actionButtons: some View {
-        HStack(spacing: 16) {
-            // Edit button
+        HStack(spacing: 12) {
             uploadButton
-            Button(action: { navigationState.editAssessment(assessmentId: assessment.id) }) {
-                Image(systemName: "pencil")
-                if assessment.isComplete {
-                    Text("Edit")
-                } else {
-                    Text("Resume")
-                }
-                
+            Button(action: { 
+                sectionViewModel.loadAssessment(id: assessment.id)
+                onSelectAssessment?(assessment.id)
+            }) {
+                Label(assessment.isComplete ? "Edit" : "Resume", systemImage: "pencil")
             }
             .help("Edit Assessment")
             
             // Preview button
             Button(action: { showingPreview.toggle() }) {
-                
-                Image(systemName: "doc.text.magnifyingglass")
-                Text("Preview")
-                    
+                Label("Preview", systemImage: "doc.text.magnifyingglass")
             }
             .help("Preview Assessment")
             
@@ -350,6 +348,7 @@ struct PreviousAssessmentRow: View {
             deleteButton
         }.foregroundColor(.blue)
     }
+    
     private var uploadButton: some View {
         Button {
             Task {
@@ -391,15 +390,7 @@ struct PreviousAssessmentRow: View {
         Group {
             if let url = shareURL, isShareReady {
                 ShareLink(item: url) {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
-                    Text("Share")
-                }
-                .help("Share Assessment as RTF Document")
-            } else {
-                Button(action: { prepareShareContent() }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
+                    Label("Share", systemImage: "square.and.arrow.up")
                 }
                 .help("Share Assessment as RTF Document")
             }
@@ -408,8 +399,7 @@ struct PreviousAssessmentRow: View {
     
     private var deleteButton: some View {
         Button(action: { showingDeleteConfirmation = true }) {
-            Image(systemName: "trash")
-            Text("Delete")
+            Label("Delete", systemImage: "trash")
         }
         .help("Delete Assessment")
         .foregroundColor(.red)
@@ -419,9 +409,10 @@ struct PreviousAssessmentRow: View {
             titleVisibility: .visible
         ) {
             Button("Delete", role: .destructive) {
-                assessmentHelper.deleteAssessment(assessment: assessment)
+                withAnimation(){
+                    assessmentHelper.deleteAssessment(assessment: assessment)
+                }
             }
-            Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure? You'll lose this assessment forever.")
         }
@@ -449,7 +440,6 @@ struct PreviousAssessmentRow: View {
     
     let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
     
-    return PreviousAssessmentRow(assessment: assessment, onUpload: { _ in print("Upload triggered in preview") })
+    PreviousAssessmentRow(assessment: assessment, modelContext: modelContext)
         .modelContainer(for: Assessment.self)
-        .environmentObject(NavigationState())
 }

@@ -32,9 +32,10 @@ class AssessmentHelper {
         return newAssessment
     }
     
-    func loadAssessment(id: UUID) -> Assessment? {
+    /// Edit an existing assessment
+    func editAssessment(assessmentId: UUID) -> Assessment? {
         let descriptor = FetchDescriptor<Assessment>(
-            predicate: #Predicate { $0.id == id }
+            predicate: #Predicate { $0.id == assessmentId }
         )
         return try? modelContext.fetch(descriptor).first
     }
