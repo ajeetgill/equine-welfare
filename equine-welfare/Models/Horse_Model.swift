@@ -3,7 +3,7 @@ import Foundation
 
 @Model
 class Horse {
-    var uuid: UUID
+    @Attribute(.unique) var uuid: UUID
     var name: String
     var age: Int
     var color: String
@@ -24,7 +24,10 @@ class Horse {
     var leftPhotoData: Data?
     
     // Add this property for abnormal findings photos
-    var abnormalPhotosData: [Data] = []
+    @Attribute(.externalStorage) var abnormalPhotosData: [Data]
+    
+    // Inverse relationship to Assessment - using proper SwiftData syntax
+    @Relationship(inverse: \Assessment.horses) var assessment: Assessment?
     
     init(
         name: String,
@@ -43,7 +46,8 @@ class Horse {
         rightPhotoData: Data? = nil,
         backPhotoData: Data? = nil,
         leftPhotoData: Data? = nil,
-        abnormalPhotosData: [Data] = []
+        abnormalPhotosData: [Data] = [],
+        assessment: Assessment? = nil
     ) {
         self.uuid = UUID()
         self.name = name
@@ -63,6 +67,7 @@ class Horse {
         self.backPhotoData = backPhotoData
         self.leftPhotoData = leftPhotoData
         self.abnormalPhotosData = abnormalPhotosData
+        self.assessment = assessment
     }
 }
 

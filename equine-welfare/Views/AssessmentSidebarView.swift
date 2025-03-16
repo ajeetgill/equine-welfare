@@ -6,10 +6,31 @@ struct AssessmentSidebarView: View {
     var onShowSectionSelection: () -> Void
     var viewModel: SectionSelectionViewModel
     var galleryViewModel: GalleryViewModel
+    
+    // Add NavigationPath binding for horse navigation
+    @Binding var navigationPath: NavigationPath
+    
+    // Add current assessment ID
+    var assessmentId: UUID
 
     @State private var isApplicableSectionsExpanded: Bool = true
     @State private var selectedSection: Section?
     @State private var currentDetailView: DetailView = .sectionSelection
+    
+    // Initializer with navigationPath
+    init(
+        onShowSectionSelection: @escaping () -> Void,
+        viewModel: SectionSelectionViewModel,
+        galleryViewModel: GalleryViewModel,
+        navigationPath: Binding<NavigationPath> = .constant(NavigationPath()),
+        assessmentId: UUID = UUID()
+    ) {
+        self.onShowSectionSelection = onShowSectionSelection
+        self.viewModel = viewModel
+        self.galleryViewModel = galleryViewModel
+        self._navigationPath = navigationPath
+        self.assessmentId = assessmentId
+    }
     
     // Define possible detail views
     private enum DetailView: Equatable {
@@ -53,7 +74,13 @@ struct AssessmentSidebarView: View {
             case .sectionSelection:
                 SectionSelectionView(viewModel: viewModel)
             case .horses:
-                HorsesView()
+                // Use a nested NavigationStack for horses
+                NavigationStack {
+                    HorsesView(
+                        assessmentId: assessmentId,
+                        navigationPath: $navigationPath
+                    )
+                }
             case .gallery:
                 GalleryView(viewModel: galleryViewModel)
             case .sectionDetail(let section):
@@ -95,6 +122,8 @@ struct AssessmentSidebarView: View {
             ) {
                 selectedSection = nil
                 currentDetailView = .horses
+                // When using NavigationStack/SplitView, we don't need to
+                // navigate here as switching the currentDetailView handles it
             }
             
             // Gallery Button

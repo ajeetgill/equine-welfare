@@ -5,7 +5,6 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var assessments: [Assessment]
 
-    //    @StateObject private var navigationState = NavigationState()
     @State private var vetName = ""
     @State private var farmName = ""
     @State private var visitDate = Date()
@@ -53,7 +52,9 @@ struct ContentView: View {
                         onShowSectionSelection: {},
                         viewModel: sectionViewModel,
                         galleryViewModel: GalleryViewModel(
-                            sectionViewModel: sectionViewModel)
+                            sectionViewModel: sectionViewModel),
+                        navigationPath: $navigationPath,
+                        assessmentId: assessmentId
                     )
                     .onAppear {
                         currentAssessmentId = assessmentId
@@ -69,6 +70,29 @@ struct ContentView: View {
                     } else {
                         Text("Section not found")
                     }
+                    
+                case .horses(let assessmentId):
+                    HorsesView(
+                        assessmentId: assessmentId,
+                        navigationPath: $navigationPath
+                    )
+                    .onAppear {
+                        currentAssessmentId = assessmentId
+                        loadAssessment(id: assessmentId)
+                    }
+                    
+                case .horseInfo(let horseId):
+                    HorseInfoView(
+                        horseId: horseId,
+                        navigationPath: $navigationPath
+                    )
+                    
+                case .horseDetail(let horseId, let assessmentId):
+                    HorseDetailView(
+                        horseId: horseId,
+                        assessmentId: assessmentId,
+                        navigationPath: $navigationPath
+                    )
                 }
             }
             .padding()

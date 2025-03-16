@@ -4,9 +4,10 @@ import PhotosUI
 
 struct HorseInfoView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var navigationState: NavigationState
     
     let horseId: UUID
+    @Binding var navigationPath: NavigationPath
+    
     @State private var horse: Horse?
     @State private var findings: String = ""
     
@@ -27,6 +28,12 @@ struct HorseInfoView: View {
     
     // Add this with your other state variables at the top of the file
     @State private var abnormalPhotoItem: PhotosPickerItem?
+    
+    // Add assessmentId access
+    private var assessmentId: UUID? {
+        // Get the assessment ID from the horse's relationship
+        return horse?.assessment?.id
+    }
     
     var body: some View {
         ScrollView {
@@ -116,8 +123,13 @@ struct HorseInfoView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") {
-                    if let horse = horse {
-                        navigationState.showHorseDetail(horseId: horse.uuid)
+                    if let horse = horse, let assessId = assessmentId {
+                        print("DEBUG: Editing horse with assessmentId: \(assessId)")
+                        navigationPath.append(AppDestination.horseDetail(horseId: horse.uuid, assessmentId: assessId))
+                    } else if let horse = horse {
+                        print("ERROR: Missing assessment ID when editing horse")
+                        // Fallback to use the horse's UUID as an ID to find it
+                        navigationPath.append(AppDestination.horseDetail(horseId: horse.uuid, assessmentId: UUID()))
                     }
                 }
             }
@@ -337,22 +349,57 @@ struct HorseInfoView: View {
     }
     
     private func loadHorse() {
-        let descriptor = FetchDescriptor<Horse>(
-            predicate: #Predicate { $0.uuid == horseId }
-        )
-        
-        if let loadedHorse = try? modelContext.fetch(descriptor).first {
-            self.horse = loadedHorse
-            self.findings = loadedHorse.notes ?? ""
+        do {
+            // Create a descriptor that also includes relationship information
+            var descriptor = FetchDescriptor<Horse>(
+                predicate: #Predicate<Horse> { horse in
+                    horse.uuid == horseId
+                }
+            )
             
-            // Load body photos
-            self.frontPhotoData = loadedHorse.frontPhotoData
-            self.rightPhotoData = loadedHorse.rightPhotoData
-            self.backPhotoData = loadedHorse.backPhotoData
-            self.leftPhotoData = loadedHorse.leftPhotoData
+            // Add relationship descriptors to ensure Assessment is loaded
+            descriptor.includePendingChanges = true
             
-            // Load abnormal photos
-            self.abnormalPhotos = loadedHorse.abnormalPhotosData
+            if let loadedHorse = try modelContext.fetch(descriptor).first {
+                self.horse = loadedHorse
+                self.findings = loadedHorse.notes ?? ""
+                
+                // Debug output to check the assessment relationship
+                if let assessment = loadedHorse.assessment {
+                    print("DEBUG: Horse belongs to assessment: \(assessment.id)")
+                } else {
+                    print("DEBUG: Horse has no assessment relationship")
+                    
+                    // Try to find the assessment that contains this horse
+                    Task { @MainActor in
+                        let assessmentDescriptor = FetchDescriptor<Assessment>()
+                        let assessments = try? modelContext.fetch(assessmentDescriptor)
+                        
+                        if let assessments = assessments {
+                            for assessment in assessments {
+                                // Use local constant for comparison to avoid optional issues
+                                let currentHorseId = horseId
+                                if assessment.horses.contains(where: { $0.uuid == currentHorseId }) {
+                                    print("DEBUG: Found containing assessment: \(assessment.id)")
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Load body photos
+                self.frontPhotoData = loadedHorse.frontPhotoData
+                self.rightPhotoData = loadedHorse.rightPhotoData
+                self.backPhotoData = loadedHorse.backPhotoData
+                self.leftPhotoData = loadedHorse.leftPhotoData
+                
+                // Load abnormal photos
+                self.abnormalPhotos = loadedHorse.abnormalPhotosData
+            } else {
+                print("ERROR: Horse with ID \(horseId) not found")
+            }
+        } catch {
+            print("ERROR: Loading horse failed: \(error.localizedDescription)")
         }
     }
 }
@@ -373,8 +420,10 @@ struct HorseInfoView: View {
     modelContext.insert(horse)
     
     return NavigationStack {
-        HorseInfoView(horseId: horse.uuid)
-            .environmentObject(NavigationState())
+        HorseInfoView(
+            horseId: horse.uuid, 
+            navigationPath: .constant(NavigationPath())
+        )
     }
     .modelContainer(for: Horse.self, inMemory: true)
 } 

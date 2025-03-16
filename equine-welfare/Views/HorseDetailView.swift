@@ -4,7 +4,10 @@ import PhotosUI
 
 struct HorseDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var navigationState: NavigationState
+    
+    let horseId: UUID?
+    let assessmentId: UUID
+    @Binding var navigationPath: NavigationPath
     
     @State private var horse: Horse
     @State private var isNewHorse: Bool
@@ -19,8 +22,16 @@ struct HorseDetailView: View {
     private let sexOptions = ["Mare", "Stallion", "Gelding"]
     private let breedOptions = ["Quarter Horse", "Appendix Quarter Horse", "Quarter Horse cross", "Standardbred", "Pony", "Halflinger", "Paint", "Appaloosa", "Miniature Horse", "Percheron", "Belgian", "Clydesdale", "Hannoverian", "Warmblood", "Warmblood cross", "Draft cross", "Arabian", "Arabian cross", "Thoroughbred", "Thoroughbred cross", "Saddlebred", "Morgan", "Cross", "Donkey", "Unknown"]
     
-    init(horse: Horse? = nil) {
-        let newHorse = horse ?? Horse(
+    // New initializer to support navigationPath
+    init(horseId: UUID?, assessmentId: UUID, navigationPath: Binding<NavigationPath>) {
+        self.horseId = horseId
+        self.assessmentId = assessmentId
+        self._navigationPath = navigationPath
+        
+        print("DEBUG: HorseDetailView.init - horseId: \(String(describing: horseId)), assessmentId: \(assessmentId)")
+        
+        // Initialize default horse
+        var initialHorse = Horse(
             name: "",
             age: 0,
             color: "Bay",
@@ -30,8 +41,10 @@ struct HorseDetailView: View {
             bcsScore: 3.0
         )
         
-        _horse = State(initialValue: newHorse)
-        _isNewHorse = State(initialValue: horse == nil)
+        self._horse = State(initialValue: initialHorse)
+        self._isNewHorse = State(initialValue: horseId == nil)
+        
+        // Note: We'll load the actual horse in onAppear if horseId is provided
     }
     
     var body: some View {
@@ -349,6 +362,9 @@ struct HorseDetailView: View {
         }
         .navigationTitle(isNewHorse ? "Add Horse" : "Edit Horse")
         .background(Color(.systemGray6))
+        .onAppear {
+            loadHorseIfNeeded()
+        }
     }
     
     private var photoSection: some View {
@@ -391,21 +407,107 @@ struct HorseDetailView: View {
     }
     
     private func saveHorse() {
-        if isNewHorse {
-            modelContext.insert(horse)
-            
-            // Add to current assessment
-            if let assessmentId = navigationState.currentAssessmentId,
-               let assessment = try? modelContext.fetch(
-                FetchDescriptor<Assessment>(predicate: #Predicate { $0.id == assessmentId })
-               ).first {
-                assessment.horses.append(horse)
-                try? modelContext.save()
+        print("DEBUG: Starting saveHorse() in HorseDetailView")
+        print("DEBUG: isNewHorse = \(isNewHorse)")
+        print("DEBUG: Assessment ID = \(assessmentId)")
+        print("DEBUG: Horse name = \(horse.name)")
+        
+        Task { @MainActor in
+            do {
+                // Create a fresh descriptor for fetch with a more specific predicate
+                let assessmentDescriptor = FetchDescriptor<Assessment>(
+                    predicate: #Predicate { $0.id == assessmentId }
+                )
+                
+                // Fetch the assessment with that exact ID
+                let assessments = try modelContext.fetch(assessmentDescriptor)
+                
+                if assessments.isEmpty {
+                    print("ERROR: No assessment found with ID \(assessmentId)")
+                    print("DEBUG: Creating placeholder assessment as fallback")
+                    
+                    // Create a placeholder assessment with the expected ID
+                    let placeholderAssessment = Assessment(
+                        vetName: "Placeholder", 
+                        farmName: "Placeholder", 
+                        visitDate: Date()
+                    )
+                    placeholderAssessment.id = assessmentId  // Use the expected ID
+                    modelContext.insert(placeholderAssessment)
+                    
+                    // Configure and insert the horse
+                    if isNewHorse {
+                        horse.uuid = UUID()
+                        modelContext.insert(horse)
+                    }
+                    
+                    // Set up BOTH sides of the relationship
+                    horse.assessment = placeholderAssessment  // This is crucial!
+                    placeholderAssessment.horses.append(horse)
+                    
+                    try modelContext.save()
+                    print("DEBUG: Created placeholder assessment and saved horse with relationship")
+                } else {
+                    let assessment = assessments[0]
+                    print("DEBUG: Found assessment: \(assessment.displayName) with ID: \(assessment.id)")
+                    
+                    if isNewHorse {
+                        // Ensure we have a new UUID
+                        horse.uuid = UUID()
+                        
+                        // Insert the horse into the context
+                        modelContext.insert(horse)
+                        print("DEBUG: Inserted new horse: \(horse.name) (\(horse.uuid))")
+                        
+                        // Set up BOTH sides of the relationship
+                        horse.assessment = assessment  // This is crucial!
+                        assessment.horses.append(horse)
+                        
+                        print("DEBUG: Added to assessment, now has \(assessment.horses.count) horses")
+                    } else {
+                        print("DEBUG: Updating existing horse: \(horse.name)")
+                        
+                        // Ensure relationship is still correct for existing horse
+                        if horse.assessment == nil || horse.assessment?.id != assessment.id {
+                            horse.assessment = assessment
+                            print("DEBUG: Fixed missing assessment relationship")
+                        }
+                    }
+                    
+                    // Save all changes
+                    try modelContext.save()
+                    print("DEBUG: Changes saved to database")
+                }
+                
+                // Navigate back
+                if navigationPath.count > 0 {
+                    print("DEBUG: Popping navigation stack")
+                    navigationPath.removeLast()
+                }
+            } catch {
+                print("ERROR: Failed to save horse: \(error.localizedDescription)")
             }
         }
-        
-        try? modelContext.save()
-        navigationState.showHorses()
+    }
+    
+    private func loadHorseIfNeeded() {
+        if let horseId = horseId {
+            // Load the horse from the database
+            do {
+                let horseDescriptor = FetchDescriptor<Horse>(
+                    predicate: #Predicate<Horse> { horse in
+                        horse.uuid == horseId
+                    }
+                )
+                
+                if let loadedHorse = try modelContext.fetch(horseDescriptor).first {
+                    horse = loadedHorse
+                    isNewHorse = false
+                }
+            } catch {
+                print("Error loading horse: \(error)")
+            }
+        }
     }
 }
 
@@ -449,7 +551,12 @@ struct BCSPartView: View {
 }
 
 #Preview {
-    HorseDetailView()
-        .environmentObject(NavigationState())
-        .modelContainer(for: Horse.self, inMemory: true)
+    NavigationStack {
+        HorseDetailView(
+            horseId: nil,
+            assessmentId: UUID(),
+            navigationPath: .constant(NavigationPath())
+        )
+    }
+    .modelContainer(for: Horse.self, inMemory: true)
 } 
