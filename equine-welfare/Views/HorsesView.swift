@@ -71,9 +71,26 @@ struct HorsesView: View {
                 List {
                     ForEach(horses) { horse in
                         VStack(alignment: .leading, spacing: 0) {
-                            NavigationLink(value: horse.uuid) {
-                                HorseInfoRow(horse: horse)
+                            HStack {
+                                // Main content - make this clickable to go to horse info
+                                Button(action: {
+                                    // Navigate to horse info view directly using AppDestination
+                                    navigationPath.append(AppDestination.horseInfo(horseId: horse.uuid))
+                                }) {
+                                    HorseInfoRow(horse: horse)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                Spacer()
+                                
+                                // Add a disclosure arrow on the far right that navigates to the same place
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                                    .onTapGesture {
+                                        navigationPath.append(AppDestination.horseInfo(horseId: horse.uuid))
+                                    }
                             }
+                            
                             HorseNotesSection(horse: horse)
                         }
                         .padding(.bottom, 20)
@@ -89,9 +106,7 @@ struct HorsesView: View {
         .frame(
             maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading
         )
-        .navigationDestination(for: UUID.self) { horseId in
-            HorseInfoView(horseId: horseId, navigationPath: $navigationPath)
-        }
+        // Single navigation destination to handle AppDestination type
         .navigationDestination(for: AppDestination.self) { destination in
             switch destination {
             case .horseDetail(let horseId, let correctAssessmentId):
@@ -100,6 +115,8 @@ struct HorsesView: View {
                     assessmentId: correctAssessmentId,
                     navigationPath: $navigationPath
                 )
+            case .horseInfo(let horseId):
+                HorseInfoView(horseId: horseId, navigationPath: $navigationPath)
             default:
                 EmptyView()
             }

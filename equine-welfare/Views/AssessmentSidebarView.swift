@@ -74,12 +74,24 @@ struct AssessmentSidebarView: View {
             case .sectionSelection:
                 SectionSelectionView(viewModel: viewModel)
             case .horses:
-                // Use a nested NavigationStack for horses
-                NavigationStack {
-                    HorsesView(
-                        assessmentId: assessmentId,
-                        navigationPath: $navigationPath
-                    )
+                // Use the same NavigationStack as parent, not nested
+                HorsesView(
+                    assessmentId: assessmentId,
+                    navigationPath: $navigationPath
+                )
+                .navigationDestination(for: AppDestination.self) { destination in
+                    switch destination {
+                    case .horseDetail(let horseId, let correctAssessmentId):
+                        HorseDetailView(
+                            horseId: horseId,
+                            assessmentId: correctAssessmentId,
+                            navigationPath: $navigationPath
+                        )
+                    case .horseInfo(let horseId):
+                        HorseInfoView(horseId: horseId, navigationPath: $navigationPath)
+                    default:
+                        EmptyView()
+                    }
                 }
             case .gallery:
                 GalleryView(viewModel: galleryViewModel)
