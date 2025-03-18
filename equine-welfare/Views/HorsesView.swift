@@ -44,7 +44,7 @@ struct HorsesView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("Horses")
-                    .font(.title)
+                    .font(.largeTitle)
                     .fontWeight(.bold)
 
                 Spacer()

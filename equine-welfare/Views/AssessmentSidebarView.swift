@@ -151,39 +151,43 @@ struct AssessmentSidebarView: View {
     }
 
     private var sectionsList: some View {
-        DisclosureGroup(
-            isExpanded: $isApplicableSectionsExpanded,
-            content: {
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(viewModel.applicableSections, id: \.id) { section in
-                        SidebarButton(
-                            title: "\(section.id). \(section.title)",
-                            isActive: currentDetailView == .sectionDetail(section)
-                        ) {
+        VStack(alignment: .leading, spacing: 12) {
+            // Keep the DisclosureGroup with dropdown functionality
+            DisclosureGroup(
+                isExpanded: $isApplicableSectionsExpanded,
+                content: {
+                    ForEach(viewModel.applicableSections) { section in
+                        Button(action: {
                             selectedSection = section
                             currentDetailView = .sectionDetail(section)
+                        }) {
+                            HStack {
+                                // Add the status indicator
+                                SectionStatusIndicator(
+                                    status: getSectionCompletionStatus(section)
+                                )
+                                .padding(.trailing, 4)
+                                
+                                Text("\(section.id). \(section.title)")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding(.vertical, 8)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
+                },
+                label: {
+                    Text("Applicable Sections")
+                        .font(.headline)
+                        .foregroundColor(.primary)
                 }
-                .padding(.top, 4)
-            },
-            label: {
-                Text("Applicable Sections")
-                    .fontWeight(.medium)
-            }
-        )
+            )
+        }
     }
 
-    // Helper function to determine section completion status
-    // Define section completion states
-    enum SectionCompletionStatus {
-        case notStarted  // No questions answered
-        case inProgress  // Some questions answered
-        case completed  // All questions answered
-    }
-    private func getSectionCompletionStatus(_ section: Section)
-        -> SectionCompletionStatus
-    {
+    // Helper method to determine section status
+    private func getSectionCompletionStatus(_ section: Section) -> SectionCompletionStatus {
         // Get all requirements for this section
         guard
             let requirements = section.subsections.flatMap({ $0.requirements })
@@ -193,8 +197,9 @@ struct AssessmentSidebarView: View {
         }
 
         // Count answered requirements (those with a compliance status)
-        let answeredCount = requirements.filter { $0.complianceStatus != nil }
-            .count
+        let answeredCount = requirements.filter { req in 
+            req.complianceStatus != nil
+        }.count
 
         if answeredCount == 0 {
             return .notStarted
