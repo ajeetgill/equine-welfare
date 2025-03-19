@@ -71,28 +71,25 @@ struct ContentView: View {
                         Text("Section not found")
                     }
                     
-                case .horses(let assessmentId):
-                    HorsesView(
-                        assessmentId: assessmentId,
-                        navigationPath: $navigationPath
-                    )
-                    .onAppear {
-                        currentAssessmentId = assessmentId
-                        loadAssessment(id: assessmentId)
-                    }
+               case .horses(let assessmentId):
+                        HorsesView(
+                            assessmentId: assessmentId
+                        )
+                        .onAppear {
+                            currentAssessmentId = assessmentId
+                            loadAssessment(id: assessmentId)
+                        }
                     
                 case .horseInfo(let horseId):
-                    HorseInfoView(
-                        horseId: horseId,
-                        navigationPath: $navigationPath
-                    )
-                    
-                case .horseDetail(let horseId, let assessmentId):
-                    HorseDetailView(
-                        horseId: horseId,
-                        assessmentId: assessmentId,
-                        navigationPath: $navigationPath
-                    )
+                        HorseInfoView(
+                            horseId: horseId
+                        )
+
+                    case .horseDetail(let horseId, let assessmentId):
+                        HorseDetailView(
+                            horseId: horseId,
+                            assessmentId: assessmentId
+                        )
                 }
             }
             .padding()

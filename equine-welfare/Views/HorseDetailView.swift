@@ -4,10 +4,11 @@ import PhotosUI
 
 struct HorseDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     
     let horseId: UUID?
     let assessmentId: UUID
-    @Binding var navigationPath: NavigationPath
+    var onDismiss: (() -> Void)?
     
     @State private var horse: Horse
     @State private var isNewHorse: Bool
@@ -22,11 +23,14 @@ struct HorseDetailView: View {
     private let sexOptions = ["Mare", "Stallion", "Gelding"]
     private let breedOptions = ["Quarter Horse", "Appendix Quarter Horse", "Quarter Horse cross", "Standardbred", "Pony", "Halflinger", "Paint", "Appaloosa", "Miniature Horse", "Percheron", "Belgian", "Clydesdale", "Hannoverian", "Warmblood", "Warmblood cross", "Draft cross", "Arabian", "Arabian cross", "Thoroughbred", "Thoroughbred cross", "Saddlebred", "Morgan", "Cross", "Donkey", "Unknown"]
     
-    // New initializer to support navigationPath
-    init(horseId: UUID?, assessmentId: UUID, navigationPath: Binding<NavigationPath>) {
+    init(
+        horseId: UUID?, 
+        assessmentId: UUID,
+        onDismiss: (() -> Void)? = nil
+    ) {
         self.horseId = horseId
         self.assessmentId = assessmentId
-        self._navigationPath = navigationPath
+        self.onDismiss = onDismiss
         
         print("DEBUG: HorseDetailView.init - horseId: \(String(describing: horseId)), assessmentId: \(assessmentId)")
         
@@ -345,25 +349,32 @@ struct HorseDetailView: View {
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
-                    
-                    // Save button
-                    Button(action: saveHorse) {
-                        Text("Save")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding(.top, 8)
                 }
             }
             .padding(.horizontal, 20)
         }
         .navigationTitle(isNewHorse ? "Add Horse" : "Edit Horse")
-        .background(Color(.systemGray6))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: saveHorse) {
+                    Text("Save")
+                }
+                .disabled(horse.name.isEmpty)
+            }
+            
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Cancel") {
+                    // Just pop back without saving
+                    print("DEBUG: Cancel button tapped in HorseDetailView")
+                    dismissView()
+                }
+            }
+        }
         .onAppear {
-            loadHorseIfNeeded()
+            print("DEBUG: HorseDetailView appeared")
+            // If we have a horse ID, load the existing horse
+            loadHorse()
         }
     }
     
@@ -479,19 +490,31 @@ struct HorseDetailView: View {
                     print("DEBUG: Changes saved to database")
                 }
                 
-                // Navigate back
-                if navigationPath.count > 0 {
-                    print("DEBUG: Popping navigation stack")
-                    navigationPath.removeLast()
-                }
+                // Dismiss the view after saving
+                dismissView()
+                
             } catch {
                 print("ERROR: Failed to save horse: \(error.localizedDescription)")
             }
         }
     }
     
-    private func loadHorseIfNeeded() {
+    private func dismissView() {
+        // Try both the environment dismiss and the onDismiss callback
+        print("DEBUG: Dismissing HorseDetailView")
+        
+        // First try the onDismiss callback
+        if let onDismiss = onDismiss {
+            onDismiss()
+        } else {
+            // Fallback to environment dismiss
+            dismiss()
+        }
+    }
+    
+    private func loadHorse() {
         if let horseId = horseId {
+            print("DEBUG: Loading horse with ID: \(horseId)")
             // Load the horse from the database
             do {
                 let horseDescriptor = FetchDescriptor<Horse>(
@@ -501,12 +524,17 @@ struct HorseDetailView: View {
                 )
                 
                 if let loadedHorse = try modelContext.fetch(horseDescriptor).first {
+                    print("DEBUG: Successfully loaded horse: \(loadedHorse.name)")
                     horse = loadedHorse
                     isNewHorse = false
+                } else {
+                    print("ERROR: Could not find horse with ID: \(horseId)")
                 }
             } catch {
-                print("Error loading horse: \(error)")
+                print("ERROR: Loading horse failed: \(error)")
             }
+        } else {
+            print("DEBUG: Creating new horse")
         }
     }
 }
@@ -554,8 +582,7 @@ struct BCSPartView: View {
     NavigationStack {
         HorseDetailView(
             horseId: nil,
-            assessmentId: UUID(),
-            navigationPath: .constant(NavigationPath())
+            assessmentId: UUID()
         )
     }
     .modelContainer(for: Horse.self, inMemory: true)

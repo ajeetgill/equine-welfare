@@ -30,6 +30,8 @@ struct AssessmentSidebarView: View {
         self.galleryViewModel = galleryViewModel
         self._navigationPath = navigationPath
         self.assessmentId = assessmentId
+        
+        print("DEBUG: AssessmentSidebarView initialized with assessmentId: \(assessmentId)")
     }
     
     // Define possible detail views
@@ -74,24 +76,13 @@ struct AssessmentSidebarView: View {
             case .sectionSelection:
                 SectionSelectionView(viewModel: viewModel)
             case .horses:
-                // Use the same NavigationStack as parent, not nested
-                HorsesView(
+                // Use our new wrapper view for horses navigation
+                HorsesNavigationView(
                     assessmentId: assessmentId,
-                    navigationPath: $navigationPath
+                    parentNavigationPath: $navigationPath
                 )
-                .navigationDestination(for: AppDestination.self) { destination in
-                    switch destination {
-                    case .horseDetail(let horseId, let correctAssessmentId):
-                        HorseDetailView(
-                            horseId: horseId,
-                            assessmentId: correctAssessmentId,
-                            navigationPath: $navigationPath
-                        )
-                    case .horseInfo(let horseId):
-                        HorseInfoView(horseId: horseId, navigationPath: $navigationPath)
-                    default:
-                        EmptyView()
-                    }
+                .onAppear {
+                    print("DEBUG: HorsesNavigationView appeared in AssessmentSidebarView detail")
                 }
             case .gallery:
                 GalleryView(viewModel: galleryViewModel)
@@ -132,10 +123,9 @@ struct AssessmentSidebarView: View {
                 icon: "pawprint.fill",
                 isActive: currentDetailView == .horses
             ) {
+                print("DEBUG: Horses button tapped")
                 selectedSection = nil
                 currentDetailView = .horses
-                // When using NavigationStack/SplitView, we don't need to
-                // navigate here as switching the currentDetailView handles it
             }
             
             // Gallery Button

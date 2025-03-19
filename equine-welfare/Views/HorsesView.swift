@@ -1,19 +1,26 @@
 import SwiftData
 import SwiftUI
 
+
 struct HorsesView: View {
     @Environment(\.modelContext) private var modelContext
     
     let assessmentId: UUID
-    @Binding var navigationPath: NavigationPath
+    var onAddHorse: () -> Void
+    var onSelectHorse: (UUID) -> Void
 
     // Get horses from the current assessment
     @Query private var assessments: [Assessment]
 
-    init(assessmentId: UUID, navigationPath: Binding<NavigationPath>) {
+    init(
+        assessmentId: UUID, 
+        onAddHorse: @escaping () -> Void = {},
+        onSelectHorse: @escaping (UUID) -> Void = { _ in }
+    ) {
         print("DEBUG: Initializing HorsesView with assessmentId: \(assessmentId)")
         self.assessmentId = assessmentId
-        self._navigationPath = navigationPath
+        self.onAddHorse = onAddHorse
+        self.onSelectHorse = onSelectHorse
         
         // Initialize the Query with proper descriptor and sorting for Swift 6
         var descriptor = FetchDescriptor<Assessment>(
@@ -42,14 +49,17 @@ struct HorsesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text("Horses")
+            HStack { Text("Horses")
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
+
                 Spacer()
 
-                Button(action: addHorse) {
+                Button(action: {
+                    print("DEBUG: Add horse button tapped")
+                    onAddHorse()
+                }) {
                     Label("Add Horse", systemImage: "plus")
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -74,8 +84,8 @@ struct HorsesView: View {
                             HStack {
                                 // Main content - make this clickable to go to horse info
                                 Button(action: {
-                                    // Navigate to horse info view directly using AppDestination
-                                    navigationPath.append(AppDestination.horseInfo(horseId: horse.uuid))
+                                    print("DEBUG: Horse row tapped: \(horse.name) with ID: \(horse.uuid)")
+                                    onSelectHorse(horse.uuid)
                                 }) {
                                     HorseInfoRow(horse: horse)
                                 }
@@ -87,7 +97,8 @@ struct HorsesView: View {
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.gray)
                                     .onTapGesture {
-                                        navigationPath.append(AppDestination.horseInfo(horseId: horse.uuid))
+                                        print("DEBUG: Horse disclosure arrow tapped for: \(horse.name)")
+                                        onSelectHorse(horse.uuid)
                                     }
                             }
                             
@@ -106,37 +117,6 @@ struct HorsesView: View {
         .frame(
             maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading
         )
-        // Single navigation destination to handle AppDestination type
-        .navigationDestination(for: AppDestination.self) { destination in
-            switch destination {
-            case .horseDetail(let horseId, let correctAssessmentId):
-                HorseDetailView(
-                    horseId: horseId,
-                    assessmentId: correctAssessmentId,
-                    navigationPath: $navigationPath
-                )
-            case .horseInfo(let horseId):
-                HorseInfoView(horseId: horseId, navigationPath: $navigationPath)
-            default:
-                EmptyView()
-            }
-        }
-    }
-
-    private func addHorse() {
-        print("DEBUG: addHorse() called in HorsesView with assessmentId: \(assessmentId)")
-        
-        // Check if we have the assessment loaded correctly
-        if let actualAssessment = assessments.first {
-            print("DEBUG: Found actual assessment with ID: \(actualAssessment.id)")
-            
-            // Pass both the horse ID (nil for new) and the correct assessment ID
-            navigationPath.append(AppDestination.horseDetail(horseId: nil, assessmentId: actualAssessment.id))
-            
-            print("DEBUG: Added horse detail with assessment ID: \(actualAssessment.id)")
-        } else {
-            print("ERROR: Couldn't find assessment when trying to add horse")
-        }
     }
 
     private func deleteHorse(_ horse: Horse) {
@@ -309,11 +289,9 @@ struct HorseNotesSection: View {
     
     modelContext.insert(assessment)
     
-    return NavigationStack {
-        HorsesView(
-            assessmentId: assessment.id,
-            navigationPath: .constant(NavigationPath())
-        )
-    }
+    return HorsesNavigationView(
+        assessmentId: assessment.id,
+        parentNavigationPath: .constant(NavigationPath())
+    )
     .modelContainer(container)
 }

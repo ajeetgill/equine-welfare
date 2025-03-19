@@ -4,9 +4,12 @@ import PhotosUI
 
 struct HorseInfoView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     
     let horseId: UUID
-    @Binding var navigationPath: NavigationPath
+    
+    // Callback for edit actions
+    var onEdit: ((UUID, UUID) -> Void)?
     
     @State private var horse: Horse?
     @State private var findings: String = ""
@@ -33,6 +36,14 @@ struct HorseInfoView: View {
     private var assessmentId: UUID? {
         // Get the assessment ID from the horse's relationship
         return horse?.assessment?.id
+    }
+    
+    init(
+        horseId: UUID, 
+        onEdit: ((UUID, UUID) -> Void)? = nil
+    ) {
+        self.horseId = horseId
+        self.onEdit = onEdit
     }
     
     var body: some View {
@@ -124,17 +135,41 @@ struct HorseInfoView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") {
                     if let horse = horse, let assessId = assessmentId {
-                        print("DEBUG: Editing horse with assessmentId: \(assessId)")
-                        navigationPath.append(AppDestination.horseDetail(horseId: horse.uuid, assessmentId: assessId))
+                        print("DEBUG: Edit button tapped for horse: \(horse.name)")
+                        
+                        // Use the callback if provided
+                        if let onEdit = onEdit {
+                            onEdit(horse.uuid, assessId)
+                        } else {
+                            print("DEBUG: No edit callback provided")
+                        }
                     } else if let horse = horse {
-                        print("ERROR: Missing assessment ID when editing horse")
-                        // Fallback to use the horse's UUID as an ID to find it
-                        navigationPath.append(AppDestination.horseDetail(horseId: horse.uuid, assessmentId: UUID()))
+                        print("ERROR: Missing assessment ID when trying to edit horse: \(horse.name)")
+                        print("DEBUG: Attempting to find the assessment relationship")
+                        
+                        // Try to find the assessment
+                        Task { @MainActor in
+                            if let foundAssessmentId = await findAssessmentForHorse(horse.uuid) {
+                                print("DEBUG: Found assessment ID: \(foundAssessmentId)")
+                                
+                                // Use the callback if provided
+                                if let onEdit = onEdit {
+                                    onEdit(horse.uuid, foundAssessmentId)
+                                } else {
+                                    print("DEBUG: No edit callback provided")
+                                }
+                            } else {
+                                print("DEBUG: Could not find assessment for horse")
+                                dismiss()
+                            }
+                        }
                     }
                 }
+                .disabled(horse == nil)
             }
         }
         .onAppear {
+            print("DEBUG: HorseInfoView appeared for horse ID: \(horseId)")
             loadHorse()
         }
         .onChange(of: frontPhotoItem) { _, newValue in
@@ -349,6 +384,7 @@ struct HorseInfoView: View {
     }
     
     private func loadHorse() {
+        print("DEBUG: Loading horse with ID: \(horseId)")
         do {
             // Create a descriptor that also includes relationship information
             var descriptor = FetchDescriptor<Horse>(
@@ -361,6 +397,7 @@ struct HorseInfoView: View {
             descriptor.includePendingChanges = true
             
             if let loadedHorse = try modelContext.fetch(descriptor).first {
+                print("DEBUG: Successfully loaded horse: \(loadedHorse.name)")
                 self.horse = loadedHorse
                 self.findings = loadedHorse.notes ?? ""
                 
@@ -368,20 +405,31 @@ struct HorseInfoView: View {
                 if let assessment = loadedHorse.assessment {
                     print("DEBUG: Horse belongs to assessment: \(assessment.id)")
                 } else {
-                    print("DEBUG: Horse has no assessment relationship")
+                    print("CRITICAL: Horse has no assessment relationship - will fix")
                     
-                    // Try to find the assessment that contains this horse
+                    // Try to find and fix the relationship
                     Task { @MainActor in
-                        let assessmentDescriptor = FetchDescriptor<Assessment>()
-                        let assessments = try? modelContext.fetch(assessmentDescriptor)
-                        
-                        if let assessments = assessments {
-                            for assessment in assessments {
-                                // Use local constant for comparison to avoid optional issues
-                                let currentHorseId = horseId
-                                if assessment.horses.contains(where: { $0.uuid == currentHorseId }) {
-                                    print("DEBUG: Found containing assessment: \(assessment.id)")
+                        if let assessmentId = await findAssessmentForHorse(horseId) {
+                            print("DEBUG: Found containing assessment: \(assessmentId)")
+                            
+                            // Get the assessment object
+                            let assessmentDescriptor = FetchDescriptor<Assessment>(
+                                predicate: #Predicate { $0.id == assessmentId }
+                            )
+                            
+                            if let assessment = try? modelContext.fetch(assessmentDescriptor).first {
+                                print("DEBUG: Fixing missing relationship")
+                                loadedHorse.assessment = assessment
+                                
+                                // Add the horse to the assessment if needed
+                                if !assessment.horses.contains(where: { $0.uuid == horseId }) {
+                                    assessment.horses.append(loadedHorse)
                                 }
+                                
+                                try? modelContext.save()
+                                
+                                // Update our local copy
+                                self.horse = loadedHorse
                             }
                         }
                     }
@@ -400,6 +448,33 @@ struct HorseInfoView: View {
             }
         } catch {
             print("ERROR: Loading horse failed: \(error.localizedDescription)")
+        }
+    }
+    
+    // Helper to find the assessment for a horse
+    private func findAssessmentForHorse(_ horseId: UUID) async -> UUID? {
+        return await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                do {
+                    // Get all assessments
+                    let assessments = try modelContext.fetch(FetchDescriptor<Assessment>())
+                    
+                    // Find the assessment containing this horse
+                    for assessment in assessments {
+                        if assessment.horses.contains(where: { $0.uuid == horseId }) {
+                            print("DEBUG: Found containing assessment: \(assessment.id)")
+                            continuation.resume(returning: assessment.id)
+                            return
+                        }
+                    }
+                    
+                    // Not found
+                    continuation.resume(returning: nil)
+                } catch {
+                    print("ERROR: Finding assessment failed: \(error.localizedDescription)")
+                    continuation.resume(returning: nil)
+                }
+            }
         }
     }
 }
@@ -421,8 +496,7 @@ struct HorseInfoView: View {
     
     return NavigationStack {
         HorseInfoView(
-            horseId: horse.uuid, 
-            navigationPath: .constant(NavigationPath())
+            horseId: horse.uuid
         )
     }
     .modelContainer(for: Horse.self, inMemory: true)
