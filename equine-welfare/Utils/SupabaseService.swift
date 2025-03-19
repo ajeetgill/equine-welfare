@@ -38,6 +38,18 @@ class SupabaseService {
     /// - Returns: A result with a success message or an error
     func uploadRTFDocument(fileURL: URL, assessment: Assessment) async -> Result<String, Error> {
         do {
+            print("Starting RTF document upload for: \(assessment.displayName)")
+            
+            // Verify the file exists and can be read
+            guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                print("Error: RTF file does not exist at path: \(fileURL.path)")
+                return .failure(NSError(
+                    domain: "SupabaseService",
+                    code: 1003,
+                    userInfo: [NSLocalizedDescriptionKey: "RTF file not found"]
+                ))
+            }
+            
             // Create a sanitized folder name based on assessment name
             let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
             
@@ -48,18 +60,25 @@ class SupabaseService {
             let storagePath = "assessments/\(sanitizedFolderName)/\(fileName)"
             
             // Read the file data
-            let fileData = try Data(contentsOf: fileURL)
-            
-            // Upload to Supabase Storage
-            let response = try await supabase.storage
-                .from("assessments")
-                .upload(
-                    path: "\(sanitizedFolderName)/\(fileName)",
-                    file: fileData,
-                    options: FileOptions(contentType: "application/rtf")
-                )
-            
-            return .success("Assessment document uploaded successfully 🎉 yeehaw 🐴")
+            do {
+                let fileData = try Data(contentsOf: fileURL)
+                print("Successfully read RTF file data, size: \(fileData.count) bytes")
+                
+                // Upload to Supabase Storage
+                let response = try await supabase.storage
+                    .from("assessments")
+                    .upload(
+                        path: "\(sanitizedFolderName)/\(fileName)",
+                        file: fileData,
+                        options: FileOptions(contentType: "application/rtf")
+                    )
+                
+                print("RTF document uploaded successfully to: \(storagePath)")
+                return .success("Assessment document uploaded successfully 🎉 yeehaw 🐴")
+            } catch {
+                print("Error reading RTF file data: \(error.localizedDescription)")
+                return .failure(error)
+            }
         } catch {
             print("Error uploading RTF document: \(error.localizedDescription)")
             return .failure(error)
@@ -297,6 +316,76 @@ class SupabaseService {
         
         print("===== END ASSESSMENT DATA =====")
     }
-   
     
+    /// Uploads all assessment data including horses, documents, and media to Supabase
+    /// - Parameters:
+    ///   - assessment: The assessment to upload
+    ///   - modelContext: The SwiftData model context
+    ///   - progressHandler: Optional closure to handle upload progress updates
+    /// - Returns: A result with success or failure
+    func uploadAssessmentComplete(assessment: Assessment, modelContext: ModelContext, progressHandler: ((String, Double) -> Void)? = nil) async -> Result<Bool, Error> {
+        do {
+            // Step 1: Upload horse data via HorseService
+            progressHandler?("Uploading horse data...", 0.1)
+            
+            // Instead of just calling HorseService.sendHorses which posts to an API endpoint,
+            // use our new method to upload horse data as a JSON file
+            let horseUploadResult = await HorseService.uploadHorsesForAssessment(
+                modelContext: modelContext, 
+                assessmentName: assessment.displayName,
+                assessmentId: assessment.id
+            )
+            
+            if case .failure(let error) = horseUploadResult {
+                print("Warning: Horse data upload failed: \(error.localizedDescription)")
+                // Continue with the rest of the uploads even if this one failed
+            }
+            
+            // Step 2: Upload RTF document
+            progressHandler?("Uploading assessment document...", 0.3)
+            if let rtfURL = await getRTFDocumentURL(for: assessment) {
+                let documentResult = await uploadRTFDocument(fileURL: rtfURL, assessment: assessment)
+                if case .failure(let error) = documentResult {
+                    print("Warning: RTF document upload failed: \(error.localizedDescription)")
+                }
+            }
+            
+            // Step 3: Upload assessment media
+            progressHandler?("Uploading assessment media...", 0.5)
+            let mediaResult = await uploadAssessmentMedia(assessment: assessment) { progress in
+                progressHandler?("Uploading assessment media...", 0.5 + progress * 0.2)
+            }
+            
+            // Step 4: Upload horse media
+            progressHandler?("Uploading horse photos...", 0.7)
+            let horseMediaResult = await uploadHorseMedia(assessment: assessment) { progress in
+                progressHandler?("Uploading horse photos...", 0.7 + progress * 0.3)
+            }
+            
+            // Final progress update
+            progressHandler?("Upload complete!", 1.0)
+            
+            return .success(true)
+        } catch {
+            return .failure(error)
+        }
+    }
+    
+    // Helper method to get RTF document URL
+    private func getRTFDocumentURL(for assessment: Assessment) async -> URL? {
+        // Find the RTF file in the temporary directory using the same naming convention as in PreviousAssessmentRow
+        let tempDir = FileManager.default.temporaryDirectory
+        let sanitizedName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
+        let fileName = "\(sanitizedName).rtf"
+        let fileURL = tempDir.appendingPathComponent(fileName)
+        
+        // Check if the file exists
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            print("RTF file found at: \(fileURL.path)")
+            return fileURL
+        } else {
+            print("RTF file not found at: \(fileURL.path)")
+            return nil
+        }
+    }
 }

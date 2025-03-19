@@ -79,31 +79,47 @@ struct PreviousAssessmentRow: View {
     
     // Upload the RTF file to Supabase
     private func uploadRTFToSupabase() async {
+        // Always prepare/refresh the content first to ensure we have the latest version
+        prepareShareContent()
+        
         guard let fileURL = shareURL, isShareReady else {
-            // If the file isn't ready yet, prepare it first
-            prepareShareContent()
-            guard let fileURL = shareURL, isShareReady else {
-                uploadError = "Failed to prepare the document for upload"
-                showUploadAlert = true
-                return
-            }
-            // Small delay to ensure file is written
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-            return 
+            uploadError = "Failed to prepare the document for upload"
+            showUploadAlert = true
+            return
+        }
+        
+        // Small delay to ensure file is fully written
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        
+        // Verify file exists before attempting upload
+        if !FileManager.default.fileExists(atPath: fileURL.path) {
+            uploadError = "RTF file not found at expected location"
+            showUploadAlert = true
+            return
         }
         
         // Start uploading - show progress
         isUploading = true
         uploadProgress = 0.1 // Initial progress
         
-        // Step 1: Upload the RTF document
-        let rtfResult = await SupabaseService.shared.uploadRTFDocument(fileURL: fileURL, assessment: assessment)
+        // Use the comprehensive upload method instead
+        let result = await SupabaseService.shared.uploadAssessmentComplete(
+            assessment: assessment,
+            modelContext: modelContext
+        ) { message, progress in
+            // Update UI with detailed progress message and value
+            self.uploadProgress = progress
+            
+            // Update the UI with detailed status messages
+            if message.contains("horse data") {
+                self.isUploadingMedia = false  // Since we're not uploading media yet
+            } else if message.contains("media") {
+                self.isUploadingMedia = true
+            }
+        }
         
-        // Update progress after RTF upload
-        uploadProgress = 0.3
-        
-        // Check if RTF upload was successful
-        switch rtfResult {
+        // Handle the result
+        switch result {
         case .success:
             // Step 2: Upload media attachments
             isUploadingMedia = true
@@ -177,10 +193,13 @@ struct PreviousAssessmentRow: View {
             uploadProgress = 0.0
             
         case .failure(let error):
-            // RTF upload failed, don't try media
-            uploadError = "Failed to upload document: \(error.localizedDescription)"
+            uploadError = "Upload failed: \(error.localizedDescription)"
             showUploadAlert = true
         }
+        
+        // Reset state
+        isUploading = false
+        uploadProgress = 0.0
     }
     
     // Generate RTF content that matches the preview
