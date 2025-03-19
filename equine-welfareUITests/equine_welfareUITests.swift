@@ -1,34 +1,20 @@
-//
-//  equine_welfareUITests.swift
-//  equine-welfareUITests
-//
-//  Created by Ajeet Gill on 19/02/25.
-//
-
 import XCTest
 
-final class equine_welfareUITests: XCTestCase {
+final class Horse_AppUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
 
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     @MainActor
     func testExample() throws {
-        // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
     @MainActor
@@ -39,5 +25,42 @@ final class equine_welfareUITests: XCTestCase {
                 XCUIApplication().launch()
             }
         }
+    }
+
+    @MainActor
+    func testAddingHorse() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // missing some steps, need to press on the top left navigate button then Horses then to the add horses button
+
+        let addButton = app.buttons["Add Horse"]//  need to navigate to the add horse button still incorrect here
+        XCTAssertTrue(addButton.exists, "Add Horse button should exist") // check if the add horse exists
+        addButton.tap() // taps
+
+        let nameField = app.textFields["Name"]
+        let breedField = app.textFields["Breed"] // fills out the fields still incorrect needs to tap each field first
+        let timeField = app.textFields["Time"]
+
+        XCTAssertTrue(nameField.exists, "Name field should exist")
+        XCTAssertTrue(breedField.exists, "Breed field should exist") //  check if the fields exist
+        XCTAssertTrue(timeField.exists, "Time field should exist")
+
+        nameField.tap()
+        nameField.typeText("Test Horse")
+
+        breedField.tap()
+        breedField.typeText("Test Breed") // taps each field
+
+        timeField.tap()
+        timeField.typeText("3") // field  is wrong
+
+        let submitButton = app.buttons["Add Horse"]
+        XCTAssertTrue(submitButton.exists, "Submit button should exist") // checks for the add button to complete the test and add the horse still incorrect
+        submitButton.tap()
+
+        // Verify the horse is added
+        let newHorse = app.staticTexts["Test Horse"]
+        XCTAssertTrue(newHorse.exists, "New horse should be in the list") // might remove this part
     }
 }

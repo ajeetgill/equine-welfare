@@ -1,17 +1,24 @@
-//
-//  equine_welfareTests.swift
-//  equine-welfareTests
-//
-//  Created by Ajeet Gill on 19/02/25.
-//
-
 import Testing
-@testable import equine_welfare
+import XCTest
+@testable import Horse_App
 
-struct equine_welfareTests {
+struct Horse_AppTests {
+    // unit testing to check that the functions work correct, still incorrect
+    func testAddingHorse() {
+        let initialCount = horseData.horses.count
+        horseData.addHorse(name: "Test Horse", breed: "Test Breed", time: 4)
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-    }
+        XCTAssertEqual(horseData.horses.count, initialCount + 1, "Horse should be added to the list")
+        XCTAssertEqual(horseData.horses.last?.name, "Test Horse", "Horse name should match")
+        }
+
+    func testDeletingHorse() {
+        horseData.addHorse(name: "Test Horse", breed: "Test Breed", time: 4)
+        let initialCount = horseData.horses.count
+
+        horseData.deleteHorse(at: IndexSet(integer: initialCount - 1))
+
+        XCTAssertEqual(horseData.horses.count, initialCount - 1, "Horse should be deleted")
+        }
 
 }
