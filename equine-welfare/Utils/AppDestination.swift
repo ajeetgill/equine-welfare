@@ -9,13 +9,13 @@ enum AppDestination: Hashable {
     case sectionDetail(sectionId: Int)
     
     /// Horses list screen for an assessment
-    case horses(assessmentId: UUID)
+//    case horses(assessmentId: UUID)
     
     /// Horse info view for a specific horse
-    case horseInfo(horseId: UUID)
+//    case horseInfo(horseId: UUID)
     
     /// Horse detail/edit view for a specific horse (nil for new horse)
-    case horseDetail(horseId: UUID?, assessmentId: UUID)
+//    case horseDetail(horseId: UUID?, assessmentId: UUID)
     
     // Implement Hashable conformance
     func hash(into hasher: inout Hasher) {
@@ -26,16 +26,16 @@ enum AppDestination: Hashable {
         case .sectionDetail(let id):
             hasher.combine("sectionDetail")
             hasher.combine(id)
-        case .horses(let id):
-            hasher.combine("horses")
-            hasher.combine(id)
-        case .horseInfo(let id):
-            hasher.combine("horseInfo")
-            hasher.combine(id)
-        case .horseDetail(let horseId, let assessmentId):
-            hasher.combine("horseDetail")
-            hasher.combine(horseId)
-            hasher.combine(assessmentId)
+//        case .horses(let id):
+//            hasher.combine("horses")
+//            hasher.combine(id)
+//        case .horseInfo(let id):
+//            hasher.combine("horseInfo")
+//            hasher.combine(id)
+//        case .horseDetail(let horseId, let assessmentId):
+//            hasher.combine("horseDetail")
+//            hasher.combine(horseId)
+//            hasher.combine(assessmentId)
         }
     }
     
@@ -45,12 +45,12 @@ enum AppDestination: Hashable {
             return id1 == id2
         case (.sectionDetail(let id1), .sectionDetail(let id2)):
             return id1 == id2
-        case (.horses(let id1), .horses(let id2)):
-            return id1 == id2
-        case (.horseInfo(let id1), .horseInfo(let id2)):
-            return id1 == id2
-        case (.horseDetail(let id1, let assessId1), .horseDetail(let id2, let assessId2)):
-            return id1 == id2 && assessId1 == assessId2
+//        case (.horses(let id1), .horses(let id2)):
+//            return id1 == id2
+//        case (.horseInfo(let id1), .horseInfo(let id2)):
+//            return id1 == id2
+//        case (.horseDetail(let id1, let assessId1), .horseDetail(let id2, let assessId2)):
+//            return id1 == id2 && assessId1 == assessId2
         default:
             return false
         }

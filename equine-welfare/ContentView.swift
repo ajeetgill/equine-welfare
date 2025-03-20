@@ -70,26 +70,26 @@ struct ContentView: View {
                     } else {
                         Text("Section not found")
                     }
-                    
-               case .horses(let assessmentId):
-                        HorsesView(
-                            assessmentId: assessmentId
-                        )
-                        .onAppear {
-                            currentAssessmentId = assessmentId
-                            loadAssessment(id: assessmentId)
-                        }
-                    
-                case .horseInfo(let horseId):
-                        HorseInfoView(
-                            horseId: horseId
-                        )
 
-                    case .horseDetail(let horseId, let assessmentId):
-                        HorseDetailView(
-                            horseId: horseId,
-                            assessmentId: assessmentId
-                        )
+//                case .horses(let assessmentId):
+//                    HorsesView(
+//                        assessmentId: assessmentId
+//                    )
+//                    .onAppear {
+//                        currentAssessmentId = assessmentId
+//                        loadAssessment(id: assessmentId)
+//                    }
+//
+//                case .horseInfo(let horseId):
+//                    HorseInfoView(
+//                        horseId: horseId
+//                    )
+//
+//                case .horseDetail(let horseId, let assessmentId):
+//                    HorseDetailView(
+//                        horseId: horseId,
+//                        assessmentId: assessmentId
+//                    )
                 }
             }
             .padding()
@@ -153,9 +153,9 @@ struct ContentView: View {
 
         // Load the assessment on a background task
         sectionViewModel.loadAssessment(id: id)
-//        Task {
-//            await sectionViewModel.loadAssessment(id: id)
-//        }
+        //        Task {
+        //            await sectionViewModel.loadAssessment(id: id)
+        //        }
     }
 }
 
