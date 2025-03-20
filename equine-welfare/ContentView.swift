@@ -1,105 +1,161 @@
-//
-//  ContentView.swift
-//  equine-welfare
-//
-//  Created by Ajeet Gill on 19/02/25.
-//
-
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var assessments: [Assessment]
-    
-    @StateObject private var navigationState = NavigationState()
+
     @State private var vetName = ""
     @State private var farmName = ""
     @State private var visitDate = Date()
-    @StateObject private var sectionViewModel: SectionSelectionViewModel
-    
+    @State private var currentAssessmentId: UUID?
+    @State private var selectedSectionId: Int?
+    @State private var navigationPath = NavigationPath()
+    @State private var sectionViewModel: SectionSelectionViewModel
+
     // MARK: - Initialization
-    
+
     init(previewMode: Bool = false) {
         let modelContext = ModelContainer.shared.mainContext
-        _sectionViewModel = StateObject(wrappedValue: SectionSelectionViewModel(modelContext: modelContext))
-        
+        _sectionViewModel = State(
+            wrappedValue: SectionSelectionViewModel(modelContext: modelContext))
+
         if previewMode {
             // Initialize preview state
-            let previewState = NavigationState()
-            previewState.currentScreen = .sectionSelection(assessmentId: nil)
-            _navigationState = StateObject(wrappedValue: previewState)
             _vetName = State(initialValue: "Dr. Smith")
             _farmName = State(initialValue: "Green Acres Farm")
             _visitDate = State(initialValue: Date())
         }
     }
-    
+
     // MARK: - Body
-    
+
     var body: some View {
-        NavigationSplitView {
-            // MARK: Sidebar Content
-            sidebarContent
-        } detail: {
-            // MARK: Detail Content
-            detailContent
-        }
-        .environmentObject(navigationState)
-    }
-    
-    // MARK: - View Components
-    
-    @ViewBuilder
-    private var sidebarContent: some View {
-        switch navigationState.currentScreen {
-        case .main:
-            SidebarMainScreen()
-        case .sectionSelection(let assessmentId):
-            AssessmentSidebarView(viewModel: sectionViewModel)
-                .onAppear {
-                    handleAssessmentAppearance(assessmentId: assessmentId)
-                }
-        }
-    }
-    
-    @ViewBuilder
-    private var detailContent: some View {
-        switch navigationState.currentScreen {
-        case .main:
+        NavigationStack(path: $navigationPath) {
             VStack(alignment: .leading, spacing: 24) {
                 MainScreen(
                     vetName: $vetName,
                     farmName: $farmName,
                     visitDate: $visitDate,
-                    navigationState: navigationState
+                    onStartNewAssessment: startNewAssessment
                 )
-                
+
                 ScrollView {
-                    PreviousAssessments()
+                    PreviousAssessments(navigationPath: $navigationPath)
+                }
+            }
+            .navigationDestination(for: AppDestination.self) {
+                destination in
+                switch destination {
+                case .sectionSelection(let assessmentId):
+                    AssessmentSidebarView(
+                        onShowSectionSelection: {},
+                        viewModel: sectionViewModel,
+                        galleryViewModel: GalleryViewModel(
+                            sectionViewModel: sectionViewModel),
+                        navigationPath: $navigationPath,
+                        assessmentId: assessmentId
+                    )
+                    .onAppear {
+                        currentAssessmentId = assessmentId
+                        selectedSectionId = nil
+                        loadAssessment(id: assessmentId)
+                    }
+
+                case .sectionDetail(let sectionId):
+                    if let section = sectionViewModel.sections.first(
+                        where: { $0.id == sectionId })
+                    {
+                        SectionDetailView(section: section)
+                    } else {
+                        Text("Section not found")
+                    }
+
+//                case .horses(let assessmentId):
+//                    HorsesView(
+//                        assessmentId: assessmentId
+//                    )
+//                    .onAppear {
+//                        currentAssessmentId = assessmentId
+//                        loadAssessment(id: assessmentId)
+//                    }
+//
+//                case .horseInfo(let horseId):
+//                    HorseInfoView(
+//                        horseId: horseId
+//                    )
+//
+//                case .horseDetail(let horseId, let assessmentId):
+//                    HorseDetailView(
+//                        horseId: horseId,
+//                        assessmentId: assessmentId
+//                    )
                 }
             }
             .padding()
-            
-        case .sectionSelection:
-            if let sectionId = navigationState.selectedSectionId,
-               let section = sectionViewModel.sections.first(where: { $0.id == sectionId }) {
-                // Show the section detail view
-                SectionDetailView(section: section)
-            } else {
-                // Show the section selection view
-                SectionSelectionView(viewModel: sectionViewModel)
-            }
         }
     }
-    
-    // MARK: - Helper Methods
-    
-    private func handleAssessmentAppearance(assessmentId: UUID?) {
-        if let id = assessmentId ?? navigationState.currentAssessmentId {
-            // Load existing assessment
-            sectionViewModel.loadAssessment(id: id)
+
+    // MARK: - Navigation Methods
+
+    private func startNewAssessment(assessmentId: UUID) {
+        currentAssessmentId = assessmentId
+        navigationPath.append(
+            AppDestination.sectionSelection(assessmentId: assessmentId))
+    }
+
+    private func editAssessment(assessmentId: UUID) {
+        currentAssessmentId = assessmentId
+        navigationPath.append(
+            AppDestination.sectionSelection(assessmentId: assessmentId))
+    }
+
+    private func returnToMain() {
+        // Save any pending changes
+        sectionViewModel.saveAssessment()
+
+        // Clear state and navigation
+        currentAssessmentId = nil
+        selectedSectionId = nil
+        navigationPath = NavigationPath()
+
+        // Reset form fields to prevent previous assessment data from appearing in new form
+        vetName = ""
+        farmName = ""
+        visitDate = Date()
+    }
+
+    private func showSectionSelection() {
+        selectedSectionId = nil
+        if navigationPath.count > 0 {
+            navigationPath.removeLast(navigationPath.count)
         }
+        if let assessmentId = currentAssessmentId {
+            navigationPath.append(
+                AppDestination.sectionSelection(assessmentId: assessmentId))
+        }
+    }
+
+    private func loadAssessment(id: UUID) {
+        // Only create a new view model if needed
+        //        if sectionViewModel == nil {
+        //            sectionViewModel = SectionSelectionViewModel(
+        //                modelContext: modelContext)
+        //        }
+
+        // Save any pending changes first if we're switching assessments
+        if let currentId = currentAssessmentId, currentId != id {
+            sectionViewModel.saveAssessment()
+        }
+
+        // Update the current assessment ID
+        currentAssessmentId = id
+
+        // Load the assessment on a background task
+        sectionViewModel.loadAssessment(id: id)
+        //        Task {
+        //            await sectionViewModel.loadAssessment(id: id)
+        //        }
     }
 }
 
@@ -113,4 +169,4 @@ struct ContentView: View {
 #Preview("Section Selection") {
     ContentView(previewMode: true)
         .modelContainer(for: Assessment.self, inMemory: true)
-} 
+}

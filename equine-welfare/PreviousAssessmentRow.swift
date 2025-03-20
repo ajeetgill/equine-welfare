@@ -19,22 +19,33 @@ extension UIFont {
 
 struct PreviousAssessmentRow: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var navigationState: NavigationState
     
     // MARK: - State Properties
     @State private var showingDeleteConfirmation = false
     @State private var showingPreview = false
     @State private var shareURL: URL?
     @State private var isShareReady = false
+    @State private var isUploading = false
+    @State private var uploadError: String?
+    @State private var showUploadAlert = false
+    @State private var showUploadSuccess = false
+    @State private var uploadSuccessMessage: String?
+    @State private var uploadProgress: Double = 0.0
+    @State private var isUploadingMedia: Bool = false
+    @State private var sectionViewModel: SectionSelectionViewModel
     
     // MARK: - Properties
     let assessment: Assessment
+    var onSelectAssessment: ((UUID) -> Void)?
     private let assessmentHelper: AssessmentHelper
-    
+
     // MARK: - Initialization
-    init(assessment: Assessment, modelContext: ModelContext) {
+    init(assessment: Assessment, modelContext: ModelContext, onSelectAssessment: ((UUID) -> Void)? = nil) {
         self.assessment = assessment
         self.assessmentHelper = AssessmentHelper(modelContext: modelContext)
+        self.sectionViewModel = SectionSelectionViewModel(
+            modelContext: modelContext)
+        self.onSelectAssessment = onSelectAssessment
     }
     
     // MARK: - Helper Methods
@@ -63,6 +74,109 @@ struct PreviousAssessmentRow: View {
             }
         } catch {
             print("Error creating share file: \(error.localizedDescription)")
+        }
+    }
+    
+    // Upload the RTF file to Supabase
+    private func uploadRTFToSupabase() async {
+        guard let fileURL = shareURL, isShareReady else {
+            // If the file isn't ready yet, prepare it first
+            prepareShareContent()
+            guard let fileURL = shareURL, isShareReady else {
+                uploadError = "Failed to prepare the document for upload"
+                showUploadAlert = true
+                return
+            }
+            // Small delay to ensure file is written
+            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            return 
+        }
+        
+        // Start uploading - show progress
+        isUploading = true
+        uploadProgress = 0.1 // Initial progress
+        
+        // Step 1: Upload the RTF document
+        let rtfResult = await SupabaseService.shared.uploadRTFDocument(fileURL: fileURL, assessment: assessment)
+        
+        // Update progress after RTF upload
+        uploadProgress = 0.3
+        
+        // Check if RTF upload was successful
+        switch rtfResult {
+        case .success:
+            // Step 2: Upload media attachments
+            isUploadingMedia = true
+            
+            // Upload media with progress updates
+            let mediaResult = await SupabaseService.shared.uploadAssessmentMedia(assessment: assessment) { progress in
+                // Scale progress from 0.3 to 0.9 (leaving room for completion steps)
+                let scaledProgress = 0.3 + (progress * 0.6)
+                self.uploadProgress = scaledProgress
+            }
+            
+            isUploadingMedia = false
+            
+            // Complete the upload process
+            uploadProgress = 1.0
+            
+            // Check media upload result
+            switch mediaResult {
+            case .success(let mediaCount):
+                // Step 3: Upload horse media
+                let horseMediaResult = await SupabaseService.shared.uploadHorseMedia(assessment: assessment) { progress in
+                    // Scale progress from 0.9 to 1.0
+                    let scaledProgress = 0.9 + (progress * 0.1)
+                    self.uploadProgress = scaledProgress
+                }
+                
+                // Complete the upload process
+                uploadProgress = 1.0
+                
+                // Check horse media upload result and combine with previous results
+                switch horseMediaResult {
+                case .success(let horseMediaCount):
+                    // All uploads complete
+                    let rtfMessage = "Assessment document uploaded"
+                    var mediaMessage = ""
+                    
+                    if mediaCount > 0 || horseMediaCount > 0 {
+                        var parts: [String] = []
+                        if mediaCount > 0 {
+                            parts.append("\(mediaCount) assessment media files")
+                        }
+                        if horseMediaCount > 0 {
+                            parts.append("\(horseMediaCount) horse media files")
+                        }
+                        mediaMessage = "with " + parts.joined(separator: " and ") + " uploaded"
+                    } else {
+                        mediaMessage = "but no media files were found"
+                    }
+                    
+                    uploadSuccessMessage = "\(rtfMessage) \(mediaMessage) successfully."
+                    
+                case .failure(let error):
+                    // Horse media upload failed but RTF and assessment media succeeded
+                    uploadSuccessMessage = "Assessment document and media uploaded, but some horse media files failed: \(error.localizedDescription)"
+                }
+                
+                showUploadSuccess = true
+                uploadError = nil
+                
+            case .failure(let error):
+                // Media upload failed but RTF succeeded
+                uploadSuccessMessage = "Assessment document uploaded, but media files failed: \(error.localizedDescription)"
+                showUploadSuccess = true
+            }
+            
+            // Reset state
+            isUploading = false
+            uploadProgress = 0.0
+            
+        case .failure(let error):
+            // RTF upload failed, don't try media
+            uploadError = "Failed to upload document: \(error.localizedDescription)"
+            showUploadAlert = true
         }
     }
     
@@ -190,6 +304,11 @@ struct PreviousAssessmentRow: View {
             // Prepare share content when the view appears
             prepareShareContent()
         }
+        .alert("Upload Successful", isPresented: $showUploadSuccess) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(uploadSuccessMessage ?? "Assessment document has been uploaded.")
+        }
     }
     
     // MARK: - View Components
@@ -203,25 +322,19 @@ struct PreviousAssessmentRow: View {
     }
     
     private var actionButtons: some View {
-        HStack(spacing: 16) {
-            // Edit button
-            Button(action: { navigationState.editAssessment(assessmentId: assessment.id) }) {
-                Image(systemName: "pencil")
-                if assessment.isComplete {
-                    Text("Edit")
-                } else {
-                    Text("Resume")
-                }
-                
+        HStack(spacing: 12) {
+            uploadButton
+            Button(action: { 
+                sectionViewModel.loadAssessment(id: assessment.id)
+                onSelectAssessment?(assessment.id)
+            }) {
+                Label(assessment.isComplete ? "Edit" : "Resume", systemImage: "pencil")
             }
             .help("Edit Assessment")
             
             // Preview button
             Button(action: { showingPreview.toggle() }) {
-                
-                Image(systemName: "doc.text.magnifyingglass")
-                Text("Preview")
-                    
+                Label("Preview", systemImage: "doc.text.magnifyingglass")
             }
             .help("Preview Assessment")
             
@@ -233,19 +346,48 @@ struct PreviousAssessmentRow: View {
         }.foregroundColor(.blue)
     }
     
+    private var uploadButton: some View {
+        Button {
+            Task {
+                await uploadRTFToSupabase()
+            }
+        } label: {
+            if isUploading {
+                VStack(spacing: 4) {
+                    if isUploadingMedia {
+                        Text("Uploading media...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Uploading document...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    // Custom progress bar
+                    ProgressView(value: uploadProgress, total: 1.0)
+                        .progressViewStyle(LinearProgressViewStyle())
+                        .frame(width: 100)
+                }
+                .padding(.horizontal, 4)
+            } else {
+                Label("Upload", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
+            }
+        }
+        .disabled(isUploading)
+        .tint(.blue)
+        .alert("Upload Error", isPresented: $showUploadAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(uploadError ?? "An unknown error occurred")
+        }
+    }
+    
     private var shareButton: some View {
         Group {
             if let url = shareURL, isShareReady {
                 ShareLink(item: url) {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
-                    Text("Share")
-                }
-                .help("Share Assessment as RTF Document")
-            } else {
-                Button(action: { prepareShareContent() }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
+                    Label("Share", systemImage: "square.and.arrow.up")
                 }
                 .help("Share Assessment as RTF Document")
             }
@@ -254,8 +396,7 @@ struct PreviousAssessmentRow: View {
     
     private var deleteButton: some View {
         Button(action: { showingDeleteConfirmation = true }) {
-            Image(systemName: "trash")
-            Text("Delete")
+            Label("Delete", systemImage: "trash")
         }
         .help("Delete Assessment")
         .foregroundColor(.red)
@@ -265,9 +406,10 @@ struct PreviousAssessmentRow: View {
             titleVisibility: .visible
         ) {
             Button("Delete", role: .destructive) {
-                assessmentHelper.deleteAssessment(assessment: assessment)
+                withAnimation(){
+                    assessmentHelper.deleteAssessment(assessment: assessment)
+                }
             }
-            Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure? You'll lose this assessment forever.")
         }
@@ -295,6 +437,6 @@ struct PreviousAssessmentRow: View {
     
     let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
     
-    return PreviousAssessmentRow(assessment: assessment, modelContext: modelContext)
-        .environmentObject(NavigationState())
+    PreviousAssessmentRow(assessment: assessment, modelContext: modelContext)
+        .modelContainer(for: Assessment.self)
 }

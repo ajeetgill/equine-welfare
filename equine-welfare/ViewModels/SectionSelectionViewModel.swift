@@ -1,12 +1,13 @@
 import SwiftUI
 import SwiftData
+import Observation
 
-class SectionSelectionViewModel: ObservableObject {
-    @Published var sections: [Section] = []
-    @Published var vetName: String = ""
-    @Published var farmName: String = ""
-    @Published var visitDate: Date = Date()
-    @Published var currentAssessmentId: UUID?
+@Observable class SectionSelectionViewModel {
+    var sections: [Section] = []
+    var vetName: String = ""
+    var farmName: String = ""
+    var visitDate: Date = Date()
+    var currentAssessmentId: UUID?
     
     private let modelContext: ModelContext
     private let assessmentHelper: AssessmentHelper
@@ -75,11 +76,11 @@ class SectionSelectionViewModel: ObservableObject {
     
     // Load data for an existing assessment
     func loadAssessment(id: UUID) {
-        if let assessment = assessmentHelper.loadAssessment(id: id) {
-            vetName = assessment.vetName
-            farmName = assessment.farmName
-            visitDate = assessment.visitDate
-            currentAssessmentId = assessment.id
+        if let assessment = assessmentHelper.editAssessment(assessmentId: id) {
+            self.vetName = assessment.vetName
+            self.farmName = assessment.farmName
+            self.visitDate = assessment.visitDate
+            self.currentAssessmentId = assessment.id
             
             sections = assessment.sections
         }
@@ -88,7 +89,7 @@ class SectionSelectionViewModel: ObservableObject {
     // Save current assessment
     func saveAssessment() {
         guard let id = currentAssessmentId,
-              let assessment = assessmentHelper.loadAssessment(id: id) else {
+              let assessment = assessmentHelper.editAssessment(assessmentId: id) else {
             return // Don't create new assessment here
         }
         
@@ -117,15 +118,16 @@ class SectionSelectionViewModel: ObservableObject {
         if let section = sections.first(where: { $0.id == id }) {
             section.isApplicable.toggle()
         }
+        saveAssessment()
     }
     
     func isSectionApplicable(_ id: Int) -> Bool {
         sections.first(where: { $0.id == id })?.isApplicable ?? false
     }
     
-    // Save when returning to home
-    func prepareForReturn(completion: @escaping () -> Void) {
-        saveAssessment()
-        completion()
-    }
+//    // Save when returning to home
+//    func prepareForReturn(completion: @escaping () -> Void) {
+//        saveAssessment()
+//        completion()
+//    }
 }

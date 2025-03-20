@@ -57,29 +57,6 @@ func parseCOPJSON(data: Data) throws -> [Section] {
     return sections
 }
 
-/// Loads COP.json from the app bundle and creates an `Assessment` populated with sections.
-// func loadAssessmentFromCOPJSON() -> Assessment? {
-//     // Attempt to locate the COP.json file in the bundle.
-//     guard let url = Bundle.main.url(forResource: "COP", withExtension: "json") else {
-//         print("COP.json not found in bundle.")
-//         return nil
-//     }
-    
-//     do {
-//         let data = try Data(contentsOf: url)
-//         let sections = try parseCOPJSON(data: data)
-        
-//         // Create an Assessment instance.
-//         // Adjust the vetName, farmName, and visitDate as necessary.
-//         let assessment = Assessment(vetName: "Default Vet", farmName: "Default Farm", visitDate: Date())
-//         assessment.sections = sections
-//         return assessment
-//     } catch {
-//         print("Error loading or parsing COP.json: \(error)")
-//         return nil
-//     }
-// }
-
 // Helper extension for sorting subsection numbers
  extension String {
     /// Extracts dot-separated numeric components (e.g. "2.1.4" -> [2,1,4]).
