@@ -32,7 +32,6 @@ struct HorsesNavigationView: View {
                         horseId: nil,
                         assessmentId: assessmentId,
                         onDismiss: {
-                            print("DEBUG: AddHorse view dismissed")
                             withAnimation {
                                 currentView = .list
                             }
@@ -46,7 +45,6 @@ struct HorsesNavigationView: View {
                         horseId: horseId,
                         assessmentId: assessmentId,
                         onDismiss: {
-                            print("DEBUG: EditHorse view dismissed")
                             withAnimation {
                                 currentView = .list
                             }
@@ -60,9 +58,6 @@ struct HorsesNavigationView: View {
                     HorseInfoView(
                         horseId: horseId,
                         onEdit: { horseId, _ in
-                            print(
-                                "DEBUG: HorseInfoView edit requested for: \(horseId)"
-                            )
                             withAnimation {
                                 selectedHorseId = horseId
                                 currentView = .editHorse

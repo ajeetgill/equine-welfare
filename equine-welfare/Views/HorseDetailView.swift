@@ -34,8 +34,6 @@ struct HorseDetailView: View {
         self.assessmentId = assessmentId
         self.onDismiss = onDismiss
         
-        print("DEBUG: HorseDetailView.init - horseId: \(String(describing: horseId)), assessmentId: \(assessmentId)")
-        
         // Initialize default horse
         let initialHorse = Horse(
             name: "",
@@ -374,13 +372,11 @@ struct HorseDetailView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Cancel") {
                     // Just pop back without saving
-                    print("DEBUG: Cancel button tapped in HorseDetailView")
                     dismissView()
                 }
             }
         }
         .onAppear {
-            print("DEBUG: HorseDetailView appeared")
             // If we have a horse ID, load the existing horse
             loadHorse()
         }
@@ -427,9 +423,9 @@ struct HorseDetailView: View {
     
     private func saveHorse() {
         print("DEBUG: Starting saveHorse() in HorseDetailView")
-        print("DEBUG: isNewHorse = \(isNewHorse)")
-        print("DEBUG: Assessment ID = \(assessmentId)")
-        print("DEBUG: Horse name = \(horse.name)")
+//        print("DEBUG: isNewHorse = \(isNewHorse)")
+//        print("DEBUG: Assessment ID = \(assessmentId)")
+//        print("DEBUG: Horse name = \(horse.name)")
         
         Task { @MainActor in
             do {
@@ -443,7 +439,6 @@ struct HorseDetailView: View {
                 
                 if assessments.isEmpty {
                     print("ERROR: No assessment found with ID \(assessmentId)")
-                    print("DEBUG: Creating placeholder assessment as fallback")
                     
                     // Create a placeholder assessment with the expected ID
                     let placeholderAssessment = Assessment(
@@ -476,7 +471,6 @@ struct HorseDetailView: View {
                         
                         // Insert the horse into the context
                         modelContext.insert(horse)
-                        print("DEBUG: Inserted new horse: \(horse.name) (\(horse.uuid))")
                         
                         // Set up BOTH sides of the relationship
                         horse.assessment = assessment  // This is crucial!
@@ -509,8 +503,6 @@ struct HorseDetailView: View {
     
     private func dismissView() {
         // Try both the environment dismiss and the onDismiss callback
-        print("DEBUG: Dismissing HorseDetailView")
-        
         // First try the onDismiss callback
         if let onDismiss = onDismiss {
             onDismiss()
@@ -522,7 +514,6 @@ struct HorseDetailView: View {
     
     private func loadHorse() {
         if let horseId = horseId {
-            print("DEBUG: Loading horse with ID: \(horseId)")
             // Load the horse from the database
             do {
                 let horseDescriptor = FetchDescriptor<Horse>(
@@ -532,7 +523,6 @@ struct HorseDetailView: View {
                 )
                 
                 if let loadedHorse = try modelContext.fetch(horseDescriptor).first {
-                    print("DEBUG: Successfully loaded horse: \(loadedHorse.name)")
                     horse = loadedHorse
                     isNewHorse = false
                     // Set the input values from the loaded horse
@@ -544,8 +534,6 @@ struct HorseDetailView: View {
             } catch {
                 print("ERROR: Loading horse failed: \(error)")
             }
-        } else {
-            print("DEBUG: Creating new horse")
         }
     }
 }

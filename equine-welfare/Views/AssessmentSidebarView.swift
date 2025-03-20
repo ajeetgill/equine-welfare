@@ -81,9 +81,6 @@ struct AssessmentSidebarView: View {
                     assessmentId: assessmentId,
                     parentNavigationPath: $navigationPath
                 )
-                .onAppear {
-                    print("DEBUG: HorsesNavigationView appeared in AssessmentSidebarView detail")
-                }
             case .gallery:
                 GalleryView(viewModel: galleryViewModel)
             case .sectionDetail(let section):
@@ -123,7 +120,6 @@ struct AssessmentSidebarView: View {
                 icon: "pawprint.fill",
                 isActive: currentDetailView == .horses
             ) {
-                print("DEBUG: Horses button tapped")
                 selectedSection = nil
                 currentDetailView = .horses
             }

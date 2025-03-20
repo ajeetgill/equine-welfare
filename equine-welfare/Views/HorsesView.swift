@@ -32,12 +32,6 @@ struct HorsesView: View {
     var horses: [Horse] {
         // More direct approach - just return the horses from the first assessment
         let result = assessments.first?.horses ?? []
-        if let first = assessments.first {
-            print("DEBUG: Assessment found with ID: \(first.id)")
-            print("DEBUG: Assessment contains \(first.horses.count) horses")
-        } else {
-            print("DEBUG: No assessment found with ID: \(assessmentId)")
-        }
         return result
     }
 
