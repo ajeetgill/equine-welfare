@@ -141,7 +141,6 @@ struct AssessmentSidebarView: View {
     }
 
     private var sectionsList: some View {
-        VStack(alignment: .leading, spacing: 12) {
             // Keep the DisclosureGroup with dropdown functionality
             DisclosureGroup(
                 isExpanded: $isApplicableSectionsExpanded,
@@ -162,9 +161,8 @@ struct AssessmentSidebarView: View {
                                     .foregroundColor(.primary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            .padding(.vertical, 8)
+                            .padding(8)
                         }
-                        .buttonStyle(PlainButtonStyle())
                     }
                 },
                 label: {
@@ -173,7 +171,6 @@ struct AssessmentSidebarView: View {
                         .foregroundColor(.primary)
                 }
             )
-        }
     }
 
     // Helper method to determine section status
