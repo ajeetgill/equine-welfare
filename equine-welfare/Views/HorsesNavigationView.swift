@@ -4,7 +4,6 @@ import SwiftUI
 // This wrapper view handles the navigation stack for Horses section
 struct HorsesNavigationView: View {
     let assessmentId: UUID
-    @Binding var parentNavigationPath: NavigationPath
 
     // State for explicit navigation
     @State private var currentView: HorseViewState = .list
@@ -161,8 +160,7 @@ enum HorseViewState {
     modelContext.insert(assessment)
 
     return HorsesNavigationView(
-        assessmentId: assessment.id,
-        parentNavigationPath: .constant(NavigationPath())
+        assessmentId: assessment.id
     )
     .modelContainer(container)
 }

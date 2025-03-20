@@ -155,9 +155,6 @@ struct PreviousAssessmentRow: View {
                     
                     uploadSuccessMessage = "\(rtfMessage) \(mediaMessage) successfully."
                     
-                    // Call the onUpload callback to notify parent views
-//                    onUpload(assessment)
-                    
                 case .failure(let error):
                     // Horse media upload failed but RTF and assessment media succeeded
                     uploadSuccessMessage = "Assessment document and media uploaded, but some horse media files failed: \(error.localizedDescription)"

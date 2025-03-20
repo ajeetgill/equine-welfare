@@ -78,8 +78,7 @@ struct AssessmentSidebarView: View {
             case .horses:
                 // Use our new wrapper view for horses navigation
                 HorsesNavigationView(
-                    assessmentId: assessmentId,
-                    parentNavigationPath: $navigationPath
+                    assessmentId: assessmentId
                 )
             case .gallery:
                 GalleryView(viewModel: galleryViewModel)
