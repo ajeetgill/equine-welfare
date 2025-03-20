@@ -41,7 +41,7 @@ class Horse {
         photoData: Data? = nil,
         notes: String? = nil,
         ageUnit: AgeUnit = .years,
-        timeUnit: TimeUnit = .days,
+        timeUnit: TimeUnit = .years,
         frontPhotoData: Data? = nil,
         rightPhotoData: Data? = nil,
         backPhotoData: Data? = nil,

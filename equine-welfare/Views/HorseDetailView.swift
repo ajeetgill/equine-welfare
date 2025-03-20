@@ -14,6 +14,8 @@ struct HorseDetailView: View {
     @State private var isNewHorse: Bool
     @State private var photoItem: PhotosUI.PhotosPickerItem?
     @State private var showBCSReferenceImage = false
+    @State private var ageInput: Int?
+    @State private var timeOnFarmInput: Int?
     
     // Use the shared instance instead of creating a new one
     private let bcsManager = BCSManager.shared
@@ -35,7 +37,7 @@ struct HorseDetailView: View {
         print("DEBUG: HorseDetailView.init - horseId: \(String(describing: horseId)), assessmentId: \(assessmentId)")
         
         // Initialize default horse
-        var initialHorse = Horse(
+        let initialHorse = Horse(
             name: "",
             age: 0,
             color: "Bay",
@@ -47,6 +49,8 @@ struct HorseDetailView: View {
         
         self._horse = State(initialValue: initialHorse)
         self._isNewHorse = State(initialValue: horseId == nil)
+        self._ageInput = State(initialValue: nil)
+        self._timeOnFarmInput = State(initialValue: nil)
         
         // Note: We'll load the actual horse in onAppear if horseId is provided
     }
@@ -89,13 +93,16 @@ struct HorseDetailView: View {
                         Spacer()
                         
                         // Number input field with fixed width
-                        TextField("Age", value: $horse.age, formatter: NumberFormatter())
+                        TextField("Age", value: $ageInput, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                             .padding(8)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
+                            .onChange(of: ageInput) { oldValue, newValue in
+                                horse.age = newValue ?? 0
+                            }
                         
                         // Unit selection dropdown
                         Menu {
@@ -202,13 +209,16 @@ struct HorseDetailView: View {
                         Spacer()
                         
                         // Number input field with fixed width
-                        TextField("Time", value: $horse.timeOnFarm, formatter: NumberFormatter())
+                        TextField("Time", value: $timeOnFarmInput, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                             .padding(8)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
+                            .onChange(of: timeOnFarmInput) { oldValue, newValue in
+                                horse.timeOnFarm = newValue ?? 0
+                            }
                         
                         // Unit selection dropdown
                         Menu {
@@ -353,10 +363,8 @@ struct HorseDetailView: View {
             }
             .padding(.horizontal, 20)
         }
-        .navigationTitle(isNewHorse ? "Add Horse" : "Edit Horse")
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button(action: saveHorse) {
                     Text("Save")
                 }
@@ -527,6 +535,9 @@ struct HorseDetailView: View {
                     print("DEBUG: Successfully loaded horse: \(loadedHorse.name)")
                     horse = loadedHorse
                     isNewHorse = false
+                    // Set the input values from the loaded horse
+                    ageInput = loadedHorse.age > 0 ? loadedHorse.age : nil
+                    timeOnFarmInput = loadedHorse.timeOnFarm > 0 ? loadedHorse.timeOnFarm : nil
                 } else {
                     print("ERROR: Could not find horse with ID: \(horseId)")
                 }
