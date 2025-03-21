@@ -2,6 +2,7 @@ import SwiftData  // used in #Preview
 import SwiftUI
 
 struct AssessmentSidebarView: View {
+    @Environment(\.modelContext) private var modelContext
     // Callbacks for navigation
     var onShowSectionSelection: () -> Void
     var viewModel: SectionSelectionViewModel
@@ -74,15 +75,12 @@ struct AssessmentSidebarView: View {
                 viewModel.saveAssessment()
             }
         } detail: {
-            // Get modelContext from environment
-            @Environment(\.modelContext) var modelContext
-            
             switch currentDetailView {
             case .overview:
                 if let assessment = viewModel.assessment {
                     AssessmentOverviewView(
                         assessment: assessment,
-                        modelContext: modelContext  // Use environment's modelContext
+                        modelContext: modelContext  // Use the property declared with @Environment
                     )
                 }
             case .sectionSelection:
