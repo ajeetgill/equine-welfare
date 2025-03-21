@@ -75,9 +75,19 @@ class SupabaseService {
                 
                 print("RTF document uploaded successfully to: \(storagePath)")
                 return .success("Assessment document uploaded successfully 🎉 yeehaw 🐴")
-            } catch {
-                print("Error reading RTF file data: \(error.localizedDescription)")
-                return .failure(error)
+            } catch let error {
+                // Check if this is a "resource already exists" error
+                if error.localizedDescription.contains("already exists") {
+                    print("Error uploading RTF document: The assessment already exists in storage")
+                    return .failure(NSError(
+                        domain: "SupabaseService",
+                        code: 1006,
+                        userInfo: [NSLocalizedDescriptionKey: "This assessment has already been uploaded. Duplicate uploads are not allowed."]
+                    ))
+                } else {
+                    print("Error reading RTF file data: \(error.localizedDescription)")
+                    return .failure(error)
+                }
             }
         } catch {
             print("Error uploading RTF document: \(error.localizedDescription)")
@@ -317,6 +327,27 @@ class SupabaseService {
         print("===== END ASSESSMENT DATA =====")
     }
     
+    /// Checks if an assessment already exists in storage
+    /// - Parameter assessment: The assessment to check
+    /// - Returns: A result indicating whether the assessment exists or not, with an error if the check fails
+    private func checkAssessmentExists(for assessment: Assessment) async -> Result<Bool, Error> {
+        do {
+            // Create a sanitized folder name based on assessment name
+            let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
+            
+            // Check if any files exist in the assessments folder with this name
+            let response = try await supabase.storage
+                .from("assessments")
+                .list(path: sanitizedFolderName)
+            
+            // If we get any results, the assessment already exists
+            return .success(!response.isEmpty)
+        } catch {
+            print("Error checking if assessment exists: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
     /// Uploads all assessment data including horses, documents, and media to Supabase
     /// - Parameters:
     ///   - assessment: The assessment to upload
@@ -325,6 +356,25 @@ class SupabaseService {
     /// - Returns: A result with success or failure
     func uploadAssessmentComplete(assessment: Assessment, modelContext: ModelContext, progressHandler: ((String, Double) -> Void)? = nil) async -> Result<Bool, Error> {
         do {
+            // First check if this assessment already exists
+            progressHandler?("Checking for existing uploads...", 0.05)
+            let existsResult = await checkAssessmentExists(for: assessment)
+            
+            switch existsResult {
+            case .success(let exists):
+                if exists {
+                    print("Assessment already exists in storage, preventing duplicate upload")
+                    return .failure(NSError(
+                        domain: "SupabaseService",
+                        code: 1005,
+                        userInfo: [NSLocalizedDescriptionKey: "This assessment has already been uploaded. Duplicate uploads are not allowed."]
+                    ))
+                }
+            case .failure(let error):
+                print("Warning: Could not check if assessment already exists: \(error.localizedDescription)")
+                // We'll continue anyway since this is just a precaution
+            }
+            
             // Step 1: Upload horse data via HorseService
             progressHandler?("Uploading horse data...", 0.1)
             
@@ -345,8 +395,19 @@ class SupabaseService {
             progressHandler?("Uploading assessment document...", 0.3)
             if let rtfURL = await getRTFDocumentURL(for: assessment) {
                 let documentResult = await uploadRTFDocument(fileURL: rtfURL, assessment: assessment)
-                if case .failure(let error) = documentResult {
+                
+                switch documentResult {
+                case .failure(let error):
+                    // If the error indicates the document already exists, stop the entire process
+                    if error.localizedDescription.contains("already been uploaded") {
+                        print("Stopping upload process - assessment already exists")
+                        return .failure(error)
+                    }
                     print("Warning: RTF document upload failed: \(error.localizedDescription)")
+                    // For other errors, we'll continue with media uploads
+                case .success(_):
+                    // Document upload succeeded, continue
+                    break
                 }
             }
             
