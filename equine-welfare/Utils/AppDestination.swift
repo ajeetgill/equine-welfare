@@ -2,6 +2,9 @@ import SwiftUI
 
 /// Defines all possible navigation destinations in the app
 enum AppDestination: Hashable {
+    /// Overview screen for an assessment
+    case overview(assessmentId: UUID)
+    
     /// Section selection screen for an assessment
     case sectionSelection(assessmentId: UUID)
     
@@ -20,6 +23,9 @@ enum AppDestination: Hashable {
     // Implement Hashable conformance
     func hash(into hasher: inout Hasher) {
         switch self {
+        case .overview(let id):
+            hasher.combine("overview")
+            hasher.combine(id)
         case .sectionSelection(let id):
             hasher.combine("sectionSelection")
             hasher.combine(id)
@@ -41,6 +47,8 @@ enum AppDestination: Hashable {
     
     static func == (lhs: AppDestination, rhs: AppDestination) -> Bool {
         switch (lhs, rhs) {
+        case (.overview(let id1), .overview(let id2)):
+            return id1 == id2
         case (.sectionSelection(let id1), .sectionSelection(let id2)):
             return id1 == id2
         case (.sectionDetail(let id1), .sectionDetail(let id2)):
@@ -55,4 +63,4 @@ enum AppDestination: Hashable {
             return false
         }
     }
-} 
+}

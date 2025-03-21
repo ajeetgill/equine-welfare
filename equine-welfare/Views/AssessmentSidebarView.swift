@@ -36,6 +36,7 @@ struct AssessmentSidebarView: View {
     
     // Define possible detail views
     private enum DetailView: Equatable {
+        case overview
         case sectionSelection
         case horses
         case gallery
@@ -43,6 +44,8 @@ struct AssessmentSidebarView: View {
         
         static func == (lhs: DetailView, rhs: DetailView) -> Bool {
             switch (lhs, rhs) {
+            case (.overview, .overview):
+                return true
             case (.sectionSelection, .sectionSelection):
                 return true
             case (.horses, .horses):
@@ -71,12 +74,20 @@ struct AssessmentSidebarView: View {
                 viewModel.saveAssessment()
             }
         } detail: {
-            // Show the appropriate detail view based on navigation state
+            // Get modelContext from environment
+            @Environment(\.modelContext) var modelContext
+            
             switch currentDetailView {
+            case .overview:
+                if let assessment = viewModel.assessment {
+                    AssessmentOverviewView(
+                        assessment: assessment,
+                        modelContext: modelContext  // Use environment's modelContext
+                    )
+                }
             case .sectionSelection:
                 SectionSelectionView(viewModel: viewModel)
             case .horses:
-                // Use our new wrapper view for horses navigation
                 HorsesNavigationView(
                     assessmentId: assessmentId
                 )
@@ -102,6 +113,16 @@ struct AssessmentSidebarView: View {
 
     private var navigationButtonsView: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // Overview Button
+            SidebarButton(
+                title: "Overview",
+                icon: "doc.text.magnifyingglass",
+                isActive: currentDetailView == .overview
+            ) {
+                selectedSection = nil
+                currentDetailView = .overview
+            }
+            
             // Section Selection Button
             SidebarButton(
                 title: "Section Selection",
@@ -179,7 +200,7 @@ struct AssessmentSidebarView: View {
         }
 
         // Count answered requirements (those with a compliance status)
-        let answeredCount = requirements.filter { req in 
+        let answeredCount = requirements.filter { req in
             req.complianceStatus != nil
         }.count
 

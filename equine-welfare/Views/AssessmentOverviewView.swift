@@ -1,0 +1,101 @@
+import SwiftUI
+import SwiftData
+
+struct AssessmentOverviewView: View {
+    @Environment(\.modelContext) private var modelContext
+    let assessment: Assessment
+    var sectionViewModel: SectionSelectionViewModel
+    
+    init(assessment: Assessment, modelContext: ModelContext) {
+        self.assessment = assessment
+        self.sectionViewModel = SectionSelectionViewModel(modelContext: modelContext)
+    }
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                Text("Overview")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                // Status text
+                Text("tracking todos")
+                    .foregroundColor(.secondary)
+                
+                // Non-Applicable Sections
+                VStack(alignment: .leading, spacing: 16) {
+                    DisclosureGroup(
+                        content: {
+                            VStack(alignment: .leading, spacing: 12) {
+                                ForEach(assessment.sections.filter { !$0.isApplicable }.sorted(by: { $0.id < $1.id }), id: \.id) { section in
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "xmark.circle")
+                                            .foregroundColor(.gray)
+                                        Text("\(section.id). \(section.title)")
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        },
+                        label: {
+                            Text("Non-Applicable Sections")
+                                .font(.headline)
+                        }
+                    )
+                }
+                
+                // Applicable Sections
+                VStack(alignment: .leading, spacing: 16) {
+                    DisclosureGroup(
+                        content: {
+                            VStack(alignment: .leading, spacing: 12) {
+                                ForEach(assessment.sections.filter { $0.isApplicable }, id: \.id) { section in
+                                    let completionStatus = sectionViewModel.getSectionStatus(section)
+                                    HStack(spacing: 8) {
+                                        SectionStatusIndicator(status: completionStatus)
+                                            .foregroundColor(completionStatus == .completed ? .green :
+                                                           completionStatus == .inProgress ? .orange : .gray)
+                                        
+                                        VStack(alignment: .leading) {
+                                            Text("\(section.id). \(section.title)")
+                                            
+                                            if completionStatus == .inProgress {
+                                                let progress = sectionViewModel.getSectionProgress(section)
+                                                Text("\(progress.0)/\(progress.1) Requirements")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        },
+                        label: {
+                            Text("Applicable Sections")
+                                .font(.headline)
+                        }
+                    )
+                }
+            }
+            .padding()
+            .onAppear {
+                sectionViewModel.loadAssessment(id: assessment.id)
+            }
+        }
+    }
+}
+
+// Preview
+#Preview {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Assessment.self, configurations: config)
+    let context = ModelContext(container)
+    
+    let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
+    
+    return AssessmentOverviewView(assessment: assessment, modelContext: context)
+        .modelContainer(container)
+}
