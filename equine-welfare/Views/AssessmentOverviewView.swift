@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Foundation
 
 struct AssessmentOverviewView: View {
     @Environment(\.modelContext) private var modelContext
@@ -86,29 +87,60 @@ struct AssessmentOverviewView: View {
                                             let subsectionStatus: SectionCompletionStatus = isCompleted ? .completed : 
                                                                                            isPartiallyCompleted ? .inProgress : .notStarted
                                             
-                                            HStack {
-                                                Spacer()
-                                                    .frame(width: 36) // Add fixed padding to the left
-                                                // Status indicator for subsection
-                                                SectionStatusIndicator(status: subsectionStatus)
-                                                    .foregroundColor(.blue)
-                                                
-                                                // Subsection name
-                                                Text(subsection.name)
-                                                    .foregroundColor(.primary)
-                                                
-                                                Spacer()
-                                                
-                                                // Details text with chevron
-                                                HStack(spacing: 4) {
-                                                    Text("Detail")
-                                                        .font(.subheadline)
-                                                        .foregroundColor(.gray)
-                                                    Image(systemName: "chevron.right")
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
+                                            DisclosureGroup {
+                                                // Requirements details
+                                                VStack(spacing: 12) {
+                                                    ForEach(subsection.requirements, id: \.text) { requirement in
+                                                        HStack(alignment: .top) {
+                                                            Spacer()
+                                                                .frame(width: 48) // Extra indentation for requirements
+                                                            
+                                                            // Requirement text
+                                                            Text(requirement.text)
+                                                                .fixedSize(horizontal: false, vertical: true)
+                                                                .foregroundColor(.primary)
+                                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                                .lineLimit(nil)
+                                                            
+                                                            // Compliance status
+                                                            Text(requirement.complianceStatus?.rawValue ?? "---")
+                                                                .foregroundColor(getStatusColor(requirement.complianceStatus))
+                                                                .font(.subheadline)
+                                                                .fontWeight(.medium)
+                                                                .padding(.horizontal, 8)
+                                                                .padding(.vertical, 4)
+                                                                .background(getStatusColor(requirement.complianceStatus).opacity(0.1))
+                                                                .cornerRadius(4)
+                                                        }
+                                                        .padding(12)
+                                                        .background(Color.white.opacity(0.7))
+                                                        .cornerRadius(8)
+                                                    }
+                                                }
+                                                .padding(.top, 8)
+                                            } label: {
+                                                HStack {
+                                                    Spacer()
+                                                        .frame(width: 36) // Add fixed padding to the left
+                                                    // Status indicator for subsection
+                                                    SectionStatusIndicator(status: subsectionStatus)
+                                                        .foregroundColor(.blue)
+                                                    
+                                                    // Subsection name
+                                                    Text(subsection.name)
+                                                        .foregroundColor(.primary)
+                                                    
+                                                    Spacer()
+                                                    
+                                                    // Details text with chevron
+                                                    HStack(spacing: 4) {
+                                                        Text("Detail")
+                                                            .font(.subheadline)
+                                                            .foregroundColor(.gray)
+                                                    }
                                                 }
                                             }
+                                            .accentColor(.blue)
                                             .padding(12)
                                             .background(Color.white)
                                             .cornerRadius(8)
@@ -167,6 +199,22 @@ struct AssessmentOverviewView: View {
         }
         .navigationTitle("Overview")
         .background(Color(.systemGray6))
+    }
+    
+    // Helper function to get the appropriate color for a compliance status
+    private func getStatusColor(_ status: ComplianceStatus?) -> Color {
+        guard let status = status else {
+            return .gray // Default for no status
+        }
+        
+        switch status {
+        case .compliant:
+            return .green
+        case .notCompliant:
+            return .red
+        case .notApplicable:
+            return .blue
+        }
     }
 }
 
