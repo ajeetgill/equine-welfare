@@ -176,7 +176,7 @@ class SupabaseService {
                             .from("assessments")
                             .upload(
                                 path: path,
-                                file: photoData,
+                                file: photoData.data,
                                 options: FileOptions(contentType: "image/jpeg")
                             )
                         successCount += 1
@@ -189,10 +189,10 @@ class SupabaseService {
                 
                 // Upload body view photos if they exist
                 let bodyPhotos: [(Data?, String)] = [
-                    (horse.frontPhotoData, "front"),
-                    (horse.rightPhotoData, "right"),
-                    (horse.backPhotoData, "back"),
-                    (horse.leftPhotoData, "left")
+                    (horse.frontPhotoData?.data, "front"),
+                    (horse.rightPhotoData?.data, "right"),
+                    (horse.backPhotoData?.data, "back"),
+                    (horse.leftPhotoData?.data, "left")
                 ]
                 
                 for (photoData, view) in bodyPhotos {

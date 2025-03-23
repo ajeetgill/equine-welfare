@@ -5,74 +5,99 @@ import AVFoundation
 
 struct MediaPicker: View {
     @Binding var isPresented: Bool
+    var cameraOnly: Bool = false
+    var galleryOnly: Bool = false
+    var cameraText: String = "Camera"
     var onMediaSelected: (Data, MediaType) -> Void
-    @State private var selectedItem: PhotosPickerItem?
-    @State private var showCameraSheet: Bool = false
 
     var body: some View {
         HStack {
-            Button(action: {
-                isPresented = true
-            }) {
-                Label("Add Photo", systemImage: "photo")
-            }
-            .buttonStyle(.bordered)
-            .photosPicker(
-                isPresented: $isPresented, selection: $selectedItem,
-                matching: .images
-            )
-            .onChange(of: selectedItem) { _, newValue in
-                Task {
-                    if let data = try? await newValue?.loadTransferable(type: Data.self),
-                       let uiImage = UIImage(data: data) {
-                        // Convert to JPEG format with 0.8 compression quality
-                        if let jpegData = uiImage.jpegData(compressionQuality: 0.8) {
-                            onMediaSelected(jpegData, .image)
-                        }
-                    }
-                }
-            }
-            Button(action: {
-                showCameraSheet = true
-            }) {
-                Image(systemName: "camera")
-            }
-            .buttonStyle(.bordered)
-            .fullScreenCover(isPresented: $showCameraSheet) {
-                MCamera()
-                    .onImageCaptured { image, controller in
-                        saveImageInGallery(image)
-                        showCameraSheet = false
-                        //                                    controller.reopenCameraScreen()
-                    }
-                    .onVideoCaptured { videoURL, controller in
-                        Task {
-                            await convertAndSaveVideo(videoURL)
-                        }
-                        showCameraSheet = false
-                        //                                    controller.reopenCameraScreen()
-                    }
-                    .setCloseMCameraAction {
-                        print("Camera closed")
-                        showCameraSheet = false
-                    }
-                    .startSession()
+            if(!cameraOnly && !galleryOnly){
+                GalleryButton(isPresented: $isPresented, onMediaSelected: onMediaSelected)
+                CameraButton(onMediaSelected: onMediaSelected)
+            } else if(cameraOnly && !galleryOnly){
+                CameraButton(cameraText: cameraText, onMediaSelected: onMediaSelected)
+            }else if(galleryOnly && !cameraOnly){
+                GalleryButton(isPresented: $isPresented, onMediaSelected: onMediaSelected)
             }
         }
     }
+}
 
-    private func saveImageInGallery(_ image: UIImage) {
+struct GalleryButton: View {
+    @Binding var isPresented: Bool
+    @State private var selectedItem: PhotosPickerItem?
+    var onMediaSelected: (Data, MediaType) -> Void
+    
+    var body: some View {
+        Button(action: {
+            isPresented = true
+        }) {
+            Label("Gallery", systemImage: "photo")
+        }
+        .buttonStyle(.bordered)
+        .photosPicker(
+            isPresented: $isPresented, selection: $selectedItem,
+            matching: .images
+        )
+        .onChange(of: selectedItem) { _, newValue in
+            Task {
+                if let data = try? await newValue?.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    // Convert to JPEG format with 0.8 compression quality
+                    if let jpegData = uiImage.jpegData(compressionQuality: 0.8) {
+                        onMediaSelected(jpegData, .image)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct CameraButton: View{
+    var cameraText: String = ""
+    @State private var showCameraSheet: Bool = false
+    var onMediaSelected: (Data, MediaType) -> Void
+    
+    var body: some View {
+        Button(action: {
+            showCameraSheet = true
+        }) {
+            Label(cameraText, systemImage: "camera")
+        }
+        .buttonStyle(.bordered)
+        .fullScreenCover(isPresented: $showCameraSheet) {
+            MCamera()
+                .onImageCaptured { image, _ in
+                    saveImageInGallery(image)
+                    showCameraSheet = false
+                }
+                .onVideoCaptured { videoURL, _ in
+                    Task {
+                        await convertAndSaveVideo(videoURL)
+                    }
+                    showCameraSheet = false
+                }
+                .setCloseMCameraAction {
+                    print("Camera closed")
+                    showCameraSheet = false
+                }
+                .startSession()
+        }
+    }
+    
+    func saveImageInGallery(_ image: UIImage) {
         print("saveImageInGallery")
         if let imageData = image.jpegData(compressionQuality: 0.8) {
             onMediaSelected(imageData, .image)
         }
     }
 
-    private func convertAndSaveVideo(_ sourceURL: URL) async {
+    func convertAndSaveVideo(_ sourceURL: URL) async {
         print("Converting and saving video")
         
         do {
-            let asset = AVAsset(url: sourceURL)
+            let asset = AVURLAsset(url: sourceURL)
             
             // Create a temporary file URL for the exported video
             let tempDir = FileManager.default.temporaryDirectory
@@ -106,8 +131,8 @@ struct MediaPicker: View {
             print("Error processing video: \(error.localizedDescription)")
         }
     }
+    
 }
-
 // MARK: - Preview
 #Preview {
     @Previewable @State var isPresented = false

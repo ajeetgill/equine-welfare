@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
+import MijickCamera
 
 struct HorseDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -16,6 +17,7 @@ struct HorseDetailView: View {
     @State private var showBCSReferenceImage = false
     @State private var ageInput: Int?
     @State private var timeOnFarmInput: Int?
+    @State private var showingMediaPicker = false
     
     // Use the shared instance instead of creating a new one
     private let bcsManager = BCSManager.shared
@@ -38,11 +40,11 @@ struct HorseDetailView: View {
         let initialHorse = Horse(
             name: "",
             age: 0,
-            color: "Bay",
-            sex: "Gelding",
-            breed: "Quarter Horse",
+            color: "",
+            sex: "",
+            breed: "",
             timeOnFarm: 0,
-            bcsScore: 3.0
+            bcsScore: 4.0
         )
         
         self._horse = State(initialValue: initialHorse)
@@ -55,38 +57,30 @@ struct HorseDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .center, spacing: 24) {
                 // Photo section at top
                 HStack {
                     Spacer()
                     photoSection
                     Spacer()
                 }
-                .padding(.bottom, 16)
                 
                 // Form-style layout with simplified design
-                VStack(alignment: .center, spacing: 24) {
+                VStack(alignment: .center, spacing: 16) {
                     // ALL FIELDS USING IDENTICAL STRUCTURE
                     
                     // Name field
                     HStack {
                         Text("Name")
-                            .font(.headline)    
-                            .frame(width: 120, alignment: .leading)
-                        
-                        Spacer()
                         
                         TextField("Horse name", text: $horse.name)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 200)
                     }
-                    .frame(maxWidth: 500)
+                    
                     
                     // Age field
                     HStack {
                         Text("Age")
-                            .font(.headline)
-                            .frame(width: 120, alignment: .leading)
                         
                         Spacer()
                         
@@ -94,7 +88,7 @@ struct HorseDetailView: View {
                         TextField("Age", value: $ageInput, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                            .frame(width: 50)
                             .padding(8)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
@@ -113,24 +107,17 @@ struct HorseDetailView: View {
                             HStack(spacing: 4) {
                                 Text(horse.ageUnit.rawValue)
                                 Image(systemName: "chevron.down")
-                                    .font(.caption)
                             }
                             .padding(.horizontal, 8)
                         }
                     }
-                    .frame(maxWidth: 500)
                     
                     // Color field
                     HStack {
                         Text("Color")
-                            .font(.headline)
-                            .frame(width: 120, alignment: .leading)
-                        
-                        Spacer()
                         
                         TextField("Color", text: $horse.color)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 150, alignment: .trailing)
                         
                         Menu {
                             ForEach(colorOptions, id: \.self) { color in
@@ -140,23 +127,16 @@ struct HorseDetailView: View {
                             }
                         } label: {
                             Image(systemName: "chevron.down")
-                                .font(.caption)
                                 .padding(.horizontal, 8)
                         }
                     }
-                    .frame(maxWidth: 500)
                     
                     // Sex field
                     HStack {
                         Text("Sex")
-                            .font(.headline)
-                            .frame(width: 120, alignment: .leading)
-                        
-                        Spacer()
                         
                         TextField("Sex", text: $horse.sex)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 150, alignment: .trailing)
                         
                         Menu {
                             ForEach(sexOptions, id: \.self) { sex in
@@ -166,23 +146,16 @@ struct HorseDetailView: View {
                             }
                         } label: {
                             Image(systemName: "chevron.down")
-                                .font(.caption)
                                 .padding(.horizontal, 8)
                         }
                     }
-                    .frame(maxWidth: 500)
                     
                     // Breed field
                     HStack {
                         Text("Breed")
-                            .font(.headline)
-                            .frame(width: 120, alignment: .leading)
-                        
-                        Spacer()
                         
                         TextField("Breed", text: $horse.breed)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 150, alignment: .trailing)
                         
                         Menu {
                             ForEach(breedOptions, id: \.self) { breed in
@@ -192,17 +165,13 @@ struct HorseDetailView: View {
                             }
                         } label: {
                             Image(systemName: "chevron.down")
-                                .font(.caption)
                                 .padding(.horizontal, 8)
                         }
                     }
-                    .frame(maxWidth: 500)
                     
                     // Time on Farm field
                     HStack {
                         Text("Time on Farm")
-                            .font(.headline)
-                            .frame(width: 120, alignment: .leading)
                         
                         Spacer()
                         
@@ -210,7 +179,7 @@ struct HorseDetailView: View {
                         TextField("Time", value: $timeOnFarmInput, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                            .frame(width: 50)
                             .padding(8)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
@@ -229,21 +198,14 @@ struct HorseDetailView: View {
                             HStack(spacing: 4) {
                                 Text(horse.timeUnit.rawValue)
                                 Image(systemName: "chevron.down")
-                                    .font(.caption)
                             }
                             .padding(.horizontal, 8)
                         }
                     }
-                    .frame(maxWidth: 500)
-                    
                     // BCS Section with modern styling
                     VStack(alignment: .leading, spacing: 16) {
                         // Header
                         HStack {
-                            Text("BCS Score")
-                                .font(.headline)
-                                .frame(width: 120, alignment: .leading)
-                            
                             Button(action: {
                                 // Show the BCS score reference image
                                 showBCSReferenceImage.toggle()
@@ -251,113 +213,77 @@ struct HorseDetailView: View {
                                 Image(systemName: "info.circle")
                                     .foregroundColor(.blue)
                             }
-                            .sheet(isPresented: $showBCSReferenceImage) {
-                                VStack {
-                                    Text("Body Condition Score Reference")
-                                        .font(.headline)
-                                        .padding()
-                                    
-                                    Image("labelled-horse")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .padding()
-                                    
-                                    Button("Close") {
-                                        showBCSReferenceImage = false
-                                    }
-                                    .padding()
-                                }
-                            }
+                            Text("BCS Score")
+                            Spacer()
+                            Text("\(String(format: "%.1f", horse.bcsScore))")
+                                .frame(width: 50)
+                                
+                            
                             
                         }
-                        
+                        .sheet(isPresented: $showBCSReferenceImage) {
+                            VStack {
+                                Text("Body Condition Score Reference")
+                                    .font(.headline)
+                                    .padding()
+                                Spacer()
+                                Image("labelled-horse")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .padding()
+                                
+                                Spacer()
+                                Button("Close") {
+                                    showBCSReferenceImage = false
+                                }
+                                .padding()
+                            }
+                        }
                         // Slider for BCS score
                         HStack {
                             Text("1")
                             Slider(value: $horse.bcsScore, in: 1...9, step: 0.5)
                             Text("9")
                         }
-                        
-                        Text("Score: \(String(format: "%.1f", horse.bcsScore))")
-                            .foregroundColor(.blue)
-                        
-                        // BCS Image and Description in a centered card
-                        HStack {
-                            // Center the card
-                            Spacer()
-                            
-                            // Card with image and description side by side with fixed width
+                        // BCS Image and Description
                             HStack(alignment: .top, spacing: 20) {
                                 // Left side: BCS image with fixed width and centered
                                 let bcsScore = Int(horse.bcsScore)
+                                
                                 VStack {
+                                    Text("BCS \(String(format: "%.1f", horse.bcsScore)) Description")
+                                        .padding(.bottom, 4)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                     bcsManager.getBCSImage(for: bcsScore)
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: 220, height: 220)
-                                        .frame(maxWidth: .infinity, alignment: .center)
                                 }
-                                .padding(.vertical)
-                                .padding(.horizontal)
+                                .frame(maxWidth: 250, alignment: .center)
                                 
                                 // Right side: BCS description
-                                if let bcsBodyParts = bcsManager.getBCSData(for: bcsScore), !bcsBodyParts.isEmpty {
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("BCS \(bcsScore) Description")
-                                            .font(.headline)
-                                            .padding(.bottom, 4)
-                                        
-                                        // Create a structured layout with part names on left and descriptions on right
+                                VStack(alignment: .leading, spacing: 12){
+                                    if let bcsBodyParts = bcsManager.getBCSData(for: bcsScore), !bcsBodyParts.isEmpty {
                                         ForEach(bcsBodyParts) { part in
-                                            HStack(alignment: .top, spacing: 16) {
-                                                // Left side - Part name
-                                                Text(part.name)
-                                                    .font(.body)
-                                                    .foregroundColor(.gray)
-                                                    .frame(width: 150, alignment: .leading)
-                                                
-                                                // Right side - Bullet descriptions
-                                                VStack(alignment: .leading, spacing: 6) {
-                                                    ForEach(part.descriptions, id: \.self) { description in
-                                                        HStack(alignment: .top, spacing: 4) {
-                                                            Text("•")
-                                                                .foregroundColor(.gray)
-                                                            Text(description)
-                                                                .font(.body)
-                                                                .foregroundColor(.gray)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            .padding(.vertical, 4)
+                                            BCSPartView(part: part)
                                         }
                                     }
-                                    .padding()
-                                    .frame(width: 500, alignment: .leading)
-                                } else {
-                                    VStack(alignment: .leading) {
-                                        Text("BCS \(bcsScore) Description")
-                                            .font(.headline)
-                                            
-                                            Text("No description data available for BCS \(bcsScore)")
+                                    else {
+                                            Text("No description data available")
                                                 .foregroundColor(.secondary)
-                                                .italic()
                                     }
-                                    .padding()
-                                    .frame(width: 500, alignment: .leading)
                                 }
+                                
+                                Spacer()
                             }
+                            .padding()
                             .background(Color.white)
                             .cornerRadius(8)
-                            
-                            // Center the card
-                            Spacer()
-                        }
                     }
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                 }
+                .frame(maxWidth: 750)
             }
             .padding(.horizontal, 20)
         }
@@ -385,37 +311,31 @@ struct HorseDetailView: View {
     private var photoSection: some View {
         VStack {
             // Horse image placeholder
-            if let photoData = horse.photoData, let uiImage = UIImage(data: photoData) {
+            if let photoData = horse.photoData, let uiImage = UIImage(data: photoData.data) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 120, height: 120)
+                     .frame(width: 80, height: 80)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "pawprint.fill")
+                Image("horse-icon")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
+                    .grayscale(1)
                     .padding(20)
                     .foregroundColor(.gray)
                     .background(Color(.systemGray5))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
-            
-            // Upload photo button
-            PhotosPicker(selection: $photoItem, matching: .images) {
-                Text("Upload Photo")
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .onChange(of: photoItem) { _, newItem in
-                Task {
-                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                        horse.photoData = data
-                    }
+            HStack{
+                MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Horse") {
+                    mediaData, mediaType in
+                    let attachment =
+                        mediaType == .image
+                        ? MediaAttachment(imageData: mediaData)
+                        : MediaAttachment(videoData: mediaData)
+                    horse.photoData = attachment
                 }
             }
         }
@@ -423,9 +343,6 @@ struct HorseDetailView: View {
     
     private func saveHorse() {
         print("DEBUG: Starting saveHorse() in HorseDetailView")
-//        print("DEBUG: isNewHorse = \(isNewHorse)")
-//        print("DEBUG: Assessment ID = \(assessmentId)")
-//        print("DEBUG: Horse name = \(horse.name)")
         
         Task { @MainActor in
             do {
@@ -538,42 +455,24 @@ struct HorseDetailView: View {
     }
 }
 
-// Helper views - keeping these intact
-struct FormField<Content: View>: View {
-    let label: String
-    let alignment: HorizontalAlignment
-    @ViewBuilder let content: () -> Content
-    
-    var body: some View {
-        VStack(alignment: alignment, spacing: 8) {
-            Text(label)
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            content()
-        }
-    }
-}
-
 struct BCSPartView: View {
     let part: BCSBodyPart
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(part.name)
-                .font(.subheadline)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
             
             ForEach(part.descriptions, id: \.self) { description in
                 HStack(alignment: .top, spacing: 4) {
-                    Text("•")
-                    Text(description)
-                        .font(.caption)
+                    Text("• \(description)")
                         .foregroundColor(.secondary)
                 }
             }
         }
+        .padding(.bottom, 2)
     }
 }
 

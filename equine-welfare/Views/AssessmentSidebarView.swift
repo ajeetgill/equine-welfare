@@ -7,17 +7,17 @@ struct AssessmentSidebarView: View {
     var onShowSectionSelection: () -> Void
     var viewModel: SectionSelectionViewModel
     var galleryViewModel: GalleryViewModel
-    
+
     // Add NavigationPath binding for horse navigation
     @Binding var navigationPath: NavigationPath
-    
+
     // Add current assessment ID
     var assessmentId: UUID
 
     @State private var isApplicableSectionsExpanded: Bool = true
     @State private var selectedSection: Section?
     @State private var currentDetailView: DetailView = .sectionSelection
-    
+
     // Initializer with navigationPath
     init(
         onShowSectionSelection: @escaping () -> Void,
@@ -31,10 +31,12 @@ struct AssessmentSidebarView: View {
         self.galleryViewModel = galleryViewModel
         self._navigationPath = navigationPath
         self.assessmentId = assessmentId
-        
-        print("DEBUG: AssessmentSidebarView initialized with assessmentId: \(assessmentId)")
+
+        print(
+            "DEBUG: AssessmentSidebarView initialized with assessmentId: \(assessmentId)"
+        )
     }
-    
+
     // Define possible detail views
     private enum DetailView: Equatable {
         case overview
@@ -42,7 +44,7 @@ struct AssessmentSidebarView: View {
         case horses
         case gallery
         case sectionDetail(Section)
-        
+
         static func == (lhs: DetailView, rhs: DetailView) -> Bool {
             switch (lhs, rhs) {
             case (.overview, .overview):
@@ -53,7 +55,9 @@ struct AssessmentSidebarView: View {
                 return true
             case (.gallery, .gallery):
                 return true
-            case (.sectionDetail(let lhsSection), .sectionDetail(let rhsSection)):
+            case (
+                .sectionDetail(let lhsSection), .sectionDetail(let rhsSection)
+            ):
                 return lhsSection.id == rhsSection.id
             default:
                 return false
@@ -63,7 +67,7 @@ struct AssessmentSidebarView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack(alignment: .leading, spacing: 20) {
+            ScrollView {
                 // MARK: - Navigation Actions
                 navigationButtonsView
                 sectionsList
@@ -136,12 +140,13 @@ struct AssessmentSidebarView: View {
             SidebarButton(
                 title: "Horses",
                 icon: "pawprint.fill",
+                customImage: "horse-icon",
                 isActive: currentDetailView == .horses
             ) {
                 selectedSection = nil
                 currentDetailView = .horses
             }
-            
+
             // Gallery Button
             SidebarButton(
                 title: "Gallery",
@@ -155,40 +160,42 @@ struct AssessmentSidebarView: View {
     }
 
     private var sectionsList: some View {
-            // Keep the DisclosureGroup with dropdown functionality
-            DisclosureGroup(
-                isExpanded: $isApplicableSectionsExpanded,
-                content: {
-                    ForEach(viewModel.applicableSections) { section in
-                        Button(action: {
-                            selectedSection = section
-                            currentDetailView = .sectionDetail(section)
-                        }) {
-                            HStack {
-                                // Add the status indicator
-                                SectionStatusIndicator(
-                                    status: getSectionCompletionStatus(section)
-                                )
-                                .padding(.trailing, 4)
-                                
-                                Text("\(section.id). \(section.title)")
-                                    .foregroundColor(.primary)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .padding(8)
+        // Keep the DisclosureGroup with dropdown functionality
+        DisclosureGroup(
+            isExpanded: $isApplicableSectionsExpanded,
+            content: {
+                ForEach(viewModel.applicableSections) { section in
+                    Button(action: {
+                        selectedSection = section
+                        currentDetailView = .sectionDetail(section)
+                    }) {
+                        HStack {
+                            // Add the status indicator
+                            SectionStatusIndicator(
+                                status: getSectionCompletionStatus(section)
+                            )
+                            .padding(.trailing, 4)
+
+                            Text("\(section.id). \(section.title)")
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .padding(8)
                     }
-                },
-                label: {
-                    Text("Applicable Sections")
-                        .font(.headline)
-                        .foregroundColor(.primary)
                 }
-            )
+            },
+            label: {
+                Text("Applicable Sections")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+        )
     }
 
     // Helper method to determine section status
-    private func getSectionCompletionStatus(_ section: Section) -> SectionCompletionStatus {
+    private func getSectionCompletionStatus(_ section: Section)
+        -> SectionCompletionStatus
+    {
         // Get all requirements for this section
         guard
             let requirements = section.subsections.flatMap({ $0.requirements })
@@ -218,13 +225,19 @@ struct AssessmentSidebarView: View {
 struct SidebarButton: View {
     let title: String
     var icon: String = "questionmark.app.dashed"
+    var customImage: String?
     var isActive: Bool? = false
     var onAction: (() -> Void)?
 
     var body: some View {
         Button(action: onAction ?? { }) {
             HStack {
-                Image(systemName: icon)
+                if let img = customImage {
+                    Image(img)
+                }
+                else {
+                    Image(systemName: icon)
+                }
                 Text(title).fontWeight(isActive ?? false ? .medium : .regular)
                 Spacer()
             }
@@ -399,23 +412,26 @@ struct MediaPreviewView: View {
 
     var body: some View {
         NavigationStack {
-            if attachment.mediaType == .image {
-                if let uiImage = UIImage(data: attachment.data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
+            VStack(alignment: .leading, spacing: 16) {
+                if attachment.mediaType == .image {
+                    if let uiImage = UIImage(data: attachment.data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .padding()
+                    }
+                } else {
+                    Text("Unsupported media type")
                 }
-            } else {
-                Text("Unsupported media type")
             }
-
-        }
-        .navigationTitle("Image Preview")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Done") {
-                    dismiss()
+            .padding()
+            .navigationTitle("Image Preview")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
         }

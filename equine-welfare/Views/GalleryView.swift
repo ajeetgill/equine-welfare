@@ -82,7 +82,8 @@ struct GalleryImageView: View {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(height: 120)
+                        .frame(width: 180, height: 120)
+                        .frame(maxWidth: 200)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
@@ -154,9 +155,3 @@ struct ImageDetailView: View {
         }
     }
 }
-
-//#Preview {
-//    let viewModel = GalleryViewModel(sectionViewModel: SectionSelectionViewModel(modelContext: ModelContext(try! ModelContainer(for: Assessment.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))))
-//    
-//    return GalleryView(viewModel: viewModel)
-//} 

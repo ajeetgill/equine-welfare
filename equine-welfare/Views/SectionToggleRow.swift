@@ -14,7 +14,6 @@ struct SectionToggleRow: View {
                 Image(systemName: "info.circle")
                     .foregroundColor(.blue)
             }
-            .padding(.trailing, 4)
             .sheet(isPresented: $showingInfo) {
                 SectionInfoView(section: section)
             }
@@ -23,12 +22,11 @@ struct SectionToggleRow: View {
                 .font(.body)
                 .fontWeight(.medium)
             
-            Spacer()
-            
             Toggle("", isOn: $isApplicable)
                 .toggleStyle(SwitchToggleStyle(tint: .green))
         }
-        .padding()
+        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
         .background(Color.white)
         .cornerRadius(10)
     }
@@ -77,8 +75,8 @@ struct SectionInfoView: View {
                 
                 Spacer()
             }
-            .padding()
             .navigationBarItems(trailing: Button("Done") { dismiss() })
         }
     }
-} 
+        
+}

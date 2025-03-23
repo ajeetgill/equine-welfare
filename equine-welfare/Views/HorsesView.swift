@@ -104,7 +104,7 @@ struct HorseInfoRow: View {
         HStack {
             // Horse image
             if let photoData = horse.photoData,
-                let uiImage = UIImage(data: photoData)
+               let uiImage = UIImage(data: photoData.data)
             {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -112,7 +112,7 @@ struct HorseInfoRow: View {
                     .frame(width: 50, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "pawprint.fill")
+                Image("horse-icon")
                     .resizable()
                     .scaledToFill()
                     .padding(10)

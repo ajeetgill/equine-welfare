@@ -15,16 +15,7 @@ struct HorseInfoView: View {
     @State private var findings: String = ""
     
     // Photo pickers for each side
-    @State private var frontPhotoItem: PhotosPickerItem?
-    @State private var rightPhotoItem: PhotosPickerItem?
-    @State private var backPhotoItem: PhotosPickerItem?
-    @State private var leftPhotoItem: PhotosPickerItem?
-    
-    // Photo data for each side
-    @State private var frontPhotoData: Data?
-    @State private var rightPhotoData: Data?
-    @State private var backPhotoData: Data?
-    @State private var leftPhotoData: Data?
+    @State private var showingMediaPicker = false
     
     // Array of abnormal findings photos
     @State private var abnormalPhotos: [Data] = []
@@ -56,14 +47,12 @@ struct HorseInfoView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Findings or Extra Details")
                         .font(.headline)
-                        .padding(.horizontal)
                     
                     TextField("Enter any findings or notes here", text: $findings, axis: .vertical)
                         .lineLimit(5...10)
                         .padding()
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
-                        .padding(.horizontal)
                         .onChange(of: findings) { _, newValue in
                             saveFindings(newValue)
                         }
@@ -72,30 +61,152 @@ struct HorseInfoView: View {
                 // Body Photos section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Body Photos")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal)
+                        .font(.headline)
                     
                     HStack(spacing: 20) {
-                        photoPickerButton(title: "Front", photoData: frontPhotoData, photoItem: $frontPhotoItem)
-                        photoPickerButton(title: "Right Side", photoData: rightPhotoData, photoItem: $rightPhotoItem)
-                        photoPickerButton(title: "Rear", photoData: backPhotoData, photoItem: $backPhotoItem)
-                        photoPickerButton(title: "Left Side", photoData: leftPhotoData, photoItem: $leftPhotoItem)
+                        VStack{
+                            if let data = horse?.frontPhotoData?.data, let uiImage = UIImage(data: data) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 70, height: 70)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 70, height: 70)
+                                    .overlay(
+                                        Image("horse-icon")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .grayscale(1)
+                                            .padding(12)
+                                            .foregroundColor(.gray)
+                                    )
+                            }
+                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Front") {
+                                mediaData, mediaType in
+                                let attachment =
+                                mediaType == .image
+                                ? MediaAttachment(imageData: mediaData)
+                                : MediaAttachment(videoData: mediaData)
+                                horse?.frontPhotoData = attachment
+                                try? modelContext.save()
+                            }
+                            .cornerRadius(30)
+                            .background(Color(.systemGray6).opacity(0.2))
+                        }
+                        
+                        VStack {
+                            if let data = horse?.rightPhotoData?.data, let uiImage = UIImage(data: data) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 70, height: 70)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 70, height: 70)
+                                    .overlay(
+                                        Image("horse-icon")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .grayscale(1)
+                                            .padding(12)
+                                            .foregroundColor(.gray)
+                                    )
+                            }
+                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Right") {
+                                mediaData, mediaType in
+                                let attachment =
+                                mediaType == .image
+                                ? MediaAttachment(imageData: mediaData)
+                                : MediaAttachment(videoData: mediaData)
+                                horse?.rightPhotoData = attachment
+                                try? modelContext.save()
+                            }
+                            .cornerRadius(30)
+                            .background(Color(.systemGray6).opacity(0.2))
+                        }
+                        
+                        VStack {
+                            if let data = horse?.backPhotoData?.data, let uiImage = UIImage(data: data) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 70, height: 70)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 70, height: 70)
+                                    .overlay(
+                                        Image("horse-icon")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .grayscale(1)
+                                            .padding(12)
+                                            .foregroundColor(.gray)
+                                    )
+                            }
+                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Back") {
+                                mediaData, mediaType in
+                                let attachment =
+                                mediaType == .image
+                                ? MediaAttachment(imageData: mediaData)
+                                : MediaAttachment(videoData: mediaData)
+                                horse?.backPhotoData = attachment
+                                try? modelContext.save()
+                            }
+                            .cornerRadius(30)
+                            .background(Color(.systemGray6).opacity(0.2))
+                        }
+                        
+                        VStack {
+                            if let data = horse?.leftPhotoData?.data, let uiImage = UIImage(data: data) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 70, height: 70)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 70, height: 70)
+                                    .overlay(
+                                        Image("horse-icon")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .grayscale(1)
+                                            .padding(12)
+                                            .foregroundColor(.gray)
+                                    )
+                            }
+                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Left") {
+                                mediaData, mediaType in
+                                let attachment =
+                                mediaType == .image
+                                ? MediaAttachment(imageData: mediaData)
+                                : MediaAttachment(videoData: mediaData)
+                                horse?.leftPhotoData = attachment
+                                try? modelContext.save()
+                            }
+                            .cornerRadius(30)
+                            .background(Color(.systemGray6).opacity(0.2))
+                        }
                     }
-                    .padding(.horizontal)
+                    .fontWeight(.semibold)
+                    .font(.caption)
                 }
                 
                 // Abnormal Findings section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Abnormal Findings")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.horizontal)
                     
                     Text("E.g.Not limited to but here you can include photos of injuries, hooves, teeth, skin, etc")
                         .font(.caption)
                         .foregroundColor(.gray)
-                        .padding(.horizontal)
                     
                     // Grid of abnormal photos with add button
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 16)], spacing: 16) {
@@ -125,10 +236,9 @@ struct HorseInfoView: View {
                         // Add photo button
                         addAbnormalPhotoButton()
                     }
-                    .padding(.horizontal)
                 }
             }
-            .padding(.vertical)
+            .padding()
         }
         .navigationTitle(horse?.name ?? "Horse Details")
         .toolbar {
@@ -144,7 +254,7 @@ struct HorseInfoView: View {
                         print("ERROR: Missing assessment ID when trying to edit horse: \(horse.name)")
                         
                         // Try to find the assessment
-                        Task { @MainActor in
+                        Task {
                             if let foundAssessmentId = await findAssessmentForHorse(horse.uuid) {
                                 // Use the callback if provided
                                 if let onEdit = onEdit {
@@ -162,29 +272,8 @@ struct HorseInfoView: View {
         .onAppear {
             loadHorse()
         }
-        .onChange(of: frontPhotoItem) { _, newValue in
-            processPhotoItem(newValue) { data in
-                frontPhotoData = data
-                saveFrontPhoto(data)
-            }
-        }
-        .onChange(of: rightPhotoItem) { _, newValue in
-            processPhotoItem(newValue) { data in
-                rightPhotoData = data
-                saveRightPhoto(data)
-            }
-        }
-        .onChange(of: backPhotoItem) { _, newValue in
-            processPhotoItem(newValue) { data in
-                backPhotoData = data
-                saveBackPhoto(data)
-            }
-        }
-        .onChange(of: leftPhotoItem) { _, newValue in
-            processPhotoItem(newValue) { data in
-                leftPhotoData = data
-                saveLeftPhoto(data)
-            }
+        .onChange(of: horseId) { _, newId in
+            loadHorse()  // Reload horse data when horseId changes
         }
         .onChange(of: abnormalPhotoItem) { _, newValue in
             processPhotoItem(newValue) { data in
@@ -203,16 +292,17 @@ struct HorseInfoView: View {
     private var horseHeaderView: some View {
         HStack(spacing: 16) {
             // Horse image
-            if let horse = horse, let photoData = horse.photoData, let uiImage = UIImage(data: photoData) {
+            if let horse = horse, let photoData = horse.photoData, let uiImage = UIImage(data: photoData.data) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 80, height: 80)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "pawprint.fill")
+                Image("horse-icon")
                     .resizable()
                     .scaledToFit()
+                    .grayscale(1)
                     .frame(width: 60, height: 60)
                     .padding(10)
                     .foregroundColor(.gray)
@@ -253,43 +343,6 @@ struct HorseInfoView: View {
         .background(Color.white)
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-        .padding(.horizontal)
-    }
-    
-    private func photoPickerButton(title: String, photoData: Data?, photoItem: Binding<PhotosPickerItem?>) -> some View {
-        VStack {
-            if let data = photoData, let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 70, height: 70)
-                    .clipShape(Circle())
-            } else {
-                Circle()
-                    .fill(Color(.systemGray5))
-                    .frame(width: 70, height: 70)
-                    .overlay(
-                        Image(systemName: "pawprint.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.gray)
-                    )
-            }
-            
-            PhotosPicker(selection: photoItem, matching: .images) {
-                HStack {
-                    Image(systemName: "plus")
-                    Text(title)
-                }
-                .font(.caption)
-                .foregroundColor(.white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.blue)
-                .cornerRadius(12)
-            }
-        }
     }
     
     private func addAbnormalPhotoButton() -> some View {
@@ -315,30 +368,6 @@ struct HorseInfoView: View {
     private func removeAbnormalPhoto(at index: Int) {
         abnormalPhotos.remove(at: index)
         saveAbnormalPhotos()
-    }
-    
-    private func saveFrontPhoto(_ data: Data?) {
-        guard let horse = horse else { return }
-        horse.frontPhotoData = data
-        try? modelContext.save()
-    }
-    
-    private func saveRightPhoto(_ data: Data?) {
-        guard let horse = horse else { return }
-        horse.rightPhotoData = data
-        try? modelContext.save()
-    }
-    
-    private func saveBackPhoto(_ data: Data?) {
-        guard let horse = horse else { return }
-        horse.backPhotoData = data
-        try? modelContext.save()
-    }
-    
-    private func saveLeftPhoto(_ data: Data?) {
-        guard let horse = horse else { return }
-        horse.leftPhotoData = data
-        try? modelContext.save()
     }
     
     private func saveAbnormalPhotos() {
@@ -393,40 +422,7 @@ struct HorseInfoView: View {
                 // Debug output to check the assessment relationship
                 if let assessment = loadedHorse.assessment {
                     print("DEBUG: Horse belongs to assessment: \(assessment.id)")
-                } else {
-                    print("CRITICAL: Horse has no assessment relationship - will fix")
-                    
-                    // Try to find and fix the relationship
-                    Task { @MainActor in
-                        if let assessmentId = await findAssessmentForHorse(horseId) {
-                            
-                            // Get the assessment object
-                            let assessmentDescriptor = FetchDescriptor<Assessment>(
-                                predicate: #Predicate { $0.id == assessmentId }
-                            )
-                            
-                            if let assessment = try? modelContext.fetch(assessmentDescriptor).first {
-                                loadedHorse.assessment = assessment
-                                
-                                // Add the horse to the assessment if needed
-                                if !assessment.horses.contains(where: { $0.uuid == horseId }) {
-                                    assessment.horses.append(loadedHorse)
-                                }
-                                
-                                try? modelContext.save()
-                                
-                                // Update our local copy
-                                self.horse = loadedHorse
-                            }
-                        }
-                    }
                 }
-                
-                // Load body photos
-                self.frontPhotoData = loadedHorse.frontPhotoData
-                self.rightPhotoData = loadedHorse.rightPhotoData
-                self.backPhotoData = loadedHorse.backPhotoData
-                self.leftPhotoData = loadedHorse.leftPhotoData
                 
                 // Load abnormal photos
                 self.abnormalPhotos = loadedHorse.abnormalPhotosData
@@ -478,12 +474,12 @@ struct HorseInfoView: View {
         timeOnFarm: 4,
         bcsScore: 4.0
     )
-    modelContext.insert(horse)
+//    modelContext.insert(horse)
     
-    return NavigationStack {
+    NavigationStack {
         HorseInfoView(
             horseId: horse.uuid
         )
     }
     .modelContainer(for: Horse.self, inMemory: true)
-} 
+}
