@@ -39,9 +39,10 @@ struct AssessmentOverviewView: View {
                     // Calculate total completed and total requirements counts
                     let totalRequirements = assessment.sections.filter { $0.isApplicable }.flatMap { $0.subsections }.flatMap { $0.requirements }.count
                     let completedRequirements = assessment.sections.filter { $0.isApplicable }.flatMap { $0.subsections }.flatMap { $0.requirements }.filter { $0.complianceStatus != nil }.count
-                    
+                    let percentCompleted = Int(Double(completedRequirements) / Double(totalRequirements) * 100)
                     VStack(spacing: 4) {
-                        Text("\(completedRequirements) / \(totalRequirements) Requirements")
+                        
+                        Text("\(percentCompleted)% completed")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
@@ -141,15 +142,24 @@ struct AssessmentOverviewView: View {
                                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                                                 .lineLimit(nil)
                                                             
-                                                            // Compliance status
-                                                            Text(requirement.complianceStatus?.rawValue ?? "---")
-                                                                .foregroundColor(getStatusColor(requirement.complianceStatus))
-                                                                .font(.subheadline)
-                                                                .fontWeight(.medium)
-                                                                .padding(.horizontal, 8)
-                                                                .padding(.vertical, 4)
-                                                                .background(getStatusColor(requirement.complianceStatus).opacity(0.1))
-                                                                .cornerRadius(4)
+                                                            // Compliance status with finding indicator
+                                                            VStack(alignment: .trailing, spacing: 2) {
+                                                                Text(requirement.complianceStatus?.rawValue ?? "---")
+                                                                    .foregroundColor(getStatusColor(requirement.complianceStatus))
+                                                                    .font(.subheadline)
+                                                                    .fontWeight(.medium)
+                                                                    .padding(.horizontal, 8)
+                                                                    .padding(.vertical, 4)
+                                                                    .background(getStatusColor(requirement.complianceStatus).opacity(0.1))
+                                                                    .cornerRadius(4)
+                                                                
+                                                                // Show finding status for non-compliant requirements
+                                                                if requirement.complianceStatus == .notCompliant {
+                                                                    Text(hasNonComplianceReason(requirement) ? "Findings Provided" : "Findings Not Provided")
+                                                                        .font(.caption)
+                                                                        .foregroundColor(.blue)
+                                                                }
+                                                            }
                                                         }
                                                         .padding(12)
                                                         .background(Color.white.opacity(0.7))
@@ -171,12 +181,7 @@ struct AssessmentOverviewView: View {
                                                     
                                                     Spacer()
                                                     
-                                                    // Details text with chevron
-                                                    HStack(spacing: 4) {
-                                                        Text("Detail")
-                                                            .font(.subheadline)
-                                                            .foregroundColor(.gray)
-                                                    }
+                                                   
                                                 }
                                             }
                                             .accentColor(.blue)
@@ -255,6 +260,16 @@ struct AssessmentOverviewView: View {
             return .blue
         }
     }
+    
+    // Helper function to check if a specific requirement has a non-compliance reason provided
+    private func hasNonComplianceReason(_ requirement: Requirement) -> Bool {
+        // Check if the requirement is non-compliant and has a non-empty reason
+        return requirement.complianceStatus == .notCompliant && 
+               requirement.nonComplianceReason != nil && 
+               !requirement.nonComplianceReason!.isEmpty
+    }
+    
+    
 }
 
 // Preview
