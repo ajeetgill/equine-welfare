@@ -52,7 +52,8 @@ struct HorseDetailView: View {
             sex: "",
             breed: "",
             timeOnFarm: 0,
-            bcsScore: 4.0
+            bcsScore: 4.0,
+            isHorse: true  // Explicitly set isHorse property
         )
         
         self._horse = State(initialValue: initialHorse)
