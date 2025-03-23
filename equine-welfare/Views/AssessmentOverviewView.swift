@@ -48,50 +48,46 @@ struct AssessmentOverviewView: View {
                 .accentColor(.blue)
                 
                 // Applicable Sections
-                VStack(alignment: .leading, spacing: 0) {
-                    DisclosureGroup(
-                        isExpanded: $isApplicableSectionsExpanded,
-                        content: {
-                            VStack(alignment: .leading, spacing: 12) {
-                                ForEach(assessment.sections.filter { $0.isApplicable }, id: \.id) { section in
-                                    let completionStatus = sectionViewModel.getSectionStatus(section)
-                                    HStack(spacing: 8) {
-                                        SectionStatusIndicator(status: completionStatus)
-                                            .foregroundColor(completionStatus == .completed ? .green :
-                                                           completionStatus == .inProgress ? .orange : .gray)
+                DisclosureGroup(
+                    isExpanded: $isApplicableSectionsExpanded,
+                    content: {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(assessment.sections.filter { $0.isApplicable }.sorted(by: { $0.id < $1.id }), id: \.id) { section in
+                                let completionStatus = sectionViewModel.getSectionStatus(section)
+                                HStack(spacing: 8) {
+                                    Text("  ")
+                                    SectionStatusIndicator(status: completionStatus)
+                                        .foregroundColor(completionStatus == .completed ? .green :
+                                                       completionStatus == .inProgress ? .orange : .gray)
+                                    
+                                    VStack(alignment: .leading) {
+                                        Text("\(section.id). \(section.title)")
+                                            .foregroundColor(.primary)
                                         
-                                        VStack(alignment: .leading) {
-                                            Text("\(section.id). \(section.title)")
-                                                .foregroundColor(.primary)
-                                            
-                                            if completionStatus == .inProgress {
-                                                let progress = sectionViewModel.getSectionProgress(section)
-                                                Text("\(progress.0)/\(progress.1) Requirements")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
+                                        if completionStatus == .inProgress {
+                                            let progress = sectionViewModel.getSectionProgress(section)
+                                            Text("\(progress.0)/\(progress.1) Requirements")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
                                         }
                                     }
                                 }
                             }
-                            .padding(.top, 8)
-                            .padding(.vertical, 8)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.white)
-                        },
-                        label: {
-                            Text("Applicable Sections")
-                                .font(.title2)
-                                .foregroundColor(.blue)
-                                .bold()
                         }
-                    )
-                    .accentColor(.blue)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.white)
-                .cornerRadius(8)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                    },
+                    label: {
+                        Text(" Applicable Sections")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .bold()
+                            .padding(.bottom, 16)
+                    }
+                )
+                .accentColor(.blue)
             }
             .padding()
             .onAppear {
