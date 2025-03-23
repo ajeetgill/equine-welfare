@@ -33,6 +33,45 @@ struct AssessmentOverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                // Total requirements count header
+                HStack {
+                    Spacer()
+                    // Calculate total completed and total requirements counts
+                    let totalRequirements = assessment.sections.filter { $0.isApplicable }.flatMap { $0.subsections }.flatMap { $0.requirements }.count
+                    let completedRequirements = assessment.sections.filter { $0.isApplicable }.flatMap { $0.subsections }.flatMap { $0.requirements }.filter { $0.complianceStatus != nil }.count
+                    
+                    VStack(spacing: 4) {
+                        Text("\(completedRequirements) / \(totalRequirements) Requirements")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        // Progress bar
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                Rectangle()
+                                    .frame(width: geometry.size.width, height: 6)
+                                    .opacity(0.2)
+                                    .foregroundColor(.gray)
+                                
+                                Rectangle()
+                                    .frame(width: totalRequirements > 0 ? 
+                                           CGFloat(completedRequirements) / CGFloat(totalRequirements) * geometry.size.width : 0, 
+                                           height: 6)
+                                    .foregroundColor(.green)
+                            }
+                            .cornerRadius(3)
+                        }
+                        .frame(height: 6)
+                        .padding(.horizontal)
+                    }
+                    .padding(.vertical, 12)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .background(Color.white)
+                .cornerRadius(8)
+                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                
                 // Non-Applicable Sections
                 DisclosureGroup(
                     isExpanded: $isNonApplicableSectionsExpanded,
