@@ -14,15 +14,6 @@ struct AssessmentOverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Header
-                Text("Overview")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                // Status text
-                Text("tracking todos")
-                    .foregroundColor(.secondary)
-                
                 // Non-Applicable Sections
                 VStack(alignment: .leading, spacing: 16) {
                     DisclosureGroup(
@@ -85,6 +76,8 @@ struct AssessmentOverviewView: View {
                 sectionViewModel.loadAssessment(id: assessment.id)
             }
         }
+        .navigationTitle("Overview")
+        .background(Color(.systemGray6))
     }
 }
 
