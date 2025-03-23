@@ -12,21 +12,18 @@ class Horse {
     var otherBreed: String?
     var timeOnFarm: Int  // Months
     var bcsScore: Double
-    var photoData: Data?
     var notes: String?
     var ageUnit: AgeUnit
     var timeUnit: TimeUnit
     
-    // Add these properties for body photos
-    var frontPhotoData: Data?
-    var rightPhotoData: Data?
-    var backPhotoData: Data?
-    var leftPhotoData: Data?
+    @Relationship(deleteRule: .cascade) var photoData: MediaAttachment?
+    @Relationship(deleteRule: .cascade) var frontPhotoData: MediaAttachment?
+    @Relationship(deleteRule: .cascade) var rightPhotoData: MediaAttachment?
+    @Relationship(deleteRule: .cascade) var backPhotoData: MediaAttachment?
+    @Relationship(deleteRule: .cascade) var leftPhotoData: MediaAttachment?
     
-    // Add this property for abnormal findings photos
     @Attribute(.externalStorage) var abnormalPhotosData: [Data]
     
-    // Inverse relationship to Assessment - using proper SwiftData syntax
     @Relationship(inverse: \Assessment.horses) var assessment: Assessment?
     
     init(
@@ -38,14 +35,14 @@ class Horse {
         otherBreed: String? = nil,
         timeOnFarm: Int,
         bcsScore: Double = 3.0,
-        photoData: Data? = nil,
+        photoData: MediaAttachment? = nil,
         notes: String? = nil,
         ageUnit: AgeUnit = .years,
-        timeUnit: TimeUnit = .days,
-        frontPhotoData: Data? = nil,
-        rightPhotoData: Data? = nil,
-        backPhotoData: Data? = nil,
-        leftPhotoData: Data? = nil,
+        timeUnit: TimeUnit = .years,
+        frontPhotoData: MediaAttachment? = nil,
+        rightPhotoData: MediaAttachment? = nil,
+        backPhotoData: MediaAttachment? = nil,
+        leftPhotoData: MediaAttachment? = nil,
         abnormalPhotosData: [Data] = [],
         assessment: Assessment? = nil
     ) {
@@ -85,11 +82,7 @@ enum TimeUnit: String, CaseIterable, Codable {
     case days = "days"
 }
 
-// For horses and other model objects that will be passed to NavigationLinks
 extension Horse: Identifiable, Hashable {
-    // If using SwiftData, Identifiable may already be implemented
-    
-    // Add hashable conformance
     public func hash(into hasher: inout Hasher) {
         hasher.combine(uuid)
     }

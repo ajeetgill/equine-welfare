@@ -44,9 +44,18 @@ struct ContentView: View {
                     PreviousAssessments(navigationPath: $navigationPath)
                 }
             }
-            .navigationDestination(for: AppDestination.self) {
-                destination in
+            .navigationDestination(for: AppDestination.self) { destination in
                 switch destination {
+                case .overview(let assessmentId):
+                    AssessmentOverviewView(
+                        assessment: assessments.first { $0.id == assessmentId } ?? Assessment(vetName: "", farmName: "", visitDate: Date()),
+                        modelContext: modelContext
+                    )
+                    .onAppear {
+                        currentAssessmentId = assessmentId
+                        loadAssessment(id: assessmentId)
+                    }
+                    
                 case .sectionSelection(let assessmentId):
                     AssessmentSidebarView(
                         onShowSectionSelection: {},
@@ -70,26 +79,6 @@ struct ContentView: View {
                     } else {
                         Text("Section not found")
                     }
-                    
-               case .horses(let assessmentId):
-                        HorsesView(
-                            assessmentId: assessmentId
-                        )
-                        .onAppear {
-                            currentAssessmentId = assessmentId
-                            loadAssessment(id: assessmentId)
-                        }
-                    
-                case .horseInfo(let horseId):
-                        HorseInfoView(
-                            horseId: horseId
-                        )
-
-                    case .horseDetail(let horseId, let assessmentId):
-                        HorseDetailView(
-                            horseId: horseId,
-                            assessmentId: assessmentId
-                        )
                 }
             }
             .padding()
@@ -153,9 +142,9 @@ struct ContentView: View {
 
         // Load the assessment on a background task
         sectionViewModel.loadAssessment(id: id)
-//        Task {
-//            await sectionViewModel.loadAssessment(id: id)
-//        }
+        //        Task {
+        //            await sectionViewModel.loadAssessment(id: id)
+        //        }
     }
 }
 

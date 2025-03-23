@@ -1,75 +1,42 @@
 import SwiftData
 import SwiftUI
 
-
 struct HorsesView: View {
     @Environment(\.modelContext) private var modelContext
-    
+
     let assessmentId: UUID
-    var onAddHorse: () -> Void
     var onSelectHorse: (UUID) -> Void
 
     // Get horses from the current assessment
     @Query private var assessments: [Assessment]
 
     init(
-        assessmentId: UUID, 
-        onAddHorse: @escaping () -> Void = {},
+        assessmentId: UUID,
         onSelectHorse: @escaping (UUID) -> Void = { _ in }
     ) {
-        print("DEBUG: Initializing HorsesView with assessmentId: \(assessmentId)")
         self.assessmentId = assessmentId
-        self.onAddHorse = onAddHorse
         self.onSelectHorse = onSelectHorse
-        
+
         // Initialize the Query with proper descriptor and sorting for Swift 6
         var descriptor = FetchDescriptor<Assessment>(
             predicate: #Predicate { $0.id == assessmentId }
         )
-        
+
         // Add sorting as a separate step for Swift 6
         descriptor.sortBy = [SortDescriptor(\.visitDate, order: .reverse)]
         descriptor.fetchLimit = 1
-        
+
         self._assessments = Query(descriptor)
     }
 
     var horses: [Horse] {
         // More direct approach - just return the horses from the first assessment
         let result = assessments.first?.horses ?? []
-        print("DEBUG: HorsesView.horses computed property returning \(result.count) horses")
-        if let first = assessments.first {
-            print("DEBUG: Assessment found with ID: \(first.id)")
-            print("DEBUG: Assessment contains \(first.horses.count) horses")
-        } else {
-            print("DEBUG: No assessment found with ID: \(assessmentId)")
-        }
         return result
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack { Text("Horses")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-
-
-                Spacer()
-
-                Button(action: {
-                    print("DEBUG: Add horse button tapped")
-                    onAddHorse()
-                }) {
-                    Label("Add Horse", systemImage: "plus")
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-            .padding()
-
             if horses.isEmpty {
                 Spacer()
                 Text("No horses added yet")
@@ -80,29 +47,22 @@ struct HorsesView: View {
             } else {
                 List {
                     ForEach(horses) { horse in
-                        VStack(alignment: .leading, spacing: 0) {
-                            HStack {
-                                // Main content - make this clickable to go to horse info
-                                Button(action: {
-                                    print("DEBUG: Horse row tapped: \(horse.name) with ID: \(horse.uuid)")
-                                    onSelectHorse(horse.uuid)
-                                }) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Button(action: {
+                                onSelectHorse(horse.uuid)
+                            }) {
+                                HStack {
                                     HorseInfoRow(horse: horse)
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
                                 }
-                                .buttonStyle(PlainButtonStyle())
-                                
-                                Spacer()
-                                
-                                // Add a disclosure arrow on the far right that navigates to the same place
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .onTapGesture {
-                                        print("DEBUG: Horse disclosure arrow tapped for: \(horse.name)")
-                                        onSelectHorse(horse.uuid)
-                                    }
+                                .contentShape(Rectangle())
+
                             }
-                            
+                            .buttonStyle(.plain)
+
                             HorseNotesSection(horse: horse)
+                                .padding(.top, 8)
                         }
                         .padding(.bottom, 20)
                     }
@@ -121,8 +81,11 @@ struct HorsesView: View {
 
     private func deleteHorse(_ horse: Horse) {
         // Remove the horse from the current assessment
-        if let assessment = assessments.first(where: { $0.id == assessmentId }) {
-            if let index = assessment.horses.firstIndex(where: { $0.uuid == horse.uuid }) {
+        if let assessment = assessments.first(where: { $0.id == assessmentId })
+        {
+            if let index = assessment.horses.firstIndex(where: {
+                $0.uuid == horse.uuid
+            }) {
                 assessment.horses.remove(at: index)
             }
         }
@@ -141,7 +104,7 @@ struct HorseInfoRow: View {
         HStack {
             // Horse image
             if let photoData = horse.photoData,
-                let uiImage = UIImage(data: photoData)
+               let uiImage = UIImage(data: photoData.data)
             {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -149,7 +112,7 @@ struct HorseInfoRow: View {
                     .frame(width: 50, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
-                Image(systemName: "pawprint.fill")
+                Image("horse-icon")
                     .resizable()
                     .scaledToFill()
                     .padding(10)
@@ -185,9 +148,7 @@ struct HorseInfoRow: View {
                 }
             }
         }
-        
-        .contentShape(Rectangle())
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -255,12 +216,14 @@ struct HorseNotesSection: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Assessment.self, Horse.self, configurations: config)
-    
+    let container = try! ModelContainer(
+        for: Assessment.self, Horse.self, configurations: config)
+
     // Create a sample assessment with horses
     let modelContext = container.mainContext
-    let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
-    
+    let assessment = Assessment(
+        vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
+
     // Add sample horses
     let horse1 = Horse(
         name: "Thunder",
@@ -272,7 +235,7 @@ struct HorseNotesSection: View {
         bcsScore: 3.5,
         notes: "Healthy and active"
     )
-    
+
     let horse2 = Horse(
         name: "Misty",
         age: 8,
@@ -283,15 +246,14 @@ struct HorseNotesSection: View {
         bcsScore: 4.0,
         notes: "Slight lameness in left front leg"
     )
-    
+
     assessment.horses.append(horse1)
     assessment.horses.append(horse2)
-    
+
     modelContext.insert(assessment)
-    
+
     return HorsesNavigationView(
-        assessmentId: assessment.id,
-        parentNavigationPath: .constant(NavigationPath())
+        assessmentId: assessment.id
     )
     .modelContainer(container)
 }
