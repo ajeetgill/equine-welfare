@@ -11,6 +11,8 @@ class Assessment {
     var isComplete: Bool
     @Relationship(deleteRule: .cascade) var horses: [Horse]
     
+    var sideNotes: String?
+    
     init(vetName: String, farmName: String, visitDate: Date) {
         self.id = UUID()
         self.vetName = vetName
@@ -19,6 +21,7 @@ class Assessment {
         self.isComplete = false
         self.sections = []
         self.horses = []
+        self.sideNotes = nil
     }
 
     var formattedDate: String {

@@ -34,25 +34,23 @@ struct AssessmentSidebarView: View {
         print("DEBUG: AssessmentSidebarView initialized with assessmentId: \(assessmentId)")
     }
     
-    // Define possible detail views
+    // Update DetailView enum
     private enum DetailView: Equatable {
         case sectionSelection
         case horses
         case gallery
+        case sideNotes
         case sectionDetail(Section)
         
         static func == (lhs: DetailView, rhs: DetailView) -> Bool {
             switch (lhs, rhs) {
-            case (.sectionSelection, .sectionSelection):
-                return true
-            case (.horses, .horses):
-                return true
-            case (.gallery, .gallery):
-                return true
-            case (.sectionDetail(let lhsSection), .sectionDetail(let rhsSection)):
-                return lhsSection.id == rhsSection.id
-            default:
-                return false
+            case (.sectionSelection, .sectionSelection): return true
+            case (.horses, .horses): return true
+            case (.gallery, .gallery): return true
+            case (.sideNotes, .sideNotes): return true
+            case (.sectionDetail(let lhs), .sectionDetail(let rhs)):
+                return lhs.id == rhs.id
+            default: return false
             }
         }
     }
@@ -82,6 +80,10 @@ struct AssessmentSidebarView: View {
                 )
             case .gallery:
                 GalleryView(viewModel: galleryViewModel)
+            case .sideNotes:
+                if let assessment = viewModel.currentAssessment {
+                    SideNotesView(assessment: assessment)   
+                }
             case .sectionDetail(let section):
                 SectionDetailView(section: section)
             }
@@ -131,6 +133,16 @@ struct AssessmentSidebarView: View {
             ) {
                 selectedSection = nil
                 currentDetailView = .gallery
+            }
+            
+            // Side Notes Button
+            SidebarButton(
+                title: "Side Notes",
+                icon: "note.text",
+                isActive: currentDetailView == .sideNotes
+            ) {
+                selectedSection = nil
+                currentDetailView = .sideNotes
             }
         }
     }
