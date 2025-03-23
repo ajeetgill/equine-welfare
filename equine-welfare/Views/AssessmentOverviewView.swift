@@ -60,6 +60,7 @@ struct AssessmentOverviewView: View {
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.black)
+                            .padding(.vertical, 8)
                     }
                 )
                 .accentColor(.blue)
