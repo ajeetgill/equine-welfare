@@ -54,22 +54,22 @@ struct AssessmentOverviewView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             ForEach(assessment.sections.filter { $0.isApplicable }.sorted(by: { $0.id < $1.id }), id: \.id) { section in
                                 let completionStatus = sectionViewModel.getSectionStatus(section)
-                                HStack(spacing: 8) {
+                                HStack(alignment: .center, spacing: 8) {
                                     Text("  ")
                                     SectionStatusIndicator(status: completionStatus)
-                                        .foregroundColor(completionStatus == .completed ? .green :
-                                                       completionStatus == .inProgress ? .orange : .gray)
+                                        .foregroundColor(completionStatus == .completed ? .blue :
+                                                       completionStatus == .inProgress ? .blue : .blue)
+                                    Text("\(section.id). \(section.title)")
+                                        .foregroundColor(.primary)
                                     
-                                    VStack(alignment: .leading) {
-                                        Text("\(section.id). \(section.title)")
-                                            .foregroundColor(.primary)
-                                        
-                                        if completionStatus == .inProgress {
-                                            let progress = sectionViewModel.getSectionProgress(section)
-                                            Text("\(progress.0)/\(progress.1) Requirements")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
+                                    Spacer()
+                                    
+                                    if completionStatus == .inProgress {
+                                        let progress = sectionViewModel.getSectionProgress(section)
+                                        Text("\(progress.0)/\(progress.1) Requirements")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .padding(.trailing, 12)
                                     }
                                 }
                             }
