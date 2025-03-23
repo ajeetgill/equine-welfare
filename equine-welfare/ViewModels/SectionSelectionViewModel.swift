@@ -8,6 +8,7 @@ import Observation
     var farmName: String = ""
     var visitDate: Date = Date()
     var currentAssessmentId: UUID?
+    var assessment: Assessment?
     
     private let modelContext: ModelContext
     private let assessmentHelper: AssessmentHelper
@@ -63,6 +64,7 @@ import Observation
         self.visitDate = visitDate
         self.currentAssessmentId = newAssessment.id
         self.sections = freshSections
+        self.assessment = newAssessment
         
         for section in sections {
             section.isApplicable = false
@@ -81,8 +83,8 @@ import Observation
             self.farmName = assessment.farmName
             self.visitDate = assessment.visitDate
             self.currentAssessmentId = assessment.id
-            
-            sections = assessment.sections
+            self.sections = assessment.sections
+            self.assessment = assessment
         }
     }
     
@@ -130,4 +132,48 @@ import Observation
 //        saveAssessment()
 //        completion()
 //    }
+
+    // MARK: - Section Status Management
+    func getSectionStatus(_ section: Section) -> SectionCompletionStatus {
+        guard section.isApplicable else {
+            return .notStarted
+        }
+
+        var hasStarted = false
+        var allCompleted = true
+
+        for subsection in section.subsections {
+            for requirement in subsection.requirements {
+                if requirement.complianceStatus != nil {
+                    hasStarted = true
+                }
+                if requirement.complianceStatus == nil {
+                    allCompleted = false
+                }
+            }
+        }
+
+        if allCompleted {
+            return .completed
+        } else if hasStarted {
+            return .inProgress
+        }
+        return .notStarted
+    }
+
+    func getSectionProgress(_ section: Section) -> (Int, Int) {
+        var completed = 0
+        var total = 0
+
+        for subsection in section.subsections {
+            for requirement in subsection.requirements {
+                total += 1
+                if requirement.complianceStatus != nil {
+                    completed += 1
+                }
+            }
+        }
+
+        return (completed, total)
+    }
 }
