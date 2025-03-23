@@ -54,7 +54,7 @@ struct GalleryView: View {
                             .padding(.horizontal)
                         
                         LazyVGrid(columns: [
-                            GridItem(.adaptive(minimum: 150, maximum: 200), spacing: 16)
+                            GridItem(.adaptive(minimum: 180, maximum: 180), spacing: 16)
                         ], spacing: 16) {
                             ForEach(section.images) { image in
                                 GalleryImageView(image: image)
@@ -82,7 +82,7 @@ struct GalleryImageView: View {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(height: 120)
+                        .frame(width: 180, height: 120)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
@@ -91,7 +91,7 @@ struct GalleryImageView: View {
                     .resizable()
                     .scaledToFit()
                     .padding()
-                    .frame(height: 120)
+                    .frame(width: 180, height: 120)
                     .background(Color.gray.opacity(0.2))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -154,9 +154,3 @@ struct ImageDetailView: View {
         }
     }
 }
-
-//#Preview {
-//    let viewModel = GalleryViewModel(sectionViewModel: SectionSelectionViewModel(modelContext: ModelContext(try! ModelContainer(for: Assessment.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))))
-//    
-//    return GalleryView(viewModel: viewModel)
-//} 
