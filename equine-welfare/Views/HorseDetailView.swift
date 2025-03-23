@@ -18,9 +18,17 @@ struct HorseDetailView: View {
     @State private var ageInput: Int?
     @State private var timeOnFarmInput: Int?
     @State private var showingMediaPicker = false
+    @State private var animalType: AnimalType = .horse
+    
+    // Animal type enum for segmented control
+    enum AnimalType: String, CaseIterable {
+        case horse = "Horse"
+        case donkey = "Donkey"
+    }
     
     // Use the shared instance instead of creating a new one
     private let bcsManager = BCSManager.shared
+    private let donkeyBCSManager = DonkeyBCSManager.shared
     
     // Color and sex options
     private let colorOptions = ["Albino", "Appaloosa", "Apricot", "Bay", "Bay Dun", "Bay Overo", "Bay Roan", "Bay Tobiano", "Bay Tovero", "Bay w/Blanket", "Bay/White", "Black", "Black Bay", "Blackgrey", "Black Overo", "Black Roan", "Black Tobiano", "Black Tovero", "Black w/Blanket", "Black/White", "Blonde", "Blond/Sorrel", "Blue Roan", "Blue Roan Overo", "Blue Roan Tobiano", "Blue Roan w/Blanket", "Brown", "Brown Dun", "Brown/White", "Buckskin", "Buckskin/Grulla", "Buckskin Overo", "Buckskin Tobiano", "Buckskin w/Blanket", "Buckskin/White", "Caramel", "Champagne", "Chestnut", "Chestnut Overo", "Chestnut Roan", "Chestnut Tobiano", "Chestnut w/Blanket", "Chestnut/White", "Chocolate", "Chocolate/Palomino", "Chocolate/White", "Cream", "Cremella", "Cremello", "Dapple", "Dapple Gray", "Dark Bay", "Dark Bay Blue Roan", "Dark Bay/Brown", "Dark Bay/White", "Dark Brown", "Dark Dun", "Double Dapple", "Dun", "Dunalino", "Dun Overo", "Dun Tobiano", "Dun w/Blanket", "Dun/White", "Flea Bitten Grey", "Gray", "Gray w/Blanket", "Gray/White", "Grey", "Grey Dapple", "Grey Dun", "Grey/White", "Grulla", "Grulla/White", "Grullo", "Grullo Champagne", "Grullo Overo", "Grullo/White", "Leopard", "Lineback Dun", "Liver", "Liver Chestnut", "Liver Chestnut w/Blanket", "Overo", "Paint", "Palomino", "Palomino Overo", "Palomino/Tobiano", "Palomino w/Blanket", "Palomino/White", "Perlino", "Piebald", "Pinto", "Raicano", "Red Chocolate", "Red Dun", "Red Dun w/Blanket", "Red Roan", "Red Roan Overo", "Red Roan Tobiano", "Red Roan w/Blanket", "Red Snowflake", "Roan", "Roan Bay", "Roan Buckskin", "Roan Chestnut", "Roan Strawberry", "Roan/White", "Sable", "Seal Bay", "Seal Brown", "Silver", "Silver Dapple", "Silver Dapple Pinto", "Sorrel", "Sorrel Overo", "Sorrel Tobiano", "Sorrel/Tovero", "Sorrel w/Blanket", "Sorrel/White", "Strawberry Roan", "Tobiano", "Tri", "White"]
@@ -227,7 +235,7 @@ struct HorseDetailView: View {
                                     .font(.headline)
                                     .padding()
                                 Spacer()
-                                Image("labelled-horse")
+                                Image(animalType == .horse ? "labelled-horse" : "labelled-donkey")
                                     .resizable()
                                     .scaledToFit()
                                     .padding()
@@ -239,11 +247,34 @@ struct HorseDetailView: View {
                                 .padding()
                             }
                         }
+                        
+                        // Segmented control for animal type
+                        Picker("Animal Type", selection: $animalType) {
+                            ForEach(AnimalType.allCases, id: \.self) { type in
+                                Text(type.rawValue).tag(type)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.vertical, 8)
+                        .onChange(of: animalType) { oldValue, newValue in
+                            // If switching to donkey and BCS score is above 5, cap it at 5
+                            if newValue == .donkey && horse.bcsScore > 5 {
+                                horse.bcsScore = 5
+                            }
+                            
+                            // Update the isHorse property based on the selected animal type
+                            horse.isHorse = (newValue == .horse)
+                        }
+                        
                         // Slider for BCS score
                         HStack {
                             Text("1")
-                            Slider(value: $horse.bcsScore, in: 1...9, step: 0.5)
-                            Text("9")
+                            Slider(
+                                value: $horse.bcsScore,
+                                in: 1...(animalType == .horse ? 9 : 5),
+                                step: 0.5
+                            )
+                            Text(animalType == .horse ? "9" : "5")
                         }
                         // BCS Image and Description
                             HStack(alignment: .top, spacing: 20) {
@@ -254,23 +285,14 @@ struct HorseDetailView: View {
                                     Text("BCS \(String(format: "%.1f", horse.bcsScore)) Description")
                                         .padding(.bottom, 4)
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                    bcsManager.getBCSImage(for: bcsScore)
-                                        .resizable()
-                                        .scaledToFit()
+                                    
+                                    getBCSImage(for: bcsScore)
                                 }
                                 .frame(maxWidth: 250, alignment: .center)
                                 
                                 // Right side: BCS description
                                 VStack(alignment: .leading, spacing: 12){
-                                    if let bcsBodyParts = bcsManager.getBCSData(for: bcsScore), !bcsBodyParts.isEmpty {
-                                        ForEach(bcsBodyParts) { part in
-                                            BCSPartView(part: part)
-                                        }
-                                    }
-                                    else {
-                                            Text("No description data available")
-                                                .foregroundColor(.secondary)
-                                    }
+                                    bcsDescriptionContent(for: bcsScore)
                                 }
                                 
                                 Spacer()
@@ -445,6 +467,9 @@ struct HorseDetailView: View {
                     // Set the input values from the loaded horse
                     ageInput = loadedHorse.age > 0 ? loadedHorse.age : nil
                     timeOnFarmInput = loadedHorse.timeOnFarm > 0 ? loadedHorse.timeOnFarm : nil
+                    
+                    // Set the animal type based on the isHorse property
+                    animalType = loadedHorse.isHorse ? .horse : .donkey
                 } else {
                     print("ERROR: Could not find horse with ID: \(horseId)")
                 }
@@ -452,6 +477,64 @@ struct HorseDetailView: View {
                 print("ERROR: Loading horse failed: \(error)")
             }
         }
+    }
+    
+    // Helper method to get the appropriate BCS image
+    private func getBCSImage(for score: Int) -> some View {
+        if animalType == .horse {
+            return bcsManager.getBCSImage(for: score)
+                .resizable()
+                .scaledToFit()
+        } else {
+            return donkeyBCSManager.getBCSImage(for: score)
+                .resizable()
+                .scaledToFit()
+        }
+    }
+    
+    // Helper method to get the BCS description content
+    private func bcsDescriptionContent(for score: Int) -> some View {
+        Group {
+            if animalType == .horse {
+                horseBCSDescription(for: score)
+            } else {
+                donkeyBCSDescription(for: score)
+            }
+        }
+    }
+    
+    // Horse-specific BCS description
+    private func horseBCSDescription(for score: Int) -> some View {
+        Group {
+            if let bcsBodyParts = bcsManager.getBCSData(for: score), !bcsBodyParts.isEmpty {
+                ForEach(bcsBodyParts) { part in
+                    BCSPartView(part: part)
+                }
+            } else {
+                Text("No description data available")
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    // Donkey-specific BCS description
+    private func donkeyBCSDescription(for score: Int) -> some View {
+        Group {
+            if let donkeyBodyParts = donkeyBCSManager.getBCSData(for: score), !donkeyBodyParts.isEmpty {
+                ForEach(donkeyBodyParts) { part in
+                    // Convert DonkeyBCSBodyPart to BCSBodyPart
+                    BCSPartView(part: convertToBCSBodyPart(part))
+                }
+            } else {
+                Text("No description data available")
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    // Converter function to transform DonkeyBCSBodyPart to BCSBodyPart
+    private func convertToBCSBodyPart(_ donkeyPart: DonkeyBCSBodyPart) -> BCSBodyPart {
+        return BCSBodyPart(name: donkeyPart.name, descriptions: donkeyPart.descriptions)
     }
 }
 
