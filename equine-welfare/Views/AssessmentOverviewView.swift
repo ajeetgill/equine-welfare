@@ -5,6 +5,8 @@ struct AssessmentOverviewView: View {
     @Environment(\.modelContext) private var modelContext
     let assessment: Assessment
     var sectionViewModel: SectionSelectionViewModel
+    @State private var isNonApplicableSectionsExpanded: Bool = true
+    @State private var isApplicableSectionsExpanded: Bool = true
     
     init(assessment: Assessment, modelContext: ModelContext) {
         self.assessment = assessment
@@ -15,8 +17,9 @@ struct AssessmentOverviewView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 // Non-Applicable Sections
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 0) {
                     DisclosureGroup(
+                        isExpanded: $isNonApplicableSectionsExpanded,
                         content: {
                             VStack(alignment: .leading, spacing: 12) {
                                 ForEach(assessment.sections.filter { !$0.isApplicable }.sorted(by: { $0.id < $1.id }), id: \.id) { section in
@@ -24,22 +27,32 @@ struct AssessmentOverviewView: View {
                                         Image(systemName: "xmark.circle")
                                             .foregroundColor(.gray)
                                         Text("\(section.id). \(section.title)")
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(.primary)
                                     }
                                 }
                             }
                             .padding(.vertical, 8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.white)
                         },
                         label: {
                             Text("Non-Applicable Sections")
-                                .font(.headline)
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                                .bold()
                         }
                     )
+                    .accentColor(.primary)
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .cornerRadius(8)
                 
                 // Applicable Sections
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 0) {
                     DisclosureGroup(
+                        isExpanded: $isApplicableSectionsExpanded,
                         content: {
                             VStack(alignment: .leading, spacing: 12) {
                                 ForEach(assessment.sections.filter { $0.isApplicable }, id: \.id) { section in
@@ -51,6 +64,7 @@ struct AssessmentOverviewView: View {
                                         
                                         VStack(alignment: .leading) {
                                             Text("\(section.id). \(section.title)")
+                                                .foregroundColor(.primary)
                                             
                                             if completionStatus == .inProgress {
                                                 let progress = sectionViewModel.getSectionProgress(section)
@@ -63,13 +77,22 @@ struct AssessmentOverviewView: View {
                                 }
                             }
                             .padding(.vertical, 8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.white)
                         },
                         label: {
                             Text("Applicable Sections")
-                                .font(.headline)
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                                .bold()
                         }
                     )
+                    .accentColor(.primary)
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .cornerRadius(8)
             }
             .padding()
             .onAppear {
