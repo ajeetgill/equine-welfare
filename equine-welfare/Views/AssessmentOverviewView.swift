@@ -39,7 +39,7 @@ struct AssessmentOverviewView: View {
                     // Calculate total completed and total requirements counts
                     let totalRequirements = assessment.sections.filter { $0.isApplicable }.flatMap { $0.subsections }.flatMap { $0.requirements }.count
                     let completedRequirements = assessment.sections.filter { $0.isApplicable }.flatMap { $0.subsections }.flatMap { $0.requirements }.filter { $0.complianceStatus != nil }.count
-                    let percentCompleted = Int(Double(completedRequirements) / Double(totalRequirements) * 100)
+                    let percentCompleted = totalRequirements > 0 ? Int(Double(completedRequirements) / Double(totalRequirements) * 100) : 0
                     VStack(spacing: 4) {
                         
                         Text("\(percentCompleted)% completed")
