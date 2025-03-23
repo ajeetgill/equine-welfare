@@ -120,11 +120,8 @@ struct PreviousAssessmentRow: View {
         
         // Handle the result
         switch result {
-        case .success(_):
-            // Since uploadAssessmentComplete returns Bool, we need a simpler approach
-            // We don't have access to media counts from the result directly
-            
-            // Create a generic success message
+        case .success(let uploadResult):
+            // Create a success message based on upload result
             uploadSuccessMessage = "Assessment uploaded successfully to cloud storage."
             showUploadSuccess = true
             uploadError = nil
@@ -133,55 +130,6 @@ struct PreviousAssessmentRow: View {
             // Complete the upload process
             uploadProgress = 1.0
             
-            // Check media upload result
-            switch mediaResult {
-            case .success(let mediaCount):
-                // Step 3: Upload horse media
-                let horseMediaResult = await SupabaseService.shared.uploadHorseMedia(assessment: assessment) { progress in
-                    // Scale progress from 0.9 to 1.0
-                    let scaledProgress = 0.9 + (progress * 0.1)
-                    self.uploadProgress = scaledProgress
-                }
-                
-                // Complete the upload process
-                uploadProgress = 1.0
-                
-                // Check horse media upload result and combine with previous results
-                switch horseMediaResult {
-                case .success(let horseMediaCount):
-                    // All uploads complete
-                    let rtfMessage = "Assessment document uploaded"
-                    var mediaMessage = ""
-                    
-                    if mediaCount > 0 || horseMediaCount > 0 {
-                        var parts: [String] = []
-                        if mediaCount > 0 {
-                            parts.append("\(mediaCount) assessment media files")
-                        }
-                        if horseMediaCount > 0 {
-                            parts.append("\(horseMediaCount) horse media files")
-                        }
-                        mediaMessage = "with " + parts.joined(separator: " and ") + " uploaded"
-                    } else {
-                        mediaMessage = "but no media files were found"
-                    }
-                    
-                    uploadSuccessMessage = "\(rtfMessage) \(mediaMessage) successfully."
-                    
-                case .failure(let error):
-                    // Horse media upload failed but RTF and assessment media succeeded
-                    uploadSuccessMessage = "Assessment document and media uploaded, but some horse media files failed: \(error.localizedDescription)"
-                }
-                
-                showUploadSuccess = true
-                uploadError = nil
-                
-            case .failure(let error):
-                // Media upload failed but RTF succeeded
-                uploadSuccessMessage = "Assessment document uploaded, but media files failed: \(error.localizedDescription)"
-                showUploadSuccess = true
-            }
-            
             // Reset state
             isUploading = false
             uploadProgress = 0.0
@@ -189,11 +137,11 @@ struct PreviousAssessmentRow: View {
         case .failure(let error):
             uploadError = error.localizedDescription
             showUploadAlert = true
+            
+            // Reset state
+            isUploading = false
+            uploadProgress = 0.0
         }
-        
-        // Reset state
-        isUploading = false
-        uploadProgress = 0.0
     }
     
     // Generate RTF content that matches the preview
