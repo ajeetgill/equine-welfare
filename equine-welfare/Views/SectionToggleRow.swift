@@ -75,7 +75,6 @@ struct SectionInfoView: View {
                 
                 Spacer()
             }
-            .frame(width: .infinity)
             .navigationBarItems(trailing: Button("Done") { dismiss() })
         }
     }
