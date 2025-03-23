@@ -17,37 +17,34 @@ struct AssessmentOverviewView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 // Non-Applicable Sections
-                VStack(alignment: .leading, spacing: 0) {
-                    DisclosureGroup(
-                        isExpanded: $isNonApplicableSectionsExpanded,
-                        content: {
-                            VStack(alignment: .leading, spacing: 12) {
-                                ForEach(assessment.sections.filter { !$0.isApplicable }.sorted(by: { $0.id < $1.id }), id: \.id) { section in
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "circle.slash")
-                                            .foregroundColor(.blue)
-                                        Text("\(section.id). \(section.title)")
-                                            .foregroundColor(.primary)
-                                    }
+                DisclosureGroup(
+                    isExpanded: $isNonApplicableSectionsExpanded,
+                    content: {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(assessment.sections.filter { !$0.isApplicable }.sorted(by: { $0.id < $1.id }), id: \.id) { section in
+                                HStack(spacing: 8) {
+                                    Image(systemName: "circle.slash")
+                                        .foregroundColor(.blue)
+                                    Text("\(section.id). \(section.title)")
+                                        .foregroundColor(.primary)
                                 }
                             }
-                            .padding(.vertical, 8)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.white)
-                        },
-                        label: {
-                            Text("Non-Applicable Sections")
-                                .font(.title2)
-                                .foregroundColor(.blue)
-                                .bold()
                         }
-                    )
-                    .accentColor(.primary)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.white)
-                .cornerRadius(8)
+                        
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                    },
+                    label: {
+                        Text(" Non-Applicable Sections")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                            .bold()
+                            .padding(.bottom, 16)
+                    }
+                )
+                .accentColor(.blue)
                 
                 // Applicable Sections
                 VStack(alignment: .leading, spacing: 0) {
@@ -76,6 +73,7 @@ struct AssessmentOverviewView: View {
                                     }
                                 }
                             }
+                            .padding(.top, 8)
                             .padding(.vertical, 8)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.white)
@@ -87,7 +85,7 @@ struct AssessmentOverviewView: View {
                                 .bold()
                         }
                     )
-                    .accentColor(.primary)
+                    .accentColor(.blue)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
