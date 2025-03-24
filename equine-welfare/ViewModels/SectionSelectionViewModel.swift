@@ -106,6 +106,12 @@ import Observation
         )
     }
     
+    // Add computed property to access current assessment
+    var currentAssessment: Assessment? {
+        guard let id = currentAssessmentId else { return nil }
+        return assessmentHelper.editAssessment(assessmentId: id)
+    }
+    
     // MARK: - Section Management
     
     var applicableSections: [Section] {
