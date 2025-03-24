@@ -23,7 +23,8 @@ struct SectionToggleRow: View {
                 .fontWeight(.medium)
             
             Toggle("", isOn: $isApplicable)
-                .toggleStyle(SwitchToggleStyle(tint: .green))
+                .toggleStyle(CheckmarkToggleStyle())
+                
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 16)
