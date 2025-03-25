@@ -19,11 +19,11 @@ final class equine_welfareUITests: XCTestCase {
     @MainActor
     func testStartAssesment() throws {
         let app = XCUIApplication()
-        app.launch()
+        app.launch()// app launches
 
-        let vetName = app.textFields["Veterinarian Name"]
-        vetName.tap()
-        vetName.typeText("Test Name")
+        let vetName = app.textFields["Veterinarian Name"]// checks for "vet name text"
+        vetName.tap()//taps
+        vetName.typeText("Test Name")//writes the text
 
         let farmName = app.textFields["Farm Name"]
         farmName.tap()
@@ -38,9 +38,9 @@ final class equine_welfareUITests: XCTestCase {
 
     func testSections() throws {
         let app = XCUIApplication()
-        app.launch()
+        app.launch() 
 
-        let vetName = app.textFields["Veterinarian Name"]
+        let vetName = app.textFields["Veterinarian Name"] 
         vetName.tap()
         vetName.typeText("Test Name")
 
@@ -55,9 +55,12 @@ final class equine_welfareUITests: XCTestCase {
 
 
         let scrollViewsQuery = app.scrollViews
-        let infoCircleElementsQuery = scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle")
-        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).images["xmark"].tap()
 
+        //looks for the button that can be toggled
+        let infoCircleElementsQuery = scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle")
+        // finds it and taps it
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).images["xmark"].tap()
+        // toggles the switch twice on then off or open then close
         let selectedSwitch = scrollViewsQuery.otherElements.switches["Selected"]
         selectedSwitch.tap()
         infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 1).tap()
@@ -85,7 +88,7 @@ final class equine_welfareUITests: XCTestCase {
     func testDeleteAssessment() throws {
         let app = XCUIApplication()
         app.launch()
-
+        // looks for the delete icon finds the delete icon then looks for a static text called delete and taps 
         let deleteStaticText = app.scrollViews.otherElements.scrollViews.children(matching: .other).element(boundBy: 0).children(matching: .other).element.children(matching: .button).matching(identifier: "Delete").element(boundBy: 0).staticTexts["Delete"]
         deleteStaticText.tap()
 
