@@ -1,23 +1,97 @@
+//
+//  equine_welfareUITests.swift
+//  equine-welfareUITests
+//
+//  Created by Ajeet Gill on 19/02/25.
+//
+
 import XCTest
 
-final class Horse_AppUITests: XCTestCase {
+final class equine_welfareUITests: XCTestCase {
 
     override func setUpWithError() throws {
+
         continueAfterFailure = false
 
-    }
 
-    override func tearDownWithError() throws {
     }
 
     @MainActor
-    func testExample() throws {
+    func testStartAssesment() throws {
         let app = XCUIApplication()
         app.launch()
 
+        let vetName = app.textFields["Veterinarian Name"]
+        vetName.tap()
+        vetName.typeText("Test Name")
+
+        let farmName = app.textFields["Farm Name"]
+        farmName.tap()
+        farmName.typeText("Test Farm")
+
+        let button = app.buttons["Start Assessment"]
+        XCTAssertTrue(button.exists)
+
+        button.tap()
+
     }
 
-    @MainActor
+    func testSections() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let vetName = app.textFields["Veterinarian Name"]
+        vetName.tap()
+        vetName.typeText("Test Name")
+
+        let farmName = app.textFields["Farm Name"]
+        farmName.tap()
+        farmName.typeText("Test Farm")
+
+        let button = app.buttons["Start Assessment"]
+        XCTAssertTrue(button.exists)
+
+        button.tap()
+
+
+        let scrollViewsQuery = app.scrollViews
+        let infoCircleElementsQuery = scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle")
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).images["xmark"].tap()
+
+        let selectedSwitch = scrollViewsQuery.otherElements.switches["Selected"]
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 1).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 2).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 3).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 4).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 5).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 6).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 7).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 8).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 9).tap()
+        selectedSwitch.tap()
+
+    }
+
+
+    func testDeleteAssessment() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let deleteStaticText = app.scrollViews.otherElements.scrollViews.children(matching: .other).element(boundBy: 0).children(matching: .other).element.children(matching: .button).matching(identifier: "Delete").element(boundBy: 0).staticTexts["Delete"]
+        deleteStaticText.tap()
+
+    }
+
+   @MainActor
     func testLaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
             // This measures how long it takes to launch your application.
@@ -25,42 +99,5 @@ final class Horse_AppUITests: XCTestCase {
                 XCUIApplication().launch()
             }
         }
-    }
-
-    @MainActor
-    func testAddingHorse() throws {
-        let app = XCUIApplication()
-        app.launch()
-
-        // missing some steps, need to press on the top left navigate button then Horses then to the add horses button
-
-        let addButton = app.buttons["Add Horse"]//  need to navigate to the add horse button still incorrect here
-        XCTAssertTrue(addButton.exists, "Add Horse button should exist") // check if the add horse exists
-        addButton.tap() // taps
-
-        let nameField = app.textFields["Name"]
-        let breedField = app.textFields["Breed"] // fills out the fields still incorrect needs to tap each field first
-        let timeField = app.textFields["Time"]
-
-        XCTAssertTrue(nameField.exists, "Name field should exist")
-        XCTAssertTrue(breedField.exists, "Breed field should exist") //  check if the fields exist
-        XCTAssertTrue(timeField.exists, "Time field should exist")
-
-        nameField.tap()
-        nameField.typeText("Test Horse")
-
-        breedField.tap()
-        breedField.typeText("Test Breed") // taps each field
-
-        timeField.tap()
-        timeField.typeText("3") // field  is wrong
-
-        let submitButton = app.buttons["Add Horse"]
-        XCTAssertTrue(submitButton.exists, "Submit button should exist") // checks for the add button to complete the test and add the horse still incorrect
-        submitButton.tap()
-
-        // Verify the horse is added
-        let newHorse = app.staticTexts["Test Horse"]
-        XCTAssertTrue(newHorse.exists, "New horse should be in the list") // might remove this part
     }
 }
