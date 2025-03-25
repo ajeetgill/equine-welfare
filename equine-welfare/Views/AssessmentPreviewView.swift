@@ -6,7 +6,7 @@ struct AssessmentPreviewView: View {
     
     // MARK: - Helper Methods for Content Generation
     
-    // Function to get non-compliant sections - used in multiple places
+//    Function to get non-compliant sections - used in multiple places
     private func getNonCompliantSections() -> [Section] {
         assessment.sections
             .filter { section in
@@ -19,7 +19,7 @@ struct AssessmentPreviewView: View {
             .sorted(by: { $0.id < $1.id })
     }
     
-    // Function to get non-compliant subsections for a section
+//    Function to get non-compliant subsections for a section
     private func getNonCompliantSubsections(for section: Section) -> [Subsection] {
         section.subsections.filter { subsection in
             subsection.requirements.contains { requirement in
@@ -98,6 +98,10 @@ struct AssessmentPreviewView: View {
                             htmlContent += "<p class='reason'>Reason for non-compliance: \(reason)</p>"
                         }
                         
+                        if !requirement.mediaAttachments.isEmpty {
+                            htmlContent += "<p class='evidence'>Evidence: \(requirement.mediaAttachments.count) image(s) attached</p>"
+                        }
+                        
                         htmlContent += "</div>"
                     }
                     
@@ -150,6 +154,10 @@ struct AssessmentPreviewView: View {
                         
                         if let reason = requirement.nonComplianceReason, !reason.isEmpty {
                             content += "Reason for non-compliance: \(reason)\n"
+                        }
+                        
+                        if !requirement.mediaAttachments.isEmpty {
+                            content += "Evidence: \(requirement.mediaAttachments.count) image(s) attached\n"
                         }
                     }
                 }
@@ -280,6 +288,7 @@ struct SubsectionPreviewView: View {
 // Helper view for requirement preview
 struct RequirementPreviewView: View {
     let requirement: Requirement
+    @State private var showingMediaPreview: MediaAttachment?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -300,14 +309,32 @@ struct RequirementPreviewView: View {
                 Text(reason)
                     .foregroundColor(.secondary)
             }
+            
+            if !requirement.mediaAttachments.isEmpty {
+                Text("Evidence:")
+                    .fontWeight(.medium)
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(requirement.mediaAttachments, id: \.id) { attachment in
+                            MediaThumbnail(attachment: attachment, size: 60)
+                                .onTapGesture {
+                                    showingMediaPreview = attachment
+                                }
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
         }
         .padding(.vertical, 4)
+        .sheet(item: $showingMediaPreview) { attachment in
+            MediaPreviewView(attachment: attachment)
+        }
     }
 }
 
 #Preview {
-    let modelContext = ModelContext(try! ModelContainer(for: Assessment.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
-    
     let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
     let section = Section(id: 1, title: "Housing", isApplicable: true)
     let subsection = Subsection(name: "1.1 Shelter")

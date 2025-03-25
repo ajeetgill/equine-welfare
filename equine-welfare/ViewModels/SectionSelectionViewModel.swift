@@ -1,12 +1,14 @@
 import SwiftUI
 import SwiftData
+import Observation
 
-class SectionSelectionViewModel: ObservableObject {
-    @Published var sections: [Section] = []
-    @Published var vetName: String = ""
-    @Published var farmName: String = ""
-    @Published var visitDate: Date = Date()
-    @Published var currentAssessmentId: UUID?
+@Observable class SectionSelectionViewModel {
+    var sections: [Section] = []
+    var vetName: String = ""
+    var farmName: String = ""
+    var visitDate: Date = Date()
+    var currentAssessmentId: UUID?
+    var assessment: Assessment?
     
     private let modelContext: ModelContext
     private let assessmentHelper: AssessmentHelper
@@ -62,6 +64,7 @@ class SectionSelectionViewModel: ObservableObject {
         self.visitDate = visitDate
         self.currentAssessmentId = newAssessment.id
         self.sections = freshSections
+        self.assessment = newAssessment
         
         for section in sections {
             section.isApplicable = false
@@ -75,20 +78,20 @@ class SectionSelectionViewModel: ObservableObject {
     
     // Load data for an existing assessment
     func loadAssessment(id: UUID) {
-        if let assessment = assessmentHelper.loadAssessment(id: id) {
-            vetName = assessment.vetName
-            farmName = assessment.farmName
-            visitDate = assessment.visitDate
-            currentAssessmentId = assessment.id
-            
-            sections = assessment.sections
+        if let assessment = assessmentHelper.editAssessment(assessmentId: id) {
+            self.vetName = assessment.vetName
+            self.farmName = assessment.farmName
+            self.visitDate = assessment.visitDate
+            self.currentAssessmentId = assessment.id
+            self.sections = assessment.sections
+            self.assessment = assessment
         }
     }
     
     // Save current assessment
     func saveAssessment() {
         guard let id = currentAssessmentId,
-              let assessment = assessmentHelper.loadAssessment(id: id) else {
+              let assessment = assessmentHelper.editAssessment(assessmentId: id) else {
             return // Don't create new assessment here
         }
         
@@ -101,6 +104,12 @@ class SectionSelectionViewModel: ObservableObject {
             sections: sections,
             horses: assessment.horses
         )
+    }
+    
+    // Add computed property to access current assessment
+    var currentAssessment: Assessment? {
+        guard let id = currentAssessmentId else { return nil }
+        return assessmentHelper.editAssessment(assessmentId: id)
     }
     
     // MARK: - Section Management
@@ -117,15 +126,60 @@ class SectionSelectionViewModel: ObservableObject {
         if let section = sections.first(where: { $0.id == id }) {
             section.isApplicable.toggle()
         }
+        saveAssessment()
     }
     
     func isSectionApplicable(_ id: Int) -> Bool {
         sections.first(where: { $0.id == id })?.isApplicable ?? false
     }
     
-    // Save when returning to home
-    func prepareForReturn(completion: @escaping () -> Void) {
-        saveAssessment()
-        completion()
+//    // Save when returning to home
+//    func prepareForReturn(completion: @escaping () -> Void) {
+//        saveAssessment()
+//        completion()
+//    }
+
+    // MARK: - Section Status Management
+    func getSectionStatus(_ section: Section) -> SectionCompletionStatus {
+        guard section.isApplicable else {
+            return .notStarted
+        }
+
+        var hasStarted = false
+        var allCompleted = true
+
+        for subsection in section.subsections {
+            for requirement in subsection.requirements {
+                if requirement.complianceStatus != nil {
+                    hasStarted = true
+                }
+                if requirement.complianceStatus == nil {
+                    allCompleted = false
+                }
+            }
+        }
+
+        if allCompleted {
+            return .completed
+        } else if hasStarted {
+            return .inProgress
+        }
+        return .notStarted
+    }
+
+    func getSectionProgress(_ section: Section) -> (Int, Int) {
+        var completed = 0
+        var total = 0
+
+        for subsection in section.subsections {
+            for requirement in subsection.requirements {
+                total += 1
+                if requirement.complianceStatus != nil {
+                    completed += 1
+                }
+            }
+        }
+
+        return (completed, total)
     }
 }

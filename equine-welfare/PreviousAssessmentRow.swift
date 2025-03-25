@@ -19,22 +19,33 @@ extension UIFont {
 
 struct PreviousAssessmentRow: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var navigationState: NavigationState
     
     // MARK: - State Properties
     @State private var showingDeleteConfirmation = false
     @State private var showingPreview = false
     @State private var shareURL: URL?
     @State private var isShareReady = false
+    @State private var isUploading = false
+    @State private var uploadError: String?
+    @State private var showUploadAlert = false
+    @State private var showUploadSuccess = false
+    @State private var uploadSuccessMessage: String?
+    @State private var uploadProgress: Double = 0.0
+    @State private var isUploadingMedia: Bool = false
+    @State private var sectionViewModel: SectionSelectionViewModel
     
     // MARK: - Properties
     let assessment: Assessment
+    var onSelectAssessment: ((UUID) -> Void)?
     private let assessmentHelper: AssessmentHelper
-    
+
     // MARK: - Initialization
-    init(assessment: Assessment, modelContext: ModelContext) {
+    init(assessment: Assessment, modelContext: ModelContext, onSelectAssessment: ((UUID) -> Void)? = nil) {
         self.assessment = assessment
         self.assessmentHelper = AssessmentHelper(modelContext: modelContext)
+        self.sectionViewModel = SectionSelectionViewModel(
+            modelContext: modelContext)
+        self.onSelectAssessment = onSelectAssessment
     }
     
     // MARK: - Helper Methods
@@ -63,6 +74,73 @@ struct PreviousAssessmentRow: View {
             }
         } catch {
             print("Error creating share file: \(error.localizedDescription)")
+        }
+    }
+    
+    // Upload the RTF file to Supabase
+    private func uploadRTFToSupabase() async {
+        // Always prepare/refresh the content first to ensure we have the latest version
+        prepareShareContent()
+        
+        guard let fileURL = shareURL, isShareReady else {
+            uploadError = "Failed to prepare the document for upload"
+            showUploadAlert = true
+            return
+        }
+        
+        // Small delay to ensure file is fully written
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        
+        // Verify file exists before attempting upload
+        if !FileManager.default.fileExists(atPath: fileURL.path) {
+            uploadError = "RTF file not found at expected location"
+            showUploadAlert = true
+            return
+        }
+        
+        // Start uploading - show progress
+        isUploading = true
+        uploadProgress = 0.1 // Initial progress
+        
+        // Use the comprehensive upload method which handles all upload steps
+        let result = await SupabaseService.shared.uploadAssessmentComplete(
+            assessment: assessment,
+            modelContext: modelContext
+        ) { message, progress in
+            // Update UI with detailed progress message and value
+            self.uploadProgress = progress
+            
+            // Update the UI with detailed status messages
+            if message.contains("horse data") || message.contains("document") {
+                self.isUploadingMedia = false
+            } else if message.contains("media") {
+                self.isUploadingMedia = true
+            }
+        }
+        
+        // Handle the result
+        switch result {
+        case .success(let uploadResult):
+            // Create a success message based on upload result
+            uploadSuccessMessage = "Assessment uploaded successfully to cloud storage."
+            showUploadSuccess = true
+            uploadError = nil
+            isUploadingMedia = false
+            
+            // Complete the upload process
+            uploadProgress = 1.0
+            
+            // Reset state
+            isUploading = false
+            uploadProgress = 0.0
+            
+        case .failure(let error):
+            uploadError = error.localizedDescription
+            showUploadAlert = true
+            
+            // Reset state
+            isUploading = false
+            uploadProgress = 0.0
         }
     }
     
@@ -190,6 +268,11 @@ struct PreviousAssessmentRow: View {
             // Prepare share content when the view appears
             prepareShareContent()
         }
+        .alert("Upload Successful", isPresented: $showUploadSuccess) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(uploadSuccessMessage ?? "Assessment document has been uploaded.")
+        }
     }
     
     // MARK: - View Components
@@ -203,25 +286,19 @@ struct PreviousAssessmentRow: View {
     }
     
     private var actionButtons: some View {
-        HStack(spacing: 16) {
-            // Edit button
-            Button(action: { navigationState.editAssessment(assessmentId: assessment.id) }) {
-                Image(systemName: "pencil")
-                if assessment.isComplete {
-                    Text("Edit")
-                } else {
-                    Text("Resume")
-                }
-                
+        HStack(spacing: 12) {
+            uploadButton
+            Button(action: { 
+                sectionViewModel.loadAssessment(id: assessment.id)
+                onSelectAssessment?(assessment.id)
+            }) {
+                Label(assessment.isComplete ? "Edit" : "Resume", systemImage: "pencil")
             }
             .help("Edit Assessment")
             
             // Preview button
             Button(action: { showingPreview.toggle() }) {
-                
-                Image(systemName: "doc.text.magnifyingglass")
-                Text("Preview")
-                    
+                Label("Preview", systemImage: "doc.text.magnifyingglass")
             }
             .help("Preview Assessment")
             
@@ -233,19 +310,48 @@ struct PreviousAssessmentRow: View {
         }.foregroundColor(.blue)
     }
     
+    private var uploadButton: some View {
+        Button {
+            Task {
+                await uploadRTFToSupabase()
+            }
+        } label: {
+            if isUploading {
+                VStack(spacing: 4) {
+                    if isUploadingMedia {
+                        Text("Uploading media...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Uploading document...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    // Custom progress bar
+                    ProgressView(value: uploadProgress, total: 1.0)
+                        .progressViewStyle(LinearProgressViewStyle())
+                        .frame(width: 100)
+                }
+                .padding(.horizontal, 4)
+            } else {
+                Label("Upload", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
+            }
+        }
+        .disabled(isUploading)
+        .tint(.blue)
+        .alert(uploadError?.contains("already been uploaded") ?? false ? "Assessment Already Exists" : "Upload Error", isPresented: $showUploadAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(uploadError ?? "An unknown error occurred")
+        }
+    }
+    
     private var shareButton: some View {
         Group {
             if let url = shareURL, isShareReady {
                 ShareLink(item: url) {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
-                    Text("Share")
-                }
-                .help("Share Assessment as RTF Document")
-            } else {
-                Button(action: { prepareShareContent() }) {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(.blue)
+                    Label("Share", systemImage: "square.and.arrow.up")
                 }
                 .help("Share Assessment as RTF Document")
             }
@@ -254,8 +360,7 @@ struct PreviousAssessmentRow: View {
     
     private var deleteButton: some View {
         Button(action: { showingDeleteConfirmation = true }) {
-            Image(systemName: "trash")
-            Text("Delete")
+            Label("Delete", systemImage: "trash")
         }
         .help("Delete Assessment")
         .foregroundColor(.red)
@@ -265,9 +370,10 @@ struct PreviousAssessmentRow: View {
             titleVisibility: .visible
         ) {
             Button("Delete", role: .destructive) {
-                assessmentHelper.deleteAssessment(assessment: assessment)
+                withAnimation(){
+                    assessmentHelper.deleteAssessment(assessment: assessment)
+                }
             }
-            Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure? You'll lose this assessment forever.")
         }
@@ -295,6 +401,6 @@ struct PreviousAssessmentRow: View {
     
     let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
     
-    return PreviousAssessmentRow(assessment: assessment, modelContext: modelContext)
-        .environmentObject(NavigationState())
+    PreviousAssessmentRow(assessment: assessment, modelContext: modelContext)
+        .modelContainer(for: Assessment.self)
 }
