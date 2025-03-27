@@ -36,6 +36,7 @@ final class equine_welfareUITests: XCTestCase {
 
     }
 
+    @MainActor
     func testSections() throws {
         let app = XCUIApplication()
         app.launch() 
@@ -84,7 +85,7 @@ final class equine_welfareUITests: XCTestCase {
 
     }
 
-
+    @MainActor
     func testDeleteAssessment() throws {
         let app = XCUIApplication()
         app.launch()
