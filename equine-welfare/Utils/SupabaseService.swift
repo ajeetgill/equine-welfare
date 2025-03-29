@@ -95,6 +95,67 @@ class SupabaseService {
         }
     }
     
+    /// Uploads JSON assessment data to Supabase Storage
+    /// - Parameter assessment: The assessment to upload
+    /// - Returns: A result with a success message or an error
+    func uploadJSONData(for assessment: Assessment) async -> Result<String, Error> {
+        do {
+            print("Starting JSON data upload for: \(assessment.displayName)")
+            
+            // Generate JSON data using our exporter
+            guard let jsonString = AssessmentJSONExporter.generateJSON(from: assessment) else {
+                return .failure(NSError(
+                    domain: "SupabaseService",
+                    code: 1007,
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to generate JSON data"]
+                ))
+            }
+            
+            // Convert string to data
+            guard let jsonData = jsonString.data(using: .utf8) else {
+                return .failure(NSError(
+                    domain: "SupabaseService",
+                    code: 1008, 
+                    userInfo: [NSLocalizedDescriptionKey: "Failed to convert JSON to data"]
+                ))
+            }
+            
+            // Create a sanitized folder name based on assessment name
+            let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
+            
+            // Create a file name using the assessment name
+            let fileName = "\(sanitizedFolderName).json"
+            
+            // Full path in storage will be: assessments/{sanitizedFolderName}/{fileName}
+            let storagePath = "assessments/\(sanitizedFolderName)/\(fileName)"
+            
+            // Upload to Supabase Storage
+            let response = try await supabase.storage
+                .from("assessments")
+                .upload(
+                    path: "\(sanitizedFolderName)/\(fileName)",
+                    file: jsonData,
+                    options: FileOptions(contentType: "application/json")
+                )
+            
+            print("JSON data uploaded successfully to: \(storagePath)")
+            return .success("Assessment JSON data uploaded successfully")
+        } catch let error {
+            // Check if this is a "resource already exists" error
+            if error.localizedDescription.contains("already exists") {
+                print("Error uploading JSON data: The assessment JSON already exists in storage")
+                return .failure(NSError(
+                    domain: "SupabaseService",
+                    code: 1009,
+                    userInfo: [NSLocalizedDescriptionKey: "This assessment JSON has already been uploaded."]
+                ))
+            } else {
+                print("Error uploading JSON data: \(error.localizedDescription)")
+                return .failure(error)
+            }
+        }
+    }
+    
     /// Uploads all media attachments from an assessment to Supabase Storage
     /// - Parameters:
     ///   - assessment: The assessment containing media attachments
@@ -391,36 +452,48 @@ class SupabaseService {
                 // Continue with the rest of the uploads even if this one failed
             }
             
-            // Step 2: Upload RTF document
-            progressHandler?("Uploading assessment document...", 0.3)
-            if let rtfURL = await getRTFDocumentURL(for: assessment) {
-                let documentResult = await uploadRTFDocument(fileURL: rtfURL, assessment: assessment)
+            // Step 2: Upload RTF document - it is intentionally not deleted
+            // progressHandler?("Uploading assessment document...", 0.3)
+            // if let rtfURL = await getRTFDocumentURL(for: assessment) {
+            //     let documentResult = await uploadRTFDocument(fileURL: rtfURL, assessment: assessment)
                 
-                switch documentResult {
-                case .failure(let error):
-                    // If the error indicates the document already exists, stop the entire process
-                    if error.localizedDescription.contains("already been uploaded") {
-                        print("Stopping upload process - assessment already exists")
-                        return .failure(error)
-                    }
-                    print("Warning: RTF document upload failed: \(error.localizedDescription)")
-                    // For other errors, we'll continue with media uploads
-                case .success(_):
-                    // Document upload succeeded, continue
-                    break
-                }
+            //     switch documentResult {
+            //     case .failure(let error):
+            //         // If the error indicates the document already exists, stop the entire process
+            //         if error.localizedDescription.contains("already been uploaded") {
+            //             print("Stopping upload process - assessment already exists")
+            //             return .failure(error)
+            //         }
+            //         print("Warning: RTF document upload failed: \(error.localizedDescription)")
+            //         // For other errors, we'll continue with media uploads
+            //     case .success(_):
+            //         // Document upload succeeded, continue
+            //         break
+            //     }
+            // }
+            
+            // Step 2: Upload JSON data
+            progressHandler?("Uploading assessment Document...", 0.4)
+            let jsonResult = await uploadJSONData(for: assessment)
+            switch jsonResult {
+            case .failure(let error):
+                print("Warning: JSON data upload failed: \(error.localizedDescription)")
+                // Continue with other uploads even if this one failed
+            case .success(_):
+                // JSON upload succeeded, continue
+                break
             }
             
             // Step 3: Upload assessment media
             progressHandler?("Uploading assessment media...", 0.5)
             let mediaResult = await uploadAssessmentMedia(assessment: assessment) { progress in
-                progressHandler?("Uploading assessment media...", 0.5 + progress * 0.2)
+                progressHandler?("Uploading assessment media...", 0.5 + progress * 0.15)
             }
             
             // Step 4: Upload horse media
-            progressHandler?("Uploading horse photos...", 0.7)
+            progressHandler?("Uploading horse photos...", 0.65)
             let horseMediaResult = await uploadHorseMedia(assessment: assessment) { progress in
-                progressHandler?("Uploading horse photos...", 0.7 + progress * 0.3)
+                progressHandler?("Uploading horse photos...", 0.65 + progress * 0.35)
             }
             
             // Final progress update
