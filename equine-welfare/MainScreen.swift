@@ -57,6 +57,10 @@ struct MainScreen: View {
             assessmentHelper = AssessmentHelper(modelContext: modelContext)
             sectionViewModel = SectionSelectionViewModel(modelContext: modelContext)
         }
+        VStack(alignment: .leading, spacing: 16){
+            Link("The contents of this application is based on the Code of Practice for the Care and Handling of Equines and for more information go to Equine Code of Practice (PDF)", destination: URL(string: "https://www.nfacc.ca/pdfs/codes/equine_code_of_practice.pdf")!)
+                .font(.caption)
+        }
     }
     
     var isFormValid: Bool {
