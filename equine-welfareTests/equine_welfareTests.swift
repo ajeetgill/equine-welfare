@@ -1,6 +1,7 @@
 import XCTest
-
-struct Horse_AppTests {
+import Testing
+@testable import equine_welfare
+struct equine_welfareTests {
     //unit testing
     func testExample() {
     }

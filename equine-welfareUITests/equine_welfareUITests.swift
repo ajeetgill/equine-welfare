@@ -10,58 +10,58 @@ import XCTest
 final class equine_welfareUITests: XCTestCase {
 
     override func setUpWithError() throws {
-
+        
         continueAfterFailure = false
 
+        
+    }
 
+    override func tearDownWithError() throws {
+        
     }
 
     @MainActor
     func testStartAssesment() throws {
         let app = XCUIApplication()
-        app.launch()// app launches
+        app.launch()
 
-        let vetName = app.textFields["Veterinarian Name"]// checks for "vet name text"
-        vetName.tap()//taps
-        vetName.typeText("Test Name")//writes the text
-
-        let farmName = app.textFields["Farm Name"]
-        farmName.tap()
-        farmName.typeText("Test Farm")
-
-        let button = app.buttons["Start Assessment"]
-        XCTAssertTrue(button.exists)
-
-        button.tap()
-
-    }
-
-    @MainActor
-    func testSections() throws {
-        let app = XCUIApplication()
-        app.launch() 
-
-        let vetName = app.textFields["Veterinarian Name"] 
+        let vetName = app.textFields["Veterinarian Name"]
         vetName.tap()
         vetName.typeText("Test Name")
 
         let farmName = app.textFields["Farm Name"]
         farmName.tap()
         farmName.typeText("Test Farm")
-
+        
         let button = app.buttons["Start Assessment"]
         XCTAssertTrue(button.exists)
+        
+        button.tap()
+        
+    }
+    
+    func testSections() throws {
+        let app = XCUIApplication()
+        app.launch()
+        
+        let vetName = app.textFields["Veterinarian Name"]
+        vetName.tap()
+        vetName.typeText("Test Name")
 
+        let farmName = app.textFields["Farm Name"]
+        farmName.tap()
+        farmName.typeText("Test Farm")
+        
+        let button = app.buttons["Start Assessment"]
+        XCTAssertTrue(button.exists)
+        
         button.tap()
 
-
+    
         let scrollViewsQuery = app.scrollViews
-
-        //looks for the button that can be toggled
         let infoCircleElementsQuery = scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle")
-        // finds it and taps it
-        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).images["xmark"].tap()
-        // toggles the switch twice on then off or open then close
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 0)/*@START_MENU_TOKEN@*/.images["xmark"]/*[[".images[\"Close\"]",".images[\"xmark\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
         let selectedSwitch = scrollViewsQuery.otherElements.switches["Selected"]
         selectedSwitch.tap()
         infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 1).tap()
@@ -84,18 +84,163 @@ final class equine_welfareUITests: XCTestCase {
         selectedSwitch.tap()
 
     }
-
-    @MainActor
+    
     func testDeleteAssessment() throws {
+        
         let app = XCUIApplication()
         app.launch()
-        // looks for the delete icon finds the delete icon then looks for a static text called delete and taps 
+        
         let deleteStaticText = app.scrollViews.otherElements.scrollViews.children(matching: .other).element(boundBy: 0).children(matching: .other).element.children(matching: .button).matching(identifier: "Delete").element(boundBy: 0).staticTexts["Delete"]
         deleteStaticText.tap()
+        
+    }
+    
+    @MainActor
+    func testFullUi() throws {
+        
+        let app = XCUIApplication()
+        app.launch()
+        
+        let vetName = app.textFields["Veterinarian Name"]
+        vetName.tap()
+        vetName.typeText("Test Name")
 
+        let farmName = app.textFields["Farm Name"]
+        farmName.tap()
+        farmName.typeText("Test Farm")
+        
+        let button = app.buttons["Start Assessment"]
+        XCTAssertTrue(button.exists)
+        button.tap()
+        
+        let scrollViewsQuery = app.scrollViews
+        let infoCircleElementsQuery = scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle")
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).tap()
+        
+        let elementsQuery2 = scrollViewsQuery.otherElements
+        let selectedSwitch = elementsQuery2.switches["Selected"]
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 1).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 2).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 3).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 4).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 5).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 6).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 7).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 8).tap()
+        selectedSwitch.tap()
+        infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 9).tap()
+        selectedSwitch.tap()
+        
+        app.navigationBars["Select Sections"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
+        let elementsQuery = elementsQuery2
+        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Overview"]/*[[".buttons[\"Overview\"].staticTexts[\"Overview\"]",".staticTexts[\"Overview\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
+        let popoverdismissregionElement = app/*@START_MENU_TOKEN@*/.otherElements["PopoverDismissRegion"]/*[[".otherElements[\"dismiss popup\"]",".otherElements[\"PopoverDismissRegion\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+        popoverdismissregionElement.tap()
+        app.navigationBars["Overview"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Horses"]/*[[".buttons[\"Horses\"].staticTexts[\"Horses\"]",".staticTexts[\"Horses\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        popoverdismissregionElement.tap()
+        app.navigationBars["All Horses"]/*@START_MENU_TOKEN@*/.staticTexts["Add"]/*[[".otherElements[\"Add\"]",".buttons[\"Add\"].staticTexts[\"Add\"]",".staticTexts[\"Add\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
+        elementsQuery2.sliders["4"].swipeRight()
+        
+        app.navigationBars["Add Horse"]/*@START_MENU_TOKEN@*/.buttons["Cancel"]/*[[".otherElements[\"Cancel\"].buttons[\"Cancel\"]",".buttons[\"Cancel\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
+        app.navigationBars["All Horses"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
+        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Gallery"]/*[[".buttons[\"Gallery\"].staticTexts[\"Gallery\"]",".staticTexts[\"Gallery\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        popoverdismissregionElement.tap()
+        
+        app.navigationBars["Assessment Sections Gallery"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Side Notes"]/*[[".buttons[\"Side Notes\"].staticTexts[\"Side Notes\"]",".staticTexts[\"Side Notes\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app/*@START_MENU_TOKEN@*/.otherElements["PopoverDismissRegion"]/*[[".otherElements[\"dismiss popup\"]",".otherElements[\"PopoverDismissRegion\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        elementsQuery.staticTexts["Tap to add notes..."].tap()
+        
+        let togglesidebarButton = app.navigationBars["Select Sections"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+
+        app.navigationBars["Side Notes"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Section Selection"]/*[[".buttons[\"Section Selection\"].staticTexts[\"Section Selection\"]",".staticTexts[\"Section Selection\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        popoverdismissregionElement.tap()
+        scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle").children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).tap()
+        togglesidebarButton.tap()
+    
+    }
+    
+    @MainActor
+    func testFullUiRandom() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let vetName = app.textFields["Veterinarian Name"]
+        vetName.tap()
+        vetName.typeText("Test Name")
+
+        let farmName = app.textFields["Farm Name"]
+        farmName.tap()
+        farmName.typeText("Test Farm")
+
+        let button = app.buttons["Start Assessment"]
+        XCTAssertTrue(button.exists)
+        button.tap()
+
+        let scrollViewsQuery = app.scrollViews
+        let infoCircleElementsQuery = scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle")
+        
+        let selectedSwitch = scrollViewsQuery.otherElements.switches["Selected"]
+        let closeSwitches = infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close")
+        let switchCount = closeSwitches.count
+        let shuffledSwitchIndexes = Array(0..<switchCount).shuffled()
+        
+        for i in shuffledSwitchIndexes {
+            closeSwitches.element(boundBy: i).tap()
+            selectedSwitch.tap()
+        }
+
+        app.navigationBars["Select Sections"].buttons["ToggleSidebar"].tap()
+
+        let elementsQuery = scrollViewsQuery.otherElements
+        elementsQuery.staticTexts["Overview"].tap()
+
+        let popoverdismissregionElement = app.otherElements["PopoverDismissRegion"]
+        popoverdismissregionElement.tap()
+        app.navigationBars["Overview"].buttons["ToggleSidebar"].tap()
+
+        elementsQuery.staticTexts["Horses"].tap()
+        popoverdismissregionElement.tap()
+        app.navigationBars["All Horses"].staticTexts["Add"].tap()
+
+        elementsQuery.sliders["4"].swipeRight()
+       
+
+        app.navigationBars["Add Horse"].buttons["Cancel"].tap()
+        app.navigationBars["All Horses"].buttons["ToggleSidebar"].tap()
+
+        elementsQuery.staticTexts["Gallery"].tap()
+        popoverdismissregionElement.tap()
+        app.navigationBars["Assessment Sections Gallery"].buttons["ToggleSidebar"].tap()
+
+        elementsQuery.staticTexts["Side Notes"].tap()
+        app.otherElements["PopoverDismissRegion"].tap()
+        elementsQuery.staticTexts["Tap to add notes..."].tap()
+
+        let togglesidebarButton = app.navigationBars["Select Sections"].buttons["ToggleSidebar"]
+        app.navigationBars["Side Notes"].buttons["ToggleSidebar"].tap()
+        elementsQuery.staticTexts["Section Selection"].tap()
+        popoverdismissregionElement.tap()
+        
+        scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle").children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).tap()
+        togglesidebarButton.tap()
     }
 
-   @MainActor
+    @MainActor
     func testLaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
             // This measures how long it takes to launch your application.
