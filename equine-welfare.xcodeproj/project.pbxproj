@@ -31,7 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5F3AF8612D666FB1005349B4 /* equine-welfare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "equine-welfare.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F3AF8612D666FB1005349B4 /* Horse COP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Horse COP.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "equine-welfareTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "equine-welfareUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -96,7 +96,7 @@
 		5F3AF8622D666FB1005349B4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5F3AF8612D666FB1005349B4 /* equine-welfare.app */,
+				5F3AF8612D666FB1005349B4 /* Horse COP.app */,
 				5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */,
 				5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */,
 			);
@@ -129,7 +129,7 @@
 				5FB51FA32D7F6EE000F48002 /* Supabase */,
 			);
 			productName = "equine-welfare";
-			productReference = 5F3AF8612D666FB1005349B4 /* equine-welfare.app */;
+			productReference = 5F3AF8612D666FB1005349B4 /* Horse COP.app */;
 			productType = "com.apple.product-type.application";
 		};
 		5F3AF8722D666FB2005349B4 /* equine-welfareTests */ = {
@@ -416,6 +416,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"equine-welfare/Preview Content\"";
@@ -435,7 +436,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "horse-thingy-v3.equine-welfare";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Horse COP";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -447,10 +448,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"equine-welfare/Preview Content\"";
-				DEVELOPMENT_TEAM = 6BW33W6MMZ;
+				DEVELOPMENT_TEAM = PSW5TFLPVC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
@@ -466,7 +468,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "horse-thingy-v2.equine-welfare";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Horse COP";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
