@@ -165,36 +165,48 @@ class SupabaseService {
         // Create a sanitized folder name based on assessment name (same naming convention as RTF upload)
         let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
         
-        // Collect all media attachments from the assessment
-        var allMediaAttachments: [MediaAttachment] = []
+        // Collect all media attachments from the assessment along with their subsection names
+        var allMediaAttachmentsWithContext: [(attachment: MediaAttachment, subsectionName: String)] = []
         
         // Traverse the assessment structure to find all media attachments
         for section in assessment.sections where section.isApplicable {
             for subsection in section.subsections {
                 for requirement in subsection.requirements {
-                    allMediaAttachments.append(contentsOf: requirement.mediaAttachments)
+                    // For each attachment, pair it with its subsection name
+                    let attachmentsWithContext = requirement.mediaAttachments.map { 
+                        ($0, subsection.name) 
+                    }
+                    allMediaAttachmentsWithContext.append(contentsOf: attachmentsWithContext)
                 }
             }
         }
         
         // If no media attachments found, return early
-        if allMediaAttachments.isEmpty {
+        if allMediaAttachmentsWithContext.isEmpty {
             return .success(0)
         }
         
         // Track upload progress
         var successCount = 0
         var errorCount = 0
-        let totalCount = allMediaAttachments.count
+        let totalCount = allMediaAttachmentsWithContext.count
         
         // Create a task group for concurrent uploads
         do {
             // Use a simple approach with a loop instead of task groups for better control
-            for (index, attachment) in allMediaAttachments.enumerated() {
+            for (index, attachmentWithContext) in allMediaAttachmentsWithContext.enumerated() {
                 do {
-                    // Create a unique filename based on attachment ID, timestamp, and media type
+                    let attachment = attachmentWithContext.attachment
+                    let subsectionName = attachmentWithContext.subsectionName
+                    
+                    // Create a unique filename based on subsection name, attachment ID, and timestamp
                     let timestamp = Int(Date().timeIntervalSince1970)
-                    let fileName = "media_\(attachment.id)_\(timestamp).\(attachment.mediaType.fileExtension)"
+                    
+                    // Sanitize subsection name for use in filename
+                    let sanitizedSubsectionName = subsectionName.replacingOccurrences(of: "/", with: "-")
+                                                               .replacingOccurrences(of: " ", with: "_")
+                    
+                    let fileName = "\(sanitizedSubsectionName)_media_\(attachment.id)_\(timestamp).\(attachment.mediaType.fileExtension)"
                     let path = "\(sanitizedFolderName)/media/\(fileName)"
                     
                     print("Uploading media file: \(fileName) with type: \(attachment.mediaType.mimeType)")
