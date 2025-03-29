@@ -84,7 +84,7 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Front") {
+                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Front") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -117,7 +117,7 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Right") {
+                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Right") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -150,7 +150,7 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Back") {
+                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Back") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -183,7 +183,7 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Left") {
+                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Left") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
