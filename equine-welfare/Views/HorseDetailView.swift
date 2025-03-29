@@ -294,13 +294,7 @@ struct HorseDetailView: View {
                 }
                 .disabled(horse.name.isEmpty)
             }
-            
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancel") {
-                    // Just pop back without saving
-                    dismissView()
-                }
-            }
+        
         }
         .onAppear {
             // If we have a horse ID, load the existing horse
