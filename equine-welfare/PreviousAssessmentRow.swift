@@ -287,7 +287,11 @@ struct PreviousAssessmentRow: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            uploadButton
+            // Only show upload button if credentials are available
+            if SupabaseService.areCredentialsAvailable() {
+                uploadButton
+            }
+            
             Button(action: { 
                 sectionViewModel.loadAssessment(id: assessment.id)
                 onSelectAssessment?(assessment.id)
@@ -338,8 +342,11 @@ struct PreviousAssessmentRow: View {
                 Label("Upload", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
             }
         }
-        .disabled(isUploading)
+        .disabled(isUploading || !SupabaseService.areCredentialsAvailable())
         .tint(.blue)
+        .help(SupabaseService.areCredentialsAvailable() ? 
+              "Upload assessment to cloud storage" : 
+              "Upload disabled - Supabase credentials not configured")
         .alert(uploadError?.contains("already been uploaded") ?? false ? "Assessment Already Exists" : "Upload Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
         } message: {

@@ -18,16 +18,46 @@ class SupabaseService {
     static let shared = SupabaseService()
     
     /// Supabase client instance
-    private let supabase = SupabaseClient(
-        supabaseURL: URL(string: "https://aknlkmbwbbnfxaoqljzd.supabase.co")!,
-        supabaseKey:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrbmxrbWJ3YmJuZnhhb3FsanpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzOTEyMTQsImV4cCI6MjA1Njk2NzIxNH0.kjZRF_JwWN9ovTahZFmGcj9h6XgIhApWTVCrAA6o8ZQ"
-    )
+    private let supabase: SupabaseClient
     
     // MARK: - Initialization
     
     /// Private initializer to enforce singleton pattern
-    private init() {}
+    private init() {
+        // Get URL and API key from environment
+        let supabaseURLString = ProcessInfo.processInfo.environment["SUPABASE_URL"] ?? ""
+        let supabaseKey = ProcessInfo.processInfo.environment["SUPABASE_KEY"] ?? ""
+        
+        // Log for debugging
+        print("Initializing Supabase with URL: \(supabaseURLString), Key length: \(supabaseKey.count)")
+        
+        // Create URL safely
+        guard let supabaseURL = URL(string: supabaseURLString), !supabaseURLString.isEmpty else {
+            fatalError("Invalid or missing SUPABASE_URL in environment variables")
+        }
+        
+        // Verify key is not empty
+        guard !supabaseKey.isEmpty else {
+            fatalError("Missing SUPABASE_KEY in environment variables")
+        }
+        
+        // Initialize client
+        supabase = SupabaseClient(
+            supabaseURL: supabaseURL,
+            supabaseKey: supabaseKey
+        )
+    }
+    
+    // MARK: - Public Methods
+    
+    /// Checks if Supabase credentials are available
+    /// - Returns: Boolean indicating if Supabase can be used
+    static func areCredentialsAvailable() -> Bool {
+        let supabaseURLString = ProcessInfo.processInfo.environment["SUPABASE_URL"] ?? ""
+        let supabaseKey = ProcessInfo.processInfo.environment["SUPABASE_KEY"] ?? ""
+        
+        return !supabaseURLString.isEmpty && !supabaseKey.isEmpty
+    }
     
     // MARK: - Public Methods
     
