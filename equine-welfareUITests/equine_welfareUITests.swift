@@ -247,6 +247,7 @@ final class equine_welfareUITests: XCTestCase {
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 XCUIApplication().launch()
             }
+            
         }
     }
 }
