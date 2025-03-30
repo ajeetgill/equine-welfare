@@ -14,14 +14,12 @@ struct HorseInfoView: View {
     @State private var horse: Horse?
     @State private var findings: String = ""
     
-    // Photo pickers for each side
-    @State private var showingMediaPicker = false
-    
-    // Array of abnormal findings photos
-    @State private var abnormalPhotos: [Data] = []
-    
-    // Add this with your other state variables at the top of the file
-    @State private var abnormalPhotoItem: PhotosPickerItem?
+    // Photo pickers for each side, separate state variables for each picker
+    @State private var showingFrontPicker = false
+    @State private var showingRightPicker = false
+    @State private var showingBackPicker = false
+    @State private var showingLeftPicker = false
+    @State private var showingAbnormalFindings = false
     
     // Add assessmentId access
     private var assessmentId: UUID? {
@@ -84,7 +82,8 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Front") {
+                            Text("Front")
+                            MediaPicker(isPresented: $showingFrontPicker, cameraText: "", galleryText: "") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -117,7 +116,8 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Right") {
+                            Text("Right")
+                            MediaPicker(isPresented: $showingRightPicker, cameraText: "", galleryText: "") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -150,7 +150,8 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Back") {
+                            Text("Back")
+                            MediaPicker(isPresented: $showingBackPicker, cameraText: "", galleryText: "") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -183,7 +184,8 @@ struct HorseInfoView: View {
                                             .foregroundColor(.gray)
                                     )
                             }
-                            MediaPicker(isPresented: $showingMediaPicker, cameraText: "Left") {
+                            Text("Left")
+                            MediaPicker(isPresented: $showingLeftPicker, cameraText: "", galleryText: "") {
                                 mediaData, mediaType in
                                 let attachment =
                                 mediaType == .image
@@ -207,12 +209,13 @@ struct HorseInfoView: View {
                     Text("E.g.Not limited to but here you can include photos of injuries, hooves, teeth, skin, etc")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    
+                    // Add photo button
+                    addAbnormalPhotoButton()
                     // Grid of abnormal photos with add button
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 16)], spacing: 16) {
                         // Display existing abnormal photos
-                        ForEach(0..<abnormalPhotos.count, id: \.self) { index in
-                            if let uiImage = UIImage(data: abnormalPhotos[index]) {
+                        ForEach(horse?.abnormalPhotosData ?? [], id: \.id) { abnormalPhoto in
+                            if let uiImage = UIImage(data: abnormalPhoto.data) {
                                 Image(uiImage: uiImage)
                                     .resizable()
                                     .scaledToFill()
@@ -220,7 +223,7 @@ struct HorseInfoView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                                     .overlay(
                                         Button(action: {
-                                            removeAbnormalPhoto(at: index)
+                                            removeAbnormalPhoto(abnormalPhoto)
                                         }) {
                                             Image(systemName: "xmark.circle.fill")
                                                 .foregroundColor(.white)
@@ -232,9 +235,6 @@ struct HorseInfoView: View {
                                     )
                             }
                         }
-                        
-                        // Add photo button
-                        addAbnormalPhotoButton()
                     }
                 }
             }
@@ -274,18 +274,6 @@ struct HorseInfoView: View {
         }
         .onChange(of: horseId) { _, newId in
             loadHorse()  // Reload horse data when horseId changes
-        }
-        .onChange(of: abnormalPhotoItem) { _, newValue in
-            processPhotoItem(newValue) { data in
-                if let imageData = data {
-                    abnormalPhotos.append(imageData)
-                    saveAbnormalPhotos()
-                }
-                // Reset the picker item after processing
-                DispatchQueue.main.async {
-                    abnormalPhotoItem = nil
-                }
-            }
         }
     }
     
@@ -346,34 +334,46 @@ struct HorseInfoView: View {
     }
     
     private func addAbnormalPhotoButton() -> some View {
-        PhotosPicker(selection: $abnormalPhotoItem, matching: .images) {
-            VStack {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray5))
-                        .frame(width: 100, height: 100)
-                    
-                    Image(systemName: "plus")
-                        .font(.system(size: 30))
-                        .foregroundColor(.gray)
-                }
+        VStack{
+            MediaPicker(isPresented: $showingAbnormalFindings, cameraText: "", galleryText: "") {
+                mediaData, mediaType in
+                guard let horse = horse else { return }
                 
-                Text("Add Photo")
-                    .font(.caption)
-                    .foregroundColor(.blue)
+                // Create a new MediaAttachment and insert it into the model context
+                let attachment = mediaType == .image
+                    ? MediaAttachment(imageData: mediaData)
+                    : MediaAttachment(videoData: mediaData)
+                
+                // Insert the attachment directly into the context first
+                modelContext.insert(attachment)
+                
+                // Add the attachment to the horse's abnormalPhotosData array
+                horse.abnormalPhotosData.append(attachment)
+                
+                // Try to save immediately
+                do {
+                    try modelContext.save()
+                    print("DEBUG: Successfully saved changes to model context")
+                } catch {
+                    print("ERROR: Failed to save attachment: \(error.localizedDescription)")
+                }
             }
+            .cornerRadius(30)
+            .background(Color(.systemGray6).opacity(0.2))
         }
     }
     
-    private func removeAbnormalPhoto(at index: Int) {
-        abnormalPhotos.remove(at: index)
-        saveAbnormalPhotos()
-    }
-    
-    private func saveAbnormalPhotos() {
+    private func removeAbnormalPhoto(_ photo: MediaAttachment) {
         guard let horse = horse else { return }
-        horse.abnormalPhotosData = abnormalPhotos
-        try? modelContext.save()
+        
+        // Remove it from the horse's array
+        if let index = horse.abnormalPhotosData.firstIndex(where: { $0.id == photo.id }) {
+            horse.abnormalPhotosData.remove(at: index)
+            
+            // Delete it from the model context, & save changes
+            modelContext.delete(photo)
+            try? modelContext.save()
+        }
     }
     
     private func processPhotoItem(_ item: PhotosPickerItem?, completion: @escaping (Data?) -> Void) {
@@ -423,9 +423,6 @@ struct HorseInfoView: View {
                 if let assessment = loadedHorse.assessment {
                     print("DEBUG: Horse belongs to assessment: \(assessment.id)")
                 }
-                
-                // Load abnormal photos
-                self.abnormalPhotos = loadedHorse.abnormalPhotosData
             } else {
                 print("ERROR: Horse with ID \(horseId) not found")
             }

@@ -322,8 +322,7 @@ struct HorseDetailView: View {
                     .background(Color(.systemGray5))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
-            HStack{
-                MediaPicker(isPresented: $showingMediaPicker, cameraOnly: true, cameraText: "Horse") {
+                MediaPicker(isPresented: $showingMediaPicker, cameraText: "", galleryText: "") {
                     mediaData, mediaType in
                     let attachment =
                         mediaType == .image
@@ -331,7 +330,8 @@ struct HorseDetailView: View {
                         : MediaAttachment(videoData: mediaData)
                     horse.photoData = attachment
                 }
-            }
+                .cornerRadius(30)
+                .background(Color(.systemGray6).opacity(0.2))
         }
     }
     

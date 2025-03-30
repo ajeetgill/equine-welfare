@@ -329,7 +329,7 @@ class SupabaseService {
                             .from("assessments")
                             .upload(
                                 path: path,
-                                file: abnormalData,
+                                file: abnormalData.data,
                                 options: FileOptions(contentType: "image/jpeg")
                             )
                         successCount += 1
