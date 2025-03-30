@@ -221,18 +221,26 @@ struct HorseInfoView: View {
                                     .scaledToFill()
                                     .frame(width: 100, height: 100)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .overlay(
-                                        Button(action: {
+                                    .contextMenu {
+                                        Button(role: .destructive) {
                                             removeAbnormalPhoto(abnormalPhoto)
-                                        }) {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundColor(.white)
-                                                .background(Color.black.opacity(0.7))
-                                                .clipShape(Circle())
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
                                         }
-                                        .padding(4),
-                                        alignment: .topTrailing
-                                    )
+                                    }
+//                                    .overlay(
+//                                        Button(action: {
+//                                            removeAbnormalPhoto(abnormalPhoto)
+//                                        }) {
+//                                            Image(systemName: "xmark.circle.fill")
+//                                                .foregroundColor(.white)
+//                                                .background(Color.black.opacity(0.7))
+//                                                .clipShape(Circle())
+//                                        }
+//                                        .padding(4),
+//                                        alignment: .topTrailing
+//                                    )
+                                    
                             }
                         }
                     }

@@ -371,6 +371,7 @@ struct RequirementView: View {
                                     MediaThumbnail(
                                         attachment: attachment, size: 80
                                     )
+                                    .frame(width: 100, height: 100)
                                     .onTapGesture {
                                         showingMediaPreview = attachment
                                     }
@@ -390,6 +391,26 @@ struct RequirementView: View {
                                                 "Delete", systemImage: "trash")
                                         }
                                     }
+//                                    .overlay(
+//                                        Button(action: {
+//                                            if let index = requirement
+//                                                .mediaAttachments.firstIndex(
+//                                                    where: {
+//                                                        $0.id == attachment.id
+//                                                    })
+//                                            {
+//                                                requirement.mediaAttachments
+//                                                    .remove(at: index)
+//                                            }
+//                                        }) {
+//                                            Image(systemName: "xmark.circle.fill")
+//                                                .foregroundColor(.white)
+//                                                .background(Color.black.opacity(0.7))
+//                                                .clipShape(Circle())
+//                                        }
+//                                        .padding(4)
+//                                        ,alignment: .topTrailing
+//                                    )
                                 }
                             }
                             .padding(.vertical, 4)
