@@ -49,6 +49,7 @@ struct AssessmentSidebarView: View {
 
         static func == (lhs: DetailView, rhs: DetailView) -> Bool {
             switch (lhs, rhs) {
+            case (.overview, .overview): return true
             case (.sectionSelection, .sectionSelection): return true
             case (.horses, .horses): return true
             case (.gallery, .gallery): return true
@@ -119,7 +120,8 @@ struct AssessmentSidebarView: View {
                 title: "Overview",
                 icon: "doc.text.magnifyingglass",
                 isActive: currentDetailView == .overview
-            ) {
+            )
+             {
                 selectedSection = nil
                 currentDetailView = .overview
             }
@@ -181,15 +183,18 @@ struct AssessmentSidebarView: View {
                         HStack {
                             // Add the status indicator
                             SectionStatusIndicator(
-                                status: getSectionCompletionStatus(section)
+                                status: getSectionCompletionStatus(section),
+                                isSelected: selectedSection?.id == section.id
                             )
                             .padding(.trailing, 4)
 
                             Text("\(section.id). \(section.title)")
-                                .foregroundColor(.primary)
+                                .foregroundColor(selectedSection?.id == section.id ? .white : .primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(8)
+                        .background(selectedSection?.id == section.id ? Color.accentColor : Color.clear)
+                        .cornerRadius(8)
                     }
                 }
             },
@@ -243,15 +248,21 @@ struct SidebarButton: View {
             HStack {
                 if let img = customImage {
                     Image(img)
+                        .renderingMode(.template)
+                        .foregroundColor(isActive ?? false ? .white : .accentColor)
                 }
                 else {
                     Image(systemName: icon)
+                        .foregroundColor(isActive ?? false ? .white : .accentColor)
                 }
-                Text(title).fontWeight(isActive ?? false ? .medium : .regular)
+                Text(title)
+                    .fontWeight(isActive ?? false ? .medium : .regular)
+                    .foregroundColor(isActive ?? false ? .white : .accentColor)
                 Spacer()
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
+            .background(isActive ?? false ? Color.accentColor : Color.clear)
             .cornerRadius(8)
         }
     }
