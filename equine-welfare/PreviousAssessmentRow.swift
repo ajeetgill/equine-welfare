@@ -306,8 +306,8 @@ struct PreviousAssessmentRow: View {
             }
             .help("Preview Assessment")
             
-            // Share button
-            shareButton
+            // Share button - it is disabled by choice, we don't want to use it now since we have the upload button
+            // shareButton
             
             // Delete button
             deleteButton
@@ -367,7 +367,7 @@ struct PreviousAssessmentRow: View {
     
     private var deleteButton: some View {
         Button(action: { showingDeleteConfirmation = true }) {
-            Label("Delete", systemImage: "trash")
+            Label("", systemImage: "trash")
         }
         .help("Delete Assessment")
         .foregroundColor(.red)
