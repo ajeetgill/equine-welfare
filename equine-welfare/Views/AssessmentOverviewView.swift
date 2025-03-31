@@ -55,8 +55,8 @@ struct AssessmentOverviewView: View {
                                     .foregroundColor(.gray)
                                 
                                 Rectangle()
-                                    .frame(width: totalRequirements > 0 ? 
-                                           CGFloat(completedRequirements) / CGFloat(totalRequirements) * geometry.size.width : 0, 
+                                    .frame(width: totalRequirements > 0 && geometry.size.width > 0 ? 
+                                           max(0, min(geometry.size.width, CGFloat(completedRequirements) / CGFloat(totalRequirements) * geometry.size.width)) : 0, 
                                            height: 6)
                                     .foregroundColor(.green)
                             }

@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 import UIKit
+import AVFoundation
 
 // MARK: - UIFont Extension
 extension UIFont {
@@ -33,6 +34,9 @@ struct PreviousAssessmentRow: View {
     @State private var uploadProgress: Double = 0.0
     @State private var isUploadingMedia: Bool = false
     @State private var sectionViewModel: SectionSelectionViewModel
+    @StateObject private var permissionsManager = PermissionsManager()
+    @State private var showPermissionsAlert = false
+    @AppStorage("isPermissionsGranted") private var isPermissionsGranted = false
     
     // MARK: - Properties
     let assessment: Assessment
@@ -292,7 +296,25 @@ struct PreviousAssessmentRow: View {
                 uploadButton
             }
             
-            Button(action: { 
+            Button(action: {
+                // Check permissions before allowing resume/edit
+                if !permissionsManager.isCameraAuthorized || !permissionsManager.isMicrophoneAuthorized {
+                    // Request permissions instead of just showing alert
+                    Task {
+                        await permissionsManager.checkAndRequestPermissions()
+                        // After requesting, check if they were granted
+                        if permissionsManager.isCameraAuthorized && permissionsManager.isMicrophoneAuthorized {
+                            isPermissionsGranted = true
+                            sectionViewModel.loadAssessment(id: assessment.id)
+                            onSelectAssessment?(assessment.id)
+                        } else {
+                            isPermissionsGranted = false
+                            showPermissionsAlert = true
+                        }
+                    }
+                    return
+                }
+                
                 sectionViewModel.loadAssessment(id: assessment.id)
                 onSelectAssessment?(assessment.id)
             }) {
@@ -311,7 +333,16 @@ struct PreviousAssessmentRow: View {
             
             // Delete button
             deleteButton
-        }.foregroundColor(.blue)
+        }
+        .foregroundColor(.blue)
+        .alert("Permissions Required", isPresented: $showPermissionsAlert) {
+            Button("Open Settings") {
+                permissionsManager.openAppSettings()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Please enable camera and microphone access in Settings to use Horse COP.")
+        }
     }
     
     private var uploadButton: some View {
