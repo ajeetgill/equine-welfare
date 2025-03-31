@@ -8,23 +8,25 @@ struct MediaPicker: View {
     var cameraOnly: Bool = false
     var galleryOnly: Bool = false
     var cameraText: String = "Camera"
+    var galleryText: String = "Gallery"
     var onMediaSelected: (Data, MediaType) -> Void
 
     var body: some View {
         HStack {
             if(!cameraOnly && !galleryOnly){
-                GalleryButton(isPresented: $isPresented, onMediaSelected: onMediaSelected)
-                CameraButton(onMediaSelected: onMediaSelected)
+                GalleryButton(galleryText: galleryText, isPresented: $isPresented, onMediaSelected: onMediaSelected)
+                CameraButton(cameraText: cameraText, onMediaSelected: onMediaSelected)
             } else if(cameraOnly && !galleryOnly){
                 CameraButton(cameraText: cameraText, onMediaSelected: onMediaSelected)
             }else if(galleryOnly && !cameraOnly){
-                GalleryButton(isPresented: $isPresented, onMediaSelected: onMediaSelected)
+                GalleryButton(galleryText: galleryText, isPresented: $isPresented, onMediaSelected: onMediaSelected)
             }
         }
     }
 }
 
 struct GalleryButton: View {
+    var galleryText: String = ""
     @Binding var isPresented: Bool
     @State private var selectedItem: PhotosPickerItem?
     var onMediaSelected: (Data, MediaType) -> Void
@@ -33,7 +35,11 @@ struct GalleryButton: View {
         Button(action: {
             isPresented = true
         }) {
-            Label("Gallery", systemImage: "photo")
+            if galleryText != "" {
+                Label(galleryText, systemImage: "photo")
+            }else{
+                Image(systemName: "photo")
+            }
         }
         .buttonStyle(.bordered)
         .photosPicker(
@@ -63,7 +69,11 @@ struct CameraButton: View{
         Button(action: {
             showCameraSheet = true
         }) {
-            Label(cameraText, systemImage: "camera")
+            if cameraText != "" {
+                Label(cameraText, systemImage: "camera")
+            }else{
+                Image(systemName: "camera")
+            }
         }
         .buttonStyle(.bordered)
         .fullScreenCover(isPresented: $showCameraSheet) {

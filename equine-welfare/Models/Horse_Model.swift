@@ -23,7 +23,7 @@ class Horse {
     @Relationship(deleteRule: .cascade) var backPhotoData: MediaAttachment?
     @Relationship(deleteRule: .cascade) var leftPhotoData: MediaAttachment?
     
-    @Attribute(.externalStorage) var abnormalPhotosData: [Data]
+    @Relationship(deleteRule: .cascade) var abnormalPhotosData: [MediaAttachment] = []
     
     @Relationship(inverse: \Assessment.horses) var assessment: Assessment?
     
@@ -45,7 +45,7 @@ class Horse {
         rightPhotoData: MediaAttachment? = nil,
         backPhotoData: MediaAttachment? = nil,
         leftPhotoData: MediaAttachment? = nil,
-        abnormalPhotosData: [Data] = [],
+        abnormalPhotosData: [MediaAttachment] = [],
         assessment: Assessment? = nil
     ) {
         self.uuid = UUID()

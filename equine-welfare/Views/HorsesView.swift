@@ -124,7 +124,7 @@ struct HorseInfoRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(
-                    "\(horse.name), \(horse.age) \(horse.ageUnit.rawValue) old"
+                    "\(horse.name), \(horse.age) \(horse.ageUnit.rawValue) old  (\(horse.isHorse ? "Horse" : "Donkey"))"
                 )
                 .font(.headline)
 
@@ -143,7 +143,7 @@ struct HorseInfoRow: View {
                     Text("Sex: \(horse.sex)")
                         .font(.caption)
 
-                    Text("BCS: \(String(format: "%.1f", horse.bcsScore))")
+                    Text("BCS: \(String(format: "%.1f", horse.bcsScore))/\(horse.isHorse ? "9" : "5")")
                         .font(.caption)
                 }
             }
