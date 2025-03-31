@@ -15,6 +15,7 @@ class Horse {
     var notes: String?
     var ageUnit: AgeUnit
     var timeUnit: TimeUnit
+    var isHorse: Bool = true  // Default to true
     
     @Relationship(deleteRule: .cascade) var photoData: MediaAttachment?
     @Relationship(deleteRule: .cascade) var frontPhotoData: MediaAttachment?
@@ -39,6 +40,7 @@ class Horse {
         notes: String? = nil,
         ageUnit: AgeUnit = .years,
         timeUnit: TimeUnit = .years,
+        isHorse: Bool = true,
         frontPhotoData: MediaAttachment? = nil,
         rightPhotoData: MediaAttachment? = nil,
         backPhotoData: MediaAttachment? = nil,
@@ -59,6 +61,7 @@ class Horse {
         self.notes = notes
         self.ageUnit = ageUnit
         self.timeUnit = timeUnit
+        self.isHorse = isHorse
         self.frontPhotoData = frontPhotoData
         self.rightPhotoData = rightPhotoData
         self.backPhotoData = backPhotoData

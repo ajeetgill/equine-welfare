@@ -1,0 +1,131 @@
+{
+    "BCS 1": {
+    "score": 1,
+    "photo": "BCS-1",
+    "NECK AND SHOULDERS": {
+      "description": [
+        "Neck thin, all bones easily felt",
+        "Neck meets shoulder abruptly, shoulder bones easily felt, angular"
+      ]
+    },
+    "WITHERS": {
+      "description": ["Dorsal spine of withers prominent and easily felt"]
+    },
+    "RIBS AND BELLY": {
+      "description": ["Ribs can be seen from a distance and felt with ease", "Belly tucked up"]
+    },
+    "BACK AND LOINS": {
+      "description": ["Backbone prominent, can feel dorsal and transverse processes easily"]
+    },
+    "HINDQUARTERS": {
+      "description": [
+        "Hip bones visible and felt easily (hock and pin bones)",
+        "Little muscle cover",
+        "May be cavity under tail"
+    ]
+    }
+  },
+  "BCS 2": {
+    "score": 2,
+    "photo": "BCS-2",
+    "NECK AND SHOULDERS": {
+      "description": [
+        "Some muscle development overlying bones",
+        "Slight step where neck meets shoulders"
+      ]
+    },
+    "WITHERS": {
+      "description": ["Some cover over dorsal withers", "Spinous processes felt but not prominent"]
+    },
+    "RIBS AND BELLY": {
+      "description": ["Ribs not visible but can be felt with ease"]
+    },
+    "BACK AND LOINS": {
+      "description": ["Dorsal and transverse processes felt with light pressure", "Poor muscle development either side midline"
+    ]
+    },
+    "HINDQUARTERS": {
+      "description": [
+        "Poor muscle cover on hindquarters, hip bones felt with ease"
+    ]
+    }
+  },
+  "BCS 3": {
+    "score": 3,
+    "photo": "BCS-3",
+    "NECK AND SHOULDERS": {
+      "description": [
+        "Good muscle development, bones felt under light cover of muscle/fat",
+        "Neck flows smoothly into shoulder, which is rounded"
+      ]
+    },
+    "WITHERS": {
+      "description": ["Good cover of muscle/fat over dorsal spinous processes, withers flow smooth into back"]
+    },
+    "RIBS AND BELLY": {
+      "description": ["Ribs just covered by light layer of fat/muscle, ribs can be felt with light pressure",
+    "Belly firm with good muscle tone and flattish outline"]
+    },
+    "BACK AND LOINS": {
+      "description": ["Cannot feel individual spinous or transverse processes", "Muscle development either side of midline is good"
+    ]
+    },
+    "HINDQUARTERS": {
+      "description": [
+        "Good muscle cover in hindquarters, hip bones rounded in appearance, can be felt with light pressure"
+    ]
+    }
+},
+"BCS 4": {
+  "score": 4,
+  "photo": "BCS-4",
+  "NECK AND SHOULDERS": {
+    "description": [
+      "Neck thick, crest hard, shoulder covered in even fat layer"
+    ]
+  },
+  "WITHERS": {
+    "description": ["Withers broad, bones felt with firm pressure"]
+  },
+  "RIBS AND BELLY": {
+    "description": ["Ribs dorsally only felt with firm pressure, ventral ribs may be felt more easily",
+  "Overdeveloped belly"]
+  },
+  "BACK AND LOINS": {
+    "description": ["Can only feel dorsal and transverse processes with firm pressure"
+  ]
+  },
+  "HINDQUARTERS": {
+    "description": [
+      "Hindquarters rounded, bones felt only with firm pressure",
+      "Fat deposits evenly placed"
+  ]
+  }
+},
+"BCS 5": {
+  "score": 5,
+  "photo": "BCS-5",
+  "NECK AND SHOULDERS": {
+    "description": [
+      "Neck thick, crest bulging with fat and may fall to one slide",
+      "Shoulder rounded and bulging with fat"
+    ]
+  },
+  "WITHERS": {
+    "description": ["Withers broad, unable to feel bones"]
+  },
+  "RIBS AND BELLY": {
+    "description": ["Large, often uneven fat deposits covering dorsal and possible ventral aspect of ribs",
+  "Ribs not palpable","Belly pendulous in depth and width"]
+  },
+  "BACK AND LOINS": {
+    "description": ["Back broad, unable to feel spinous or transverse processes", "Deep crease along midline, bulging fat either side"
+  ]
+  },
+  "HINDQUARTERS": {
+    "description": [
+      "Cannot feel hip bones, fat may overhang either side of tail head, fat often uneven and bulging."
+  ]
+  }
+}
+}
