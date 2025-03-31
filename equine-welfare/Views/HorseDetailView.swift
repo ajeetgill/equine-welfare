@@ -222,7 +222,7 @@ struct HorseDetailView: View {
                                 Image(systemName: "info.circle")
                                     .foregroundColor(.blue)
                             }
-                            Text("BCS Score")
+                            Text("BCS")
                             Spacer()
                             Text("\(String(format: "%.1f", horse.bcsScore))")
                                 .frame(width: 50)
@@ -476,12 +476,13 @@ struct HorseDetailView: View {
     
     // Helper method to get the appropriate BCS image
     private func getBCSImage(for score: Int) -> some View {
+        let adjustedScore = getAdjustedBCSScore(score: horse.bcsScore)
         if animalType == .horse {
-            return bcsManager.getBCSImage(for: score)
+            return bcsManager.getBCSImage(for: adjustedScore)
                 .resizable()
                 .scaledToFit()
         } else {
-            return donkeyBCSManager.getBCSImage(for: score)
+            return donkeyBCSManager.getBCSImage(for: adjustedScore)
                 .resizable()
                 .scaledToFit()
         }
@@ -498,10 +499,27 @@ struct HorseDetailView: View {
         }
     }
     
+    // Helper function to handle special BCS score rounding
+    private func getAdjustedBCSScore(score: Double) -> Int {
+        let intScore = Int(score)
+        let fraction = score - Double(intScore)
+        
+        if fraction == 0.5 {
+            if animalType == .horse && score > 6 {
+                return intScore + 1
+            } else if animalType == .donkey && score > 3 {
+                return intScore + 1
+            }
+        }
+        
+        return intScore
+    }
+    
     // Horse-specific BCS description
     private func horseBCSDescription(for score: Int) -> some View {
-        Group {
-            if let bcsBodyParts = bcsManager.getBCSData(for: score), !bcsBodyParts.isEmpty {
+        let adjustedScore = getAdjustedBCSScore(score: horse.bcsScore)
+        return Group {
+            if let bcsBodyParts = bcsManager.getBCSData(for: adjustedScore), !bcsBodyParts.isEmpty {
                 ForEach(bcsBodyParts) { part in
                     BCSPartView(part: part)
                 }
@@ -514,8 +532,9 @@ struct HorseDetailView: View {
     
     // Donkey-specific BCS description
     private func donkeyBCSDescription(for score: Int) -> some View {
-        Group {
-            if let donkeyBodyParts = donkeyBCSManager.getBCSData(for: score), !donkeyBodyParts.isEmpty {
+        let adjustedScore = getAdjustedBCSScore(score: horse.bcsScore)
+        return Group {
+            if let donkeyBodyParts = donkeyBCSManager.getBCSData(for: adjustedScore), !donkeyBodyParts.isEmpty {
                 ForEach(donkeyBodyParts) { part in
                     // Convert DonkeyBCSBodyPart to BCSBodyPart
                     BCSPartView(part: convertToBCSBodyPart(part))
