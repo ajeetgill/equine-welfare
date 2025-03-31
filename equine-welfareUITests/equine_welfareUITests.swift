@@ -139,38 +139,7 @@ final class equine_welfareUITests: XCTestCase {
         infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 9).tap()
         selectedSwitch.tap()
         
-        app.navigationBars["Select Sections"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         
-        let elementsQuery = elementsQuery2
-        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Overview"]/*[[".buttons[\"Overview\"].staticTexts[\"Overview\"]",".staticTexts[\"Overview\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        
-        let popoverdismissregionElement = app/*@START_MENU_TOKEN@*/.otherElements["PopoverDismissRegion"]/*[[".otherElements[\"dismiss popup\"]",".otherElements[\"PopoverDismissRegion\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        popoverdismissregionElement.tap()
-        app.navigationBars["Overview"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Horses"]/*[[".buttons[\"Horses\"].staticTexts[\"Horses\"]",".staticTexts[\"Horses\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        popoverdismissregionElement.tap()
-        app.navigationBars["All Horses"]/*@START_MENU_TOKEN@*/.staticTexts["Add"]/*[[".otherElements[\"Add\"]",".buttons[\"Add\"].staticTexts[\"Add\"]",".staticTexts[\"Add\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
-        elementsQuery2.sliders["4"].swipeRight()
-        
-        app.navigationBars["Add Horse"]/*@START_MENU_TOKEN@*/.buttons["Cancel"]/*[[".otherElements[\"Cancel\"].buttons[\"Cancel\"]",".buttons[\"Cancel\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        
-        app.navigationBars["All Horses"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        
-        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Gallery"]/*[[".buttons[\"Gallery\"].staticTexts[\"Gallery\"]",".staticTexts[\"Gallery\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        popoverdismissregionElement.tap()
-        
-        app.navigationBars["Assessment Sections Gallery"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Side Notes"]/*[[".buttons[\"Side Notes\"].staticTexts[\"Side Notes\"]",".staticTexts[\"Side Notes\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        app/*@START_MENU_TOKEN@*/.otherElements["PopoverDismissRegion"]/*[[".otherElements[\"dismiss popup\"]",".otherElements[\"PopoverDismissRegion\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        elementsQuery.staticTexts["Tap to add notes..."].tap()
-        
-        let togglesidebarButton = app.navigationBars["Select Sections"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-
-        app.navigationBars["Side Notes"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Section Selection"]/*[[".buttons[\"Section Selection\"].staticTexts[\"Section Selection\"]",".staticTexts[\"Section Selection\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        popoverdismissregionElement.tap()
-        scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle").children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).tap()
-        togglesidebarButton.tap()
     
     }
     
@@ -247,7 +216,6 @@ final class equine_welfareUITests: XCTestCase {
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 XCUIApplication().launch()
             }
-            
         }
     }
 }
