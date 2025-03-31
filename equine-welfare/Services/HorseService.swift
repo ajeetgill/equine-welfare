@@ -47,7 +47,8 @@ class HorseService {
                 "timeOnFarm": horse.timeOnFarm,
                 "bcsScore": horse.bcsScore,
                 "ageUnit": horse.ageUnit.rawValue,
-                "timeUnit": horse.timeUnit.rawValue
+                "timeUnit": horse.timeUnit.rawValue,
+                "isHorse": horse.isHorse
             ]
             
             // Add optional fields if they exist
