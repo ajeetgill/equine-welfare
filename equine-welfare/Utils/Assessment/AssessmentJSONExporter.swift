@@ -17,7 +17,9 @@ class AssessmentJSONExporter {
             "vetName": assessment.vetName,
             "farmName": assessment.farmName,
             "visitDate": assessment.formattedDate,
-            "displayName": assessment.displayName
+            "displayName": assessment.displayName,
+            "averageHorseBCS": String(format: "%.1f", calculateAverageBCS(horses: assessment.horses.filter { $0.isHorse })),
+            "averageDonkeyBCS": String(format: "%.1f", calculateAverageBCS(horses: assessment.horses.filter { !$0.isHorse }))
         ]
         
         // Add side notes if available
@@ -135,5 +137,14 @@ class AssessmentJSONExporter {
             print("Error saving JSON file: \(error.localizedDescription)")
             return nil
         }
+    }
+    
+    /// Calculate the average BCS score for the given array of horses/donkeys
+    /// - Parameter horses: Array of horses/donkeys to calculate average BCS from
+    /// - Returns: The raw average BCS score
+    private static func calculateAverageBCS(horses: [Horse]) -> Double {
+        guard !horses.isEmpty else { return 0.0 }
+        let total = horses.reduce(0.0) { $0 + $1.bcsScore }
+        return total / Double(horses.count)
     }
 } 
