@@ -15,8 +15,8 @@ class Assessment {
     
     init(vetName: String, farmName: String, visitDate: Date) {
         self.id = UUID()
-        self.vetName = vetName
-        self.farmName = farmName
+        self.vetName = vetName.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "-")
+        self.farmName = farmName.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "-")
         self.visitDate = visitDate
         self.isComplete = false
         self.sections = []
@@ -27,10 +27,10 @@ class Assessment {
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MMM-dd"
-        return formatter.string(from: visitDate)
+        return formatter.string(from: visitDate).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     var displayName: String {
-        "\(formattedDate)-\(vetName)-\(farmName)"
+        "\(formattedDate)-\(vetName.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "-"))-\(farmName.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "-"))"
     }
 }
