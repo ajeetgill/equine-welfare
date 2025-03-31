@@ -18,32 +18,20 @@ class SupabaseService {
     static let shared = SupabaseService()
     
     /// Supabase client instance
-    private let supabase: SupabaseClient
+    private var client: SupabaseClient
     
     // MARK: - Initialization
     
     /// Private initializer to enforce singleton pattern
     private init() {
-        // Get URL and API key from environment
-        let supabaseURLString = ProcessInfo.processInfo.environment["SUPABASE_URL"] ?? ""
-        let supabaseKey = ProcessInfo.processInfo.environment["SUPABASE_KEY"] ?? ""
-        
-        // Log for debugging
-        print("Initializing Supabase with URL: \(supabaseURLString), Key length: \(supabaseKey.count)")
-        
-        // Create URL safely
-        guard let supabaseURL = URL(string: supabaseURLString), !supabaseURLString.isEmpty else {
-            fatalError("Invalid or missing SUPABASE_URL in environment variables")
+        guard let supabaseUrlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
+              let supabaseKey = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_KEY") as? String,
+              let supabaseUrl = URL(string: supabaseUrlString) else {
+            fatalError("Supabase configuration not found or invalid. Ensure Secrets.xcconfig is properly configured.")
         }
         
-        // Verify key is not empty
-        guard !supabaseKey.isEmpty else {
-            fatalError("Missing SUPABASE_KEY in environment variables")
-        }
-        
-        // Initialize client
-        supabase = SupabaseClient(
-            supabaseURL: supabaseURL,
+        self.client = SupabaseClient(
+            supabaseURL: supabaseUrl,
             supabaseKey: supabaseKey
         )
     }
@@ -53,10 +41,15 @@ class SupabaseService {
     /// Checks if Supabase credentials are available
     /// - Returns: Boolean indicating if Supabase can be used
     static func areCredentialsAvailable() -> Bool {
-        let supabaseURLString = ProcessInfo.processInfo.environment["SUPABASE_URL"] ?? ""
-        let supabaseKey = ProcessInfo.processInfo.environment["SUPABASE_KEY"] ?? ""
+        guard let supabaseUrlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
+              let supabaseKey = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_KEY") as? String,
+              URL(string: supabaseUrlString) != nil else {
+            print("Debug - Supabase Credentials Check: Invalid or missing configuration")
+            return false
+        }
         
-        return !supabaseURLString.isEmpty && !supabaseKey.isEmpty
+        print("Debug - Supabase Credentials Check: Configuration valid")
+        return true
     }
     
     // MARK: - Public Methods
@@ -95,7 +88,7 @@ class SupabaseService {
                 print("Successfully read RTF file data, size: \(fileData.count) bytes")
                 
                 // Upload to Supabase Storage
-                let response = try await supabase.storage
+                let response = try await client.storage
                     .from("assessments")
                     .upload(
                         path: "\(sanitizedFolderName)/\(fileName)",
@@ -145,7 +138,7 @@ class SupabaseService {
             guard let jsonData = jsonString.data(using: .utf8) else {
                 return .failure(NSError(
                     domain: "SupabaseService",
-                    code: 1008, 
+                    code: 1008,
                     userInfo: [NSLocalizedDescriptionKey: "Failed to convert JSON to data"]
                 ))
             }
@@ -160,7 +153,7 @@ class SupabaseService {
             let storagePath = "assessments/\(sanitizedFolderName)/\(fileName)"
             
             // Upload to Supabase Storage
-            let response = try await supabase.storage
+            let response = try await client.storage
                 .from("assessments")
                 .upload(
                     path: "\(sanitizedFolderName)/\(fileName)",
@@ -203,8 +196,8 @@ class SupabaseService {
             for subsection in section.subsections {
                 for requirement in subsection.requirements {
                     // For each attachment, pair it with its subsection name
-                    let attachmentsWithContext = requirement.mediaAttachments.map { 
-                        ($0, subsection.name) 
+                    let attachmentsWithContext = requirement.mediaAttachments.map {
+                        ($0, subsection.name)
                     }
                     allMediaAttachmentsWithContext.append(contentsOf: attachmentsWithContext)
                 }
@@ -242,7 +235,7 @@ class SupabaseService {
                     print("Uploading media file: \(fileName) with type: \(attachment.mediaType.mimeType)")
                     
                     // Upload the file to Supabase with correct content type
-                    _ = try await supabase.storage
+                    _ = try await client.storage
                         .from("assessments")
                         .upload(
                             path: path,
@@ -304,7 +297,7 @@ class SupabaseService {
                         let fileName = "main_photo.jpg"
                         let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/\(fileName)"
                         
-                        _ = try await supabase.storage
+                        _ = try await client.storage
                             .from("assessments")
                             .upload(
                                 path: path,
@@ -333,7 +326,7 @@ class SupabaseService {
                             let fileName = "\(view)_view.jpg"
                             let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/\(fileName)"
                             
-                            _ = try await supabase.storage
+                            _ = try await client.storage
                                 .from("assessments")
                                 .upload(
                                     path: path,
@@ -355,7 +348,7 @@ class SupabaseService {
                         let fileName = "abnormal_\(abnormalIndex + 1).jpg"
                         let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/abnormal/\(fileName)"
                         
-                        _ = try await supabase.storage
+                        _ = try await client.storage
                             .from("assessments")
                             .upload(
                                 path: path,
@@ -439,7 +432,7 @@ class SupabaseService {
             let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
             
             // Check if any files exist in the assessments folder with this name
-            let response = try await supabase.storage
+            let response = try await client.storage
                 .from("assessments")
                 .list(path: sanitizedFolderName)
             
@@ -484,7 +477,7 @@ class SupabaseService {
             // Instead of just calling HorseService.sendHorses which posts to an API endpoint,
             // use our new method to upload horse data as a JSON file
             let horseUploadResult = await HorseService.uploadHorsesForAssessment(
-                modelContext: modelContext, 
+                modelContext: modelContext,
                 assessmentName: assessment.displayName,
                 assessmentId: assessment.id
             )
