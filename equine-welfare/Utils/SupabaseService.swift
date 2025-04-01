@@ -516,6 +516,14 @@ class SupabaseService {
             switch jsonResult {
             case .failure(let error):
                 print("Warning: JSON data upload failed: \(error.localizedDescription)")
+                if error.localizedDescription.contains("already been uploaded") {
+                    progressHandler?("Upload failed - Assessment already exists", 1.0)
+                    return .failure(NSError(
+                        domain: "SupabaseService",
+                        code: 1010,
+                        userInfo: [NSLocalizedDescriptionKey: "This assessment has already been uploaded. Duplicate uploads are not allowed."]
+                    ))
+                }
                 // Continue with other uploads even if this one failed
             case .success(_):
                 // JSON upload succeeded, continue
