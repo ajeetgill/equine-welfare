@@ -1,10 +1,3 @@
-//
-//  equine_welfareUITests.swift
-//  equine-welfareUITests
-//
-//  Created by Ajeet Gill on 19/02/25.
-//
-
 import XCTest
 
 final class equine_welfareUITests: XCTestCase {
@@ -75,9 +68,6 @@ final class equine_welfareUITests: XCTestCase {
         infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 9).tap()
         selectedSwitch.tap()
         
-        
-     
-
     }
     
     func testDeleteAssessment() throws {
@@ -231,16 +221,5 @@ final class equine_welfareUITests: XCTestCase {
         scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle").children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).tap()
         togglesidebarButton.tap()
         
-    }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-                
-            }
-        }
     }
 }

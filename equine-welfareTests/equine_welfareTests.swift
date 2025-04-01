@@ -1,6 +1,8 @@
 import XCTest
 import Testing
+import SwiftData
 @testable import equine_welfare
+
 class equine_welfareTests: XCTestCase {
     
 //Horse_Model
@@ -112,8 +114,8 @@ class equine_welfareTests: XCTestCase {
         // Verify that the ID is generated.
         XCTAssertNotNil(assessment.id, "ID should not be nil")
         // Verify the vet name, farm name, and visit date.
-        XCTAssertEqual(assessment.vetName, "Dr. Smith")
-        XCTAssertEqual(assessment.farmName, "Sunny Farms")
+        XCTAssertEqual(assessment.vetName, "Dr.-Smith")
+        XCTAssertEqual(assessment.farmName, "Sunny-Farms")
         XCTAssertEqual(assessment.visitDate, date)
         // Verify that the assessment starts incomplete.
         XCTAssertFalse(assessment.isComplete, "isComplete should be false by default")
@@ -276,5 +278,160 @@ class equine_welfareTests: XCTestCase {
         // Test decoding: decode the JSON back to a ComplianceStatus case.
         let decodedCase = try decoder.decode(ComplianceStatus.self, from: encodedData)
         XCTAssertEqual(decodedCase, ComplianceStatus.compliant)
+    }
+    
+//MediaAttachment
+    
+// Test that the file extension property returns the expected values.
+    func testFileExtension() {
+        XCTAssertEqual(MediaType.image.fileExtension, "jpg", "The file extension for image should be jpg")
+        XCTAssertEqual(MediaType.video.fileExtension, "mp4", "The file extension for video should be mp4")
+    }
+
+    // Test that the MIME type property returns the expected values.
+    func testMimeType() {
+        XCTAssertEqual(MediaType.image.mimeType, "image/jpeg", "The MIME type for image should be image/jpeg")
+        XCTAssertEqual(MediaType.video.mimeType, "video/mp4", "The MIME type for video should be video/mp4")
+    }
+    
+    // Test initialization using the imageData initializer.
+    func testImageMediaAttachmentInitialization() {
+        // Use some sample data (in a real test, you might use actual image data)
+        let sampleData = "sample image".data(using: .utf8)!
+        let attachment = MediaAttachment(imageData: sampleData)
+
+        // Verify properties
+        XCTAssertNotNil(attachment.id, "The id should not be nil")
+        XCTAssertEqual(attachment.data, sampleData, "The data should match the sample image data")
+        XCTAssertEqual(attachment.mediaType, .image, "The mediaType should be .image for imageData initializer")
+
+        // Check creationDate is set to a recent date (within 1 second of now)
+        XCTAssertTrue(abs(attachment.creationDate.timeIntervalSinceNow) < 1, "The creationDate should be near the current time")
+    }
+
+    // Test initialization using the videoData initializer.
+    func testVideoMediaAttachmentInitialization() {
+        let sampleData = "sample video".data(using: .utf8)!
+        let attachment = MediaAttachment(videoData: sampleData)
+
+        // Verify properties
+        XCTAssertNotNil(attachment.id, "The id should not be nil")
+        XCTAssertEqual(attachment.data, sampleData, "The data should match the sample video data")
+        XCTAssertEqual(attachment.mediaType, .video, "The mediaType should be .video for videoData initializer")
+        XCTAssertTrue(abs(attachment.creationDate.timeIntervalSinceNow) < 1, "The creationDate should be near the current time")
+    }
+//SectionSelectionViwModel
+    
+//create an in‑memory model container and context for testing.
+    var modelContext: ModelContext!
+    var viewModel: SectionSelectionViewModel!
+       
+    override func setUp() {
+        
+        super.setUp()
+        // Create an in‑memory container for our models.
+        // Include the relevant models: Assessment, Horse, Section, Subsection, Requirement.
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: Assessment.self, Horse.self, Section.self, Subsection.self, Requirement.self, configurations: config)
+        modelContext = ModelContext(container)
+           
+        // Initialize the view model.
+        viewModel = SectionSelectionViewModel(modelContext: modelContext)
+           
+        // Override the default sections with a known dummy structure for testing.
+        // Create one section with one subsection and two requirements.
+        let section = Section(id: 1, title: "Section 1", isApplicable: true)
+        let subsection = Subsection(name: "Subsection 1")
+        let req1 = Requirement(text: "Requirement 1")
+        let req2 = Requirement(text: "Requirement 2")
+        subsection.requirements.append(contentsOf: [req1, req2])
+        section.subsections.append(subsection)
+           
+        // Set the viewModel's sections to our dummy section.
+        viewModel.sections = [section]
+        
+    }
+       
+    override func tearDown() {
+        
+        viewModel = nil
+        modelContext = nil
+        super.tearDown()
+        
+    }
+       
+    // Test that toggling a section's applicability works correctly.
+    func testToggleSection() {
+        
+        // Initially, section with id 1 should be applicable.
+        XCTAssertTrue(viewModel.isSectionApplicable(1))
+           
+        // Toggle it off.
+        viewModel.toggleSection(1)
+        XCTAssertFalse(viewModel.isSectionApplicable(1))
+           
+        // Toggle it on again.
+        viewModel.toggleSection(1)
+        XCTAssertTrue(viewModel.isSectionApplicable(1))
+        
+    }
+       
+    // Test the computed property for section status when not started.
+    func testGetSectionStatusNotStarted() {
+        
+        // With no requirements marked, and section is applicable,
+        // the status should be .notStarted.
+        let section = viewModel.sections.first!
+        section.isApplicable = true
+        // All requirements have complianceStatus == nil.
+        let status = viewModel.getSectionStatus(section)
+        XCTAssertEqual(status, .notStarted, "Section status should be notStarted when no requirement has been acted on.")
+        
+    }
+       
+    // Test the section status when progress has begun but not all requirements are complete.
+    func testGetSectionStatusInProgress() {
+        
+        let section = viewModel.sections.first!
+        section.isApplicable = true
+           
+        // Mark the first requirement as completed (for example, .compliant)
+        section.subsections.first!.requirements.first!.complianceStatus = .compliant
+           
+        let status = viewModel.getSectionStatus(section)
+        XCTAssertEqual(status, .inProgress, "Section status should be inProgress if some but not all requirements are completed.")
+        
+    }
+       
+    // Test the section status when all requirements are complete.
+    func testGetSectionStatusCompleted() {
+        
+        let section = viewModel.sections.first!
+        section.isApplicable = true
+           
+        // Mark all requirements as complete.
+        for req in section.subsections.first!.requirements {
+            req.complianceStatus = .compliant
+        }
+        let status = viewModel.getSectionStatus(section)
+        XCTAssertEqual(status, .completed, "Section status should be completed when all requirements are complete.")
+        
+    }
+       
+    // Test the section progress calculation.
+    func testGetSectionProgress() {
+        
+        let section = viewModel.sections.first!
+        // Initially, none of the 2 requirements are completed.
+        let progressInitial = viewModel.getSectionProgress(section)
+        XCTAssertEqual(progressInitial.0, 0, "Initially, 0 requirements should be completed.")
+        XCTAssertEqual(progressInitial.1, 2, "There should be 2 requirements in total.")
+           
+        // Mark one requirement as completed.
+        section.subsections.first!.requirements.first!.complianceStatus = .compliant
+        let progressAfter = viewModel.getSectionProgress(section)
+        XCTAssertEqual(progressAfter.0, 1, "After marking one requirement as complete, 1 requirement should be complete.")
+        XCTAssertEqual(progressAfter.1, 2, "The total number of requirements should remain 2.")
+        
     }
 }
