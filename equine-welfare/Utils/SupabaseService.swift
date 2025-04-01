@@ -345,7 +345,10 @@ class SupabaseService {
                 // Upload abnormal photos if they exist
                 for (abnormalIndex, abnormalData) in horse.abnormalPhotosData.enumerated() {
                     do {
-                        let fileName = "abnormal_\(abnormalIndex + 1).jpg"
+                        // Use the correct file extension and MIME type based on mediaType
+                        let fileExtension = abnormalData.mediaType.fileExtension
+                        let mimeType = abnormalData.mediaType.mimeType
+                        let fileName = "abnormal_\(abnormalIndex + 1).\(fileExtension)"
                         let path = "\(sanitizedFolderName)/horses/\(sanitizedHorseName)/abnormal/\(fileName)"
                         
                         _ = try await client.storage
@@ -353,12 +356,12 @@ class SupabaseService {
                             .upload(
                                 path: path,
                                 file: abnormalData.data,
-                                options: FileOptions(contentType: "image/jpeg")
+                                options: FileOptions(contentType: mimeType)
                             )
                         successCount += 1
                         horsePhotosUploaded += 1
                     } catch {
-                        print("Error uploading abnormal photo: \(error.localizedDescription)")
+                        print("Error uploading abnormal media: \(error.localizedDescription)")
                         errorCount += 1
                     }
                 }
@@ -513,6 +516,14 @@ class SupabaseService {
             switch jsonResult {
             case .failure(let error):
                 print("Warning: JSON data upload failed: \(error.localizedDescription)")
+                if error.localizedDescription.contains("already been uploaded") {
+                    progressHandler?("Upload failed - Assessment already exists", 1.0)
+                    return .failure(NSError(
+                        domain: "SupabaseService",
+                        code: 1010,
+                        userInfo: [NSLocalizedDescriptionKey: "This assessment has already been uploaded. Duplicate uploads are not allowed."]
+                    ))
+                }
                 // Continue with other uploads even if this one failed
             case .success(_):
                 // JSON upload succeeded, continue

@@ -43,8 +43,7 @@ struct GalleryButton: View {
         }
         .buttonStyle(.bordered)
         .photosPicker(
-            isPresented: $isPresented, selection: $selectedItem,
-            matching: .images
+            isPresented: $isPresented, selection: $selectedItem
         )
         .onChange(of: selectedItem) { _, newValue in
             Task {
