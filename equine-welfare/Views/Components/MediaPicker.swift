@@ -77,6 +77,7 @@ struct CameraButton: View{
         .buttonStyle(.bordered)
         .fullScreenCover(isPresented: $showCameraSheet) {
             MCamera()
+                .setCameraScreen(CustomCameraScreen.init)
                 .onImageCaptured { image, _ in
                     saveImageInGallery(image)
                     showCameraSheet = false
