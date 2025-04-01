@@ -245,5 +245,36 @@ class equine_welfareTests: XCTestCase {
         XCTAssertEqual(subsection.requirements.count, 1, "requirements should contain one item after appending a requirement")
         XCTAssertEqual(subsection.requirements.first?.text, "Ensure safety measures", "The requirement text should match")
     }
-    
+//Compliance Status
+        
+// Test that the raw values are correctly set.
+    func testRawValues() {
+        XCTAssertEqual(ComplianceStatus.compliant.rawValue, "Compliant")
+        XCTAssertEqual(ComplianceStatus.notCompliant.rawValue, "Not Compliant")
+        XCTAssertEqual(ComplianceStatus.notApplicable.rawValue, "N/A")
+    }
+
+    // Test that all cases are included in the allCases array.
+    func testCaseIterable() {
+        let allCases = ComplianceStatus.allCases
+        XCTAssertEqual(allCases.count, 3, "There should be three cases")
+        XCTAssertTrue(allCases.contains(.compliant))
+        XCTAssertTrue(allCases.contains(.notCompliant))
+        XCTAssertTrue(allCases.contains(.notApplicable))
+    }
+
+    // Test Codable conformance: encoding and decoding.
+    func testCodableConformance() throws {
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+
+        // Test encoding: encode one of the cases to JSON.
+        let encodedData = try encoder.encode(ComplianceStatus.compliant)
+        let jsonString = String(data: encodedData, encoding: .utf8)
+        XCTAssertEqual(jsonString, "\"Compliant\"")
+
+        // Test decoding: decode the JSON back to a ComplianceStatus case.
+        let decodedCase = try decoder.decode(ComplianceStatus.self, from: encodedData)
+        XCTAssertEqual(decodedCase, ComplianceStatus.compliant)
+    }
 }

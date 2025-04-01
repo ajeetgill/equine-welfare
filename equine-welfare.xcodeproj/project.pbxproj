@@ -31,38 +31,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5F3AF8612D666FB1005349B4 /* Horse C.O.P.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Horse C.O.P.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F3AF8612D666FB1005349B4 /* equine-welfare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "equine-welfare.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "equine-welfareTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "equine-welfareUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		39BCCE502D9B5DA100B06BA5 /* Exceptions for "equine-welfare" folder in "equine-welfare" target */ = {
+		13C488232D9B651C002E47CE /* Exceptions for "equine-welfare" folder in "equine-welfare" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Config/Secrets.example.xcconfig,
 				Info.plist,
 			);
 			target = 5F3AF8602D666FB1005349B4 /* equine-welfare */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		39BCCE532D9B5F1F00B06BA5 /* Exceptions for "equine-welfare" folder in "Compile Sources" phase from "equine-welfare" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 5F3AF85D2D666FB1005349B4 /* Sources */;
-			membershipExceptions = (
-				Config/Secrets.example.xcconfig,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5F3AF8632D666FB1005349B4 /* equine-welfare */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				39BCCE502D9B5DA100B06BA5 /* Exceptions for "equine-welfare" folder in "equine-welfare" target */,
-				39BCCE532D9B5F1F00B06BA5 /* Exceptions for "equine-welfare" folder in "Compile Sources" phase from "equine-welfare" target */,
+				13C488232D9B651C002E47CE /* Exceptions for "equine-welfare" folder in "equine-welfare" target */,
 			);
 			path = "equine-welfare";
 			sourceTree = "<group>";
@@ -121,7 +109,7 @@
 		5F3AF8622D666FB1005349B4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5F3AF8612D666FB1005349B4 /* Horse C.O.P.app */,
+				5F3AF8612D666FB1005349B4 /* equine-welfare.app */,
 				5F3AF8732D666FB2005349B4 /* equine-welfareTests.xctest */,
 				5F3AF87D2D666FB2005349B4 /* equine-welfareUITests.xctest */,
 			);
@@ -154,7 +142,7 @@
 				5FB51FA32D7F6EE000F48002 /* Supabase */,
 			);
 			productName = "equine-welfare";
-			productReference = 5F3AF8612D666FB1005349B4 /* Horse C.O.P.app */;
+			productReference = 5F3AF8612D666FB1005349B4 /* equine-welfare.app */;
 			productType = "com.apple.product-type.application";
 		};
 		5F3AF8722D666FB2005349B4 /* equine-welfareTests */ = {
@@ -315,8 +303,6 @@
 /* Begin XCBuildConfiguration section */
 		5F3AF8852D666FB2005349B4 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 5F3AF8632D666FB1005349B4 /* equine-welfare */;
-			baseConfigurationReferenceRelativePath = Config/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -367,8 +353,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Needs camera access to capture photos and videos during welfare assessments.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Needs microphone access to record audio notes during welfare assessments.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Also need to record your horse";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -382,8 +368,6 @@
 		};
 		5F3AF8862D666FB2005349B4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReferenceAnchor = 5F3AF8632D666FB1005349B4 /* equine-welfare */;
-			baseConfigurationReferenceRelativePath = Config/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -428,8 +412,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Needs camera access to capture photos and videos during welfare assessments.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Needs microphone access to record audio notes during welfare assessments.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Also need to record your horse";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -445,16 +429,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"equine-welfare/Preview Content\"";
 				DEVELOPMENT_TEAM = PSW5TFLPVC;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "equine-welfare/Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Needs camera access to capture photos and videos during welfare assessments.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Needs microphone access to record audio notes during welfare assessments.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Also need to record your horse";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -466,7 +448,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "horse-thingy-v3.equine-welfare";
-				PRODUCT_NAME = "Horse C.O.P";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -478,16 +460,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"equine-welfare/Preview Content\"";
-				DEVELOPMENT_TEAM = PSW5TFLPVC;
+				DEVELOPMENT_TEAM = 6BW33W6MMZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "equine-welfare/Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Needs camera access to capture photos and videos during welfare assessments.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Needs microphone access to record audio notes during welfare assessments.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Just let us capture your horse";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Also need to record your horse";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -498,8 +478,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "horse-thingy-v3.equine-welfare";
-				PRODUCT_NAME = "Horse C.O.P";
+				PRODUCT_BUNDLE_IDENTIFIER = "horse-thingy-v2.equine-welfare";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

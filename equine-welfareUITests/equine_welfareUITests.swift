@@ -9,19 +9,9 @@ import XCTest
 
 final class equine_welfareUITests: XCTestCase {
 
-    override func setUpWithError() throws {
-        
-        continueAfterFailure = false
-
-        
-    }
-
-    override func tearDownWithError() throws {
-        
-    }
-
     @MainActor
     func testStartAssesment() throws {
+        
         let app = XCUIApplication()
         app.launch()
 
@@ -40,7 +30,9 @@ final class equine_welfareUITests: XCTestCase {
         
     }
     
+    @MainActor
     func testSections() throws {
+        
         let app = XCUIApplication()
         app.launch()
         
@@ -82,6 +74,9 @@ final class equine_welfareUITests: XCTestCase {
         selectedSwitch.tap()
         infoCircleElementsQuery.children(matching: .switch).matching(identifier: "Close").element(boundBy: 9).tap()
         selectedSwitch.tap()
+        
+        
+     
 
     }
     
@@ -90,8 +85,8 @@ final class equine_welfareUITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
         
-        let deleteStaticText = app.scrollViews.otherElements.scrollViews.children(matching: .other).element(boundBy: 0).children(matching: .other).element.children(matching: .button).matching(identifier: "Delete").element(boundBy: 0).staticTexts["Delete"]
-        deleteStaticText.tap()
+        app.scrollViews.otherElements.scrollViews.children(matching: .other).element(boundBy: 0).children(matching: .other).element.children(matching: .button).element(boundBy: 2).tap()
+        app.popovers.sheets["Delete Assessment"].scrollViews.otherElements.buttons["Delete"].tap()
         
     }
     
@@ -151,11 +146,9 @@ final class equine_welfareUITests: XCTestCase {
         popoverdismissregionElement.tap()
         app.navigationBars["All Horses"]/*@START_MENU_TOKEN@*/.staticTexts["Add"]/*[[".otherElements[\"Add\"]",".buttons[\"Add\"].staticTexts[\"Add\"]",".staticTexts[\"Add\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
         elementsQuery2.sliders["4"].swipeRight()
-        
-        app.navigationBars["Add Horse"]/*@START_MENU_TOKEN@*/.buttons["Cancel"]/*[[".otherElements[\"Cancel\"].buttons[\"Cancel\"]",".buttons[\"Cancel\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        
-        app.navigationBars["All Horses"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
-        
+                
+        app.navigationBars["Add Horse"]/*@START_MENU_TOKEN@*/.buttons["ToggleSidebar"]/*[[".buttons[\"Show Sidebar\"]",".buttons[\"ToggleSidebar\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+
         elementsQuery/*@START_MENU_TOKEN@*/.staticTexts["Gallery"]/*[[".buttons[\"Gallery\"].staticTexts[\"Gallery\"]",".staticTexts[\"Gallery\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         popoverdismissregionElement.tap()
         
@@ -220,8 +213,7 @@ final class equine_welfareUITests: XCTestCase {
         elementsQuery.sliders["4"].swipeRight()
        
 
-        app.navigationBars["Add Horse"].buttons["Cancel"].tap()
-        app.navigationBars["All Horses"].buttons["ToggleSidebar"].tap()
+        app.navigationBars["Add Horse"].buttons["ToggleSidebar"].tap()
 
         elementsQuery.staticTexts["Gallery"].tap()
         popoverdismissregionElement.tap()
@@ -238,6 +230,7 @@ final class equine_welfareUITests: XCTestCase {
         
         scrollViewsQuery.otherElements.containing(.button, identifier:"info.circle").children(matching: .switch).matching(identifier: "Close").element(boundBy: 0).tap()
         togglesidebarButton.tap()
+        
     }
 
     @MainActor
@@ -246,6 +239,7 @@ final class equine_welfareUITests: XCTestCase {
             // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 XCUIApplication().launch()
+                
             }
         }
     }
