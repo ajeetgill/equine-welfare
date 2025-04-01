@@ -1,5 +1,6 @@
 import SwiftData  // used in #Preview
 import SwiftUI
+import AVKit
 
 struct AssessmentSidebarView: View {
     @Environment(\.modelContext) private var modelContext
@@ -48,6 +49,7 @@ struct AssessmentSidebarView: View {
 
         static func == (lhs: DetailView, rhs: DetailView) -> Bool {
             switch (lhs, rhs) {
+            case (.overview, .overview): return true
             case (.sectionSelection, .sectionSelection): return true
             case (.horses, .horses): return true
             case (.gallery, .gallery): return true
@@ -118,7 +120,8 @@ struct AssessmentSidebarView: View {
                 title: "Overview",
                 icon: "doc.text.magnifyingglass",
                 isActive: currentDetailView == .overview
-            ) {
+            )
+             {
                 selectedSection = nil
                 currentDetailView = .overview
             }
@@ -180,15 +183,18 @@ struct AssessmentSidebarView: View {
                         HStack {
                             // Add the status indicator
                             SectionStatusIndicator(
-                                status: getSectionCompletionStatus(section)
+                                status: getSectionCompletionStatus(section),
+                                isSelected: selectedSection?.id == section.id
                             )
                             .padding(.trailing, 4)
 
                             Text("\(section.id). \(section.title)")
-                                .foregroundColor(.primary)
+                                .foregroundColor(selectedSection?.id == section.id ? .white : .primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(8)
+                        .background(selectedSection?.id == section.id ? Color.accentColor : Color.clear)
+                        .cornerRadius(8)
                     }
                 }
             },
@@ -242,15 +248,21 @@ struct SidebarButton: View {
             HStack {
                 if let img = customImage {
                     Image(img)
+                        .renderingMode(.template)
+                        .foregroundColor(isActive ?? false ? .white : .accentColor)
                 }
                 else {
                     Image(systemName: icon)
+                        .foregroundColor(isActive ?? false ? .white : .accentColor)
                 }
-                Text(title).fontWeight(isActive ?? false ? .medium : .regular)
+                Text(title)
+                    .fontWeight(isActive ?? false ? .medium : .regular)
+                    .foregroundColor(isActive ?? false ? .white : .accentColor)
                 Spacer()
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
+            .background(isActive ?? false ? Color.accentColor : Color.clear)
             .cornerRadius(8)
         }
     }
@@ -370,6 +382,7 @@ struct RequirementView: View {
                                     MediaThumbnail(
                                         attachment: attachment, size: 80
                                     )
+                                    .frame(width: 100, height: 100)
                                     .onTapGesture {
                                         showingMediaPreview = attachment
                                     }
@@ -389,6 +402,26 @@ struct RequirementView: View {
                                                 "Delete", systemImage: "trash")
                                         }
                                     }
+//                                    .overlay(
+//                                        Button(action: {
+//                                            if let index = requirement
+//                                                .mediaAttachments.firstIndex(
+//                                                    where: {
+//                                                        $0.id == attachment.id
+//                                                    })
+//                                            {
+//                                                requirement.mediaAttachments
+//                                                    .remove(at: index)
+//                                            }
+//                                        }) {
+//                                            Image(systemName: "xmark.circle.fill")
+//                                                .foregroundColor(.white)
+//                                                .background(Color.black.opacity(0.7))
+//                                                .clipShape(Circle())
+//                                        }
+//                                        .padding(4)
+//                                        ,alignment: .topTrailing
+//                                    )
                                 }
                             }
                             .padding(.vertical, 4)
@@ -417,6 +450,10 @@ struct RequirementView: View {
 struct MediaPreviewView: View {
     let attachment: MediaAttachment
     @Environment(\.dismiss) private var dismiss
+    @State private var videoPlayer: AVPlayer?
+    @State private var tempVideoURL: URL?
+    @State private var showError: Bool = false
+    @State private var errorMessage: String = ""
 
     var body: some View {
         NavigationStack {
@@ -428,22 +465,117 @@ struct MediaPreviewView: View {
                             .scaledToFit()
                             .padding()
                     }
+                } else if attachment.mediaType == .video {
+                    videoPlayerView
                 } else {
                     Text("Unsupported media type")
                 }
             }
             .padding()
-            .navigationTitle("Image Preview")
+            .navigationTitle(attachment.mediaType == .video ? "Video Preview" : "Image Preview")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
+                        cleanupResources()
                         dismiss()
                     }
                 }
             }
+            .onAppear {
+                prepareVideoPlayer()
+            }
+            .onDisappear {
+                cleanupResources()
+            }
+            .alert("Error", isPresented: $showError) {
+                Button("OK") {}
+            } message: {
+                Text(errorMessage)
+            }
         }
-
+    }
+    
+    private var videoPlayerView: some View {
+        Group {
+            if let player = videoPlayer {
+                VideoPlayer(player: player)
+                    .aspectRatio(contentMode: .fit)
+                    .onAppear {
+                        player.play()
+                    }
+                    .onDisappear {
+                        player.pause()
+                    }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+            }
+        }
+    }
+    
+    private func prepareVideoPlayer() {
+        guard attachment.mediaType == .video else { return }
+        
+        // Create a temporary file to play the video
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let tempURL = tempDirectory.appendingPathComponent("temp_video_\(UUID().uuidString).mp4")
+        self.tempVideoURL = tempURL
+        
+        do {
+            try attachment.data.write(to: tempURL)
+            
+            // Create asset and check if it's playable
+            let asset = AVAsset(url: tempURL)
+            
+            Task {
+                do {
+                    // Check if the asset is playable
+                    let playable = try await asset.load(.isPlayable)
+                    if playable {
+                        DispatchQueue.main.async {
+                            self.videoPlayer = AVPlayer(url: tempURL)
+                            // Add observer for item status
+                            NotificationCenter.default.addObserver(
+                                forName: .AVPlayerItemFailedToPlayToEndTime,
+                                object: self.videoPlayer?.currentItem,
+                                queue: .main) { _ in
+                                    self.showError = true
+                                    self.errorMessage = "Failed to play video"
+                                }
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            self.showError = true
+                            self.errorMessage = "This video format is not supported"
+                        }
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        self.showError = true
+                        self.errorMessage = "Error loading video: \(error.localizedDescription)"
+                    }
+                }
+            }
+        } catch {
+            self.showError = true
+            self.errorMessage = "Error creating video file: \(error.localizedDescription)"
+        }
+    }
+    
+    private func cleanupResources() {
+        // Stop and release player
+        videoPlayer?.pause()
+        videoPlayer = nil
+        
+        // Clean up temporary file
+        if let tempURL = tempVideoURL {
+            try? FileManager.default.removeItem(at: tempURL)
+            self.tempVideoURL = nil
+        }
+        
+        // Remove any observers
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

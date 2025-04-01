@@ -16,6 +16,9 @@ xcuserdata/
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace
+Secrets.xcconfig
+**/Secrets.xcconfig
+
 
 # Swift Package Manager
 #

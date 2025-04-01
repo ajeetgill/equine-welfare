@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 import UIKit
+import AVFoundation
 
 // MARK: - UIFont Extension
 extension UIFont {
@@ -33,6 +34,9 @@ struct PreviousAssessmentRow: View {
     @State private var uploadProgress: Double = 0.0
     @State private var isUploadingMedia: Bool = false
     @State private var sectionViewModel: SectionSelectionViewModel
+    @StateObject private var permissionsManager = PermissionsManager()
+    @State private var showPermissionsAlert = false
+    @AppStorage("isPermissionsGranted") private var isPermissionsGranted = false
     
     // MARK: - Properties
     let assessment: Assessment
@@ -287,8 +291,30 @@ struct PreviousAssessmentRow: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            uploadButton
-            Button(action: { 
+            // Only show upload button if credentials are available
+            if SupabaseService.areCredentialsAvailable() {
+                uploadButton
+            }
+            
+            Button(action: {
+                // Check permissions before allowing resume/edit
+                if !permissionsManager.isCameraAuthorized || !permissionsManager.isMicrophoneAuthorized {
+                    // Request permissions instead of just showing alert
+                    Task {
+                        await permissionsManager.checkAndRequestPermissions()
+                        // After requesting, check if they were granted
+                        if permissionsManager.isCameraAuthorized && permissionsManager.isMicrophoneAuthorized {
+                            isPermissionsGranted = true
+                            sectionViewModel.loadAssessment(id: assessment.id)
+                            onSelectAssessment?(assessment.id)
+                        } else {
+                            isPermissionsGranted = false
+                            showPermissionsAlert = true
+                        }
+                    }
+                    return
+                }
+                
                 sectionViewModel.loadAssessment(id: assessment.id)
                 onSelectAssessment?(assessment.id)
             }) {
@@ -302,12 +328,21 @@ struct PreviousAssessmentRow: View {
             }
             .help("Preview Assessment")
             
-            // Share button
-            shareButton
+            // Share button - it is disabled by choice, we don't want to use it now since we have the upload button
+            // shareButton
             
             // Delete button
             deleteButton
-        }.foregroundColor(.blue)
+        }
+        .foregroundColor(.blue)
+        .alert("Permissions Required", isPresented: $showPermissionsAlert) {
+            Button("Open Settings") {
+                permissionsManager.openAppSettings()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Please enable camera and microphone access in Settings to use Horse COP.")
+        }
     }
     
     private var uploadButton: some View {
@@ -338,8 +373,11 @@ struct PreviousAssessmentRow: View {
                 Label("Upload", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
             }
         }
-        .disabled(isUploading)
+        .disabled(isUploading || !SupabaseService.areCredentialsAvailable())
         .tint(.blue)
+        .help(SupabaseService.areCredentialsAvailable() ? 
+              "Upload assessment to cloud storage" : 
+              "Upload disabled - Supabase credentials not configured")
         .alert(uploadError?.contains("already been uploaded") ?? false ? "Assessment Already Exists" : "Upload Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -360,7 +398,7 @@ struct PreviousAssessmentRow: View {
     
     private var deleteButton: some View {
         Button(action: { showingDeleteConfirmation = true }) {
-            Label("Delete", systemImage: "trash")
+            Label("", systemImage: "trash")
         }
         .help("Delete Assessment")
         .foregroundColor(.red)
