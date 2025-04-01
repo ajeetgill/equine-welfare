@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
+import AVKit
 
 struct HorseInfoView: View {
     @Environment(\.modelContext) private var modelContext
@@ -20,6 +21,7 @@ struct HorseInfoView: View {
     @State private var showingBackPicker = false
     @State private var showingLeftPicker = false
     @State private var showingAbnormalFindings = false
+    @State private var selectedMedia: MediaAttachment?
     
     // Add assessmentId access
     private var assessmentId: UUID? {
@@ -28,7 +30,7 @@ struct HorseInfoView: View {
     }
     
     init(
-        horseId: UUID, 
+        horseId: UUID,
         onEdit: ((UUID, UUID) -> Void)? = nil
     ) {
         self.horseId = horseId
@@ -214,39 +216,26 @@ struct HorseInfoView: View {
                     // Grid of abnormal photos with add button
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 16)], spacing: 16) {
                         // Display existing abnormal photos
-                        ForEach(horse?.abnormalPhotosData ?? [], id: \.id) { abnormalPhoto in
-                            if let uiImage = UIImage(data: abnormalPhoto.data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 100, height: 100)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .contextMenu {
-                                        Button(role: .destructive) {
-                                            removeAbnormalPhoto(abnormalPhoto)
-                                        } label: {
-                                            Label("Delete", systemImage: "trash")
-                                        }
+                        ForEach(horse?.abnormalPhotosData ?? [], id: \.id) { attachment in
+                            MediaThumbnail(attachment: attachment, size: 100)
+                                .onTapGesture {
+                                    selectedMedia = attachment
+                                }
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        removeAbnormalPhoto(attachment)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
                                     }
-//                                    .overlay(
-//                                        Button(action: {
-//                                            removeAbnormalPhoto(abnormalPhoto)
-//                                        }) {
-//                                            Image(systemName: "xmark.circle.fill")
-//                                                .foregroundColor(.white)
-//                                                .background(Color.black.opacity(0.7))
-//                                                .clipShape(Circle())
-//                                        }
-//                                        .padding(4),
-//                                        alignment: .topTrailing
-//                                    )
-                                    
-                            }
+                                }
                         }
                     }
                 }
             }
             .padding()
+        }
+        .sheet(item: $selectedMedia) { media in
+            MediaViewer(attachment: media)
         }
         .navigationTitle(horse?.name ?? "Horse Details")
         .toolbar {
@@ -361,9 +350,9 @@ struct HorseInfoView: View {
                 // Try to save immediately
                 do {
                     try modelContext.save()
-                    print("DEBUG: Successfully saved changes to model context")
+                    print("DEBUG: Successfully saved \(mediaType) attachment to model context")
                 } catch {
-                    print("ERROR: Failed to save attachment: \(error.localizedDescription)")
+                    print("ERROR: Failed to save \(mediaType) attachment: \(error.localizedDescription)")
                 }
             }
             .cornerRadius(30)
