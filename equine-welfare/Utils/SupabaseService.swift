@@ -474,20 +474,40 @@ class SupabaseService {
                 // We'll continue anyway since this is just a precaution
             }
             
-            // Step 1: Upload horse data via HorseService
+            // Step 1: Upload horse data as JSON
             progressHandler?("Uploading horse data...", 0.1)
-            
-            // Instead of just calling HorseService.sendHorses which posts to an API endpoint,
-            // use our new method to upload horse data as a JSON file
-            let horseUploadResult = await HorseService.uploadHorsesForAssessment(
-                modelContext: modelContext,
-                assessmentName: assessment.displayName,
-                assessmentId: assessment.id
-            )
-            
-            if case .failure(let error) = horseUploadResult {
-                print("Warning: Horse data upload failed: \(error.localizedDescription)")
-                // Continue with the rest of the uploads even if this one failed
+
+            let horses = assessment.horses
+            let horseDicts = horses.map { horse -> [String: Any] in
+                var dict: [String: Any] = [
+                    "uuid": horse.uuid.uuidString,
+                    "name": horse.name,
+                    "age": horse.age,
+                    "color": horse.color,
+                    "sex": horse.sex,
+                    "breed": horse.breed,
+                    "timeOnFarm": horse.timeOnFarm,
+                    "bcsScore": horse.bcsScore,
+                    "ageUnit": horse.ageUnit.rawValue,
+                    "timeUnit": horse.timeUnit.rawValue,
+                    "isHorse": horse.isHorse
+                ]
+                if let otherBreed = horse.otherBreed { dict["otherBreed"] = otherBreed }
+                if let notes = horse.notes { dict["notes"] = notes }
+                return dict
+            }
+
+            if let jsonData = try? JSONSerialization.data(withJSONObject: horseDicts, options: .prettyPrinted) {
+                let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
+                let storagePath = "\(sanitizedFolderName)/horses/horse_data.json"
+
+                do {
+                    _ = try await client.storage
+                        .from("assessments")
+                        .upload(path: storagePath, file: jsonData, options: FileOptions(contentType: "application/json"))
+                } catch {
+                    print("Warning: Horse data upload failed: \(error.localizedDescription)")
+                }
             }
             
             // Step 2: Upload RTF document - it is intentionally not deleted
