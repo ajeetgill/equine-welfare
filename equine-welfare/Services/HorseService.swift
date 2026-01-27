@@ -16,7 +16,6 @@ class HorseService {
             let horses = try modelContext.fetch(fetchDescriptor)
             return horses
         } catch {
-            print("Error fetching horses: \(error)")
             return []
         }
     }
@@ -56,7 +55,6 @@ class HorseService {
         do {
             return try JSONSerialization.data(withJSONObject: horseDicts, options: .prettyPrinted)
         } catch {
-            print("Error encoding horses to JSON: \(error)")
             return nil
         }
     }
