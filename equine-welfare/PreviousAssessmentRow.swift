@@ -73,11 +73,9 @@ struct PreviousAssessmentRow: View {
                 try rtfData.write(to: fileURL)
                 shareURL = fileURL
                 isShareReady = true
-            } else {
-                print("Error converting to RTF format")
             }
         } catch {
-            print("Error creating share file: \(error.localizedDescription)")
+            // Error creating share file - silently fail
         }
     }
     
