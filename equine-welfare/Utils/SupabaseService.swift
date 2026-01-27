@@ -44,11 +44,9 @@ class SupabaseService {
         guard let supabaseUrlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
               let supabaseKey = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_KEY") as? String,
               URL(string: supabaseUrlString) != nil else {
-            print("Debug - Supabase Credentials Check: Invalid or missing configuration")
             return false
         }
-        
-        print("Debug - Supabase Credentials Check: Configuration valid")
+
         return true
     }
     
@@ -61,11 +59,8 @@ class SupabaseService {
     /// - Returns: A result with a success message or an error
     func uploadRTFDocument(fileURL: URL, assessment: Assessment) async -> Result<String, Error> {
         do {
-            print("Starting RTF document upload for: \(assessment.displayName)")
-            
             // Verify the file exists and can be read
             guard FileManager.default.fileExists(atPath: fileURL.path) else {
-                print("Error: RTF file does not exist at path: \(fileURL.path)")
                 return .failure(NSError(
                     domain: "SupabaseService",
                     code: 1003,
@@ -85,8 +80,7 @@ class SupabaseService {
             // Read the file data
             do {
                 let fileData = try Data(contentsOf: fileURL)
-                print("Successfully read RTF file data, size: \(fileData.count) bytes")
-                
+
                 // Upload to Supabase Storage
                 let response = try await client.storage
                     .from("assessments")
@@ -95,25 +89,21 @@ class SupabaseService {
                         file: fileData,
                         options: FileOptions(contentType: "application/rtf")
                     )
-                
-                print("RTF document uploaded successfully to: \(storagePath)")
+
                 return .success("Assessment document uploaded successfully 🎉 yeehaw 🐴")
             } catch let error {
                 // Check if this is a "resource already exists" error
                 if error.localizedDescription.contains("already exists") {
-                    print("Error uploading RTF document: The assessment already exists in storage")
                     return .failure(NSError(
                         domain: "SupabaseService",
                         code: 1006,
                         userInfo: [NSLocalizedDescriptionKey: "This assessment has already been uploaded. Duplicate uploads are not allowed."]
                     ))
                 } else {
-                    print("Error reading RTF file data: \(error.localizedDescription)")
                     return .failure(error)
                 }
             }
         } catch {
-            print("Error uploading RTF document: \(error.localizedDescription)")
             return .failure(error)
         }
     }
@@ -123,8 +113,6 @@ class SupabaseService {
     /// - Returns: A result with a success message or an error
     func uploadJSONData(for assessment: Assessment) async -> Result<String, Error> {
         do {
-            print("Starting JSON data upload for: \(assessment.displayName)")
-            
             // Generate JSON data using our exporter
             guard let jsonString = AssessmentJSONExporter.generateJSON(from: assessment) else {
                 return .failure(NSError(
@@ -160,20 +148,17 @@ class SupabaseService {
                     file: jsonData,
                     options: FileOptions(contentType: "application/json")
                 )
-            
-            print("JSON data uploaded successfully to: \(storagePath)")
+
             return .success("Assessment JSON data uploaded successfully")
         } catch let error {
             // Check if this is a "resource already exists" error
             if error.localizedDescription.contains("already exists") {
-                print("Error uploading JSON data: The assessment JSON already exists in storage")
                 return .failure(NSError(
                     domain: "SupabaseService",
                     code: 1009,
                     userInfo: [NSLocalizedDescriptionKey: "This assessment JSON has already been uploaded."]
                 ))
             } else {
-                print("Error uploading JSON data: \(error.localizedDescription)")
                 return .failure(error)
             }
         }
@@ -231,9 +216,7 @@ class SupabaseService {
                     
                     let fileName = "\(sanitizedSubsectionName)_media_\(attachment.id)_\(timestamp).\(attachment.mediaType.fileExtension)"
                     let path = "\(sanitizedFolderName)/media/\(fileName)"
-                    
-                    print("Uploading media file: \(fileName) with type: \(attachment.mediaType.mimeType)")
-                    
+
                     // Upload the file to Supabase with correct content type
                     _ = try await client.storage
                         .from("assessments")
@@ -251,7 +234,6 @@ class SupabaseService {
                     progressHandler?(progress)
                     
                 } catch {
-                    print("Error uploading media attachment: \(error.localizedDescription)")
                     errorCount += 1
                 }
             }
@@ -267,11 +249,10 @@ class SupabaseService {
             
             return .success(successCount)
         } catch {
-            print("Error in upload process: \(error.localizedDescription)")
             return .failure(error)
         }
     }
-    
+
     /// Uploads horse media to Supabase Storage
     /// - Parameters:
     ///   - assessment: The assessment containing horses with media attachments
@@ -307,11 +288,10 @@ class SupabaseService {
                         successCount += 1
                         horsePhotosUploaded += 1
                     } catch {
-                        print("Error uploading main horse photo: \(error.localizedDescription)")
                         errorCount += 1
                     }
                 }
-                
+
                 // Upload body view photos if they exist
                 let bodyPhotos: [(Data?, String)] = [
                     (horse.frontPhotoData?.data, "front"),
@@ -336,12 +316,11 @@ class SupabaseService {
                             successCount += 1
                             horsePhotosUploaded += 1
                         } catch {
-                            print("Error uploading \(view) view photo: \(error.localizedDescription)")
                             errorCount += 1
                         }
                     }
                 }
-                
+
                 // Upload abnormal photos if they exist
                 for (abnormalIndex, abnormalData) in horse.abnormalPhotosData.enumerated() {
                     do {
@@ -361,11 +340,10 @@ class SupabaseService {
                         successCount += 1
                         horsePhotosUploaded += 1
                     } catch {
-                        print("Error uploading abnormal media: \(error.localizedDescription)")
                         errorCount += 1
                     }
                 }
-                
+
                 // Calculate progress based on current horse
                 let progress = Double(index + 1) / Double(totalHorses)
                 progressHandler?(progress)
@@ -382,48 +360,14 @@ class SupabaseService {
             
             return .success(successCount)
         } catch {
-            print("Error in horse media upload process: \(error.localizedDescription)")
             return .failure(error)
         }
     }
-    
+
     /// Prints the assessment data for debugging purposes
     /// - Parameter assessment: The assessment to print
     func printAssessmentData(_ assessment: Assessment) {
-        print("===== ASSESSMENT DATA =====")
-        print("ID: \(assessment.id)")
-        print("Vet Name: \(assessment.vetName)")
-        print("Farm Name: \(assessment.farmName)")
-        print("Visit Date: \(assessment.formattedDate)")
-        print("Is Complete: \(assessment.isComplete)")
-        
-        print("\nSections (\(assessment.sections.count)):")
-        for (index, section) in assessment.sections.enumerated() {
-            print("  Section \(index + 1): \(section.title)")
-            print("  Is Applicable: \(section.isApplicable)")
-            
-            print("  Subsections (\(section.subsections.count)):")
-            for (subIndex, subsection) in section.subsections.enumerated() {
-                print("    Subsection \(subIndex + 1): \(subsection.name)")
-                
-                print("    Requirements (\(subsection.requirements.count)):")
-                for (reqIndex, requirement) in subsection.requirements.enumerated() {
-                    print("      Requirement \(reqIndex + 1): \(requirement.text)")
-                    print("      Status: \(requirement.complianceStatus?.rawValue ?? "Not Evaluated")")
-                    if let reason = requirement.nonComplianceReason, !reason.isEmpty {
-                        print("      Reason: \(reason)")
-                    }
-                }
-            }
-        }
-        
-        print("\nHorses (\(assessment.horses.count)):")
-        for (index, horse) in assessment.horses.enumerated() {
-            print("  Horse \(index + 1): \(horse.name)")
-            // Add more horse details as needed
-        }
-        
-        print("===== END ASSESSMENT DATA =====")
+        // Debug print statements removed for production
     }
     
     /// Checks if an assessment already exists in storage
@@ -442,7 +386,6 @@ class SupabaseService {
             // If we get any results, the assessment already exists
             return .success(!response.isEmpty)
         } catch {
-            print("Error checking if assessment exists: \(error.localizedDescription)")
             return .failure(error)
         }
     }
@@ -462,16 +405,15 @@ class SupabaseService {
             switch existsResult {
             case .success(let exists):
                 if exists {
-                    print("Assessment already exists in storage, preventing duplicate upload")
                     return .failure(NSError(
                         domain: "SupabaseService",
                         code: 1005,
                         userInfo: [NSLocalizedDescriptionKey: "This assessment has already been uploaded. Duplicate uploads are not allowed."]
                     ))
                 }
-            case .failure(let error):
-                print("Warning: Could not check if assessment already exists: \(error.localizedDescription)")
-                // We'll continue anyway since this is just a precaution
+            case .failure:
+                // Continue anyway since this is just a precaution
+                break
             }
             
             // Step 1: Upload horse data as JSON
@@ -501,13 +443,9 @@ class SupabaseService {
                 let sanitizedFolderName = assessment.displayName.replacingOccurrences(of: "/", with: "-")
                 let storagePath = "\(sanitizedFolderName)/horses/horse_data.json"
 
-                do {
-                    _ = try await client.storage
-                        .from("assessments")
-                        .upload(path: storagePath, file: jsonData, options: FileOptions(contentType: "application/json"))
-                } catch {
-                    print("Warning: Horse data upload failed: \(error.localizedDescription)")
-                }
+                _ = try? await client.storage
+                    .from("assessments")
+                    .upload(path: storagePath, file: jsonData, options: FileOptions(contentType: "application/json"))
             }
             
             // Step 2: Upload RTF document - it is intentionally not deleted
@@ -535,7 +473,6 @@ class SupabaseService {
             let jsonResult = await uploadJSONData(for: assessment)
             switch jsonResult {
             case .failure(let error):
-                print("Warning: JSON data upload failed: \(error.localizedDescription)")
                 if error.localizedDescription.contains("already been uploaded") {
                     progressHandler?("Upload failed - Assessment already exists", 1.0)
                     return .failure(NSError(
@@ -581,10 +518,8 @@ class SupabaseService {
         
         // Check if the file exists
         if FileManager.default.fileExists(atPath: fileURL.path) {
-            print("RTF file found at: \(fileURL.path)")
             return fileURL
         } else {
-            print("RTF file not found at: \(fileURL.path)")
             return nil
         }
     }
