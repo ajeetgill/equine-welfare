@@ -20,7 +20,8 @@ extension UIFont {
 
 struct PreviousAssessmentRow: View {
     @Environment(\.modelContext) private var modelContext
-    
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     // MARK: - State Properties
     @State private var showingDeleteConfirmation = false
     @State private var showingPreview = false
@@ -213,14 +214,19 @@ struct PreviousAssessmentRow: View {
     
     // MARK: - View Body
     var body: some View {
-        HStack {
-            // Assessment information
-            assessmentInfo
-            
-            Spacer()
-            
-            // Action buttons
-            actionButtons
+        Group {
+            if horizontalSizeClass == .compact {
+                VStack(alignment: .leading, spacing: 10) {
+                    assessmentInfo
+                    actionButtons
+                }
+            } else {
+                HStack {
+                    assessmentInfo
+                    Spacer()
+                    actionButtons
+                }
+            }
         }
         .padding()
         .background(Color(.systemGray6))
@@ -229,7 +235,6 @@ struct PreviousAssessmentRow: View {
             previewSheet
         }
         .onAppear {
-            // Prepare share content when the view appears
             prepareShareContent()
         }
         .alert("Upload Successful", isPresented: $showUploadSuccess) {
@@ -250,17 +255,16 @@ struct PreviousAssessmentRow: View {
     }
     
     private var actionButtons: some View {
-        HStack(spacing: 12) {
-            // Sync button (always available when Convex is configured)
+        let isCompact = horizontalSizeClass == .compact
+        return HStack(spacing: isCompact ? 16 : 12) {
+            // Sync button
             uploadButton
-            
+
             Button(action: {
                 // Check permissions before allowing resume/edit
                 if !permissionsManager.isCameraAuthorized || !permissionsManager.isMicrophoneAuthorized {
-                    // Request permissions instead of just showing alert
                     Task {
                         await permissionsManager.checkAndRequestPermissions()
-                        // After requesting, check if they were granted
                         if permissionsManager.isCameraAuthorized && permissionsManager.isMicrophoneAuthorized {
                             isPermissionsGranted = true
                             sectionViewModel.loadAssessment(id: assessment.id)
@@ -272,23 +276,28 @@ struct PreviousAssessmentRow: View {
                     }
                     return
                 }
-                
+
                 sectionViewModel.loadAssessment(id: assessment.id)
                 onSelectAssessment?(assessment.id)
             }) {
-                Label(assessment.isComplete ? "Edit" : "Resume", systemImage: "pencil")
+                if isCompact {
+                    Image(systemName: "pencil")
+                } else {
+                    Label(assessment.isComplete ? "Edit" : "Resume", systemImage: "pencil")
+                }
             }
-            .help("Edit Assessment")
-            
+            .help(assessment.isComplete ? "Edit Assessment" : "Resume Assessment")
+
             // Preview button
             Button(action: { showingPreview.toggle() }) {
-                Label("Preview", systemImage: "doc.text.magnifyingglass")
+                if isCompact {
+                    Image(systemName: "doc.text.magnifyingglass")
+                } else {
+                    Label("Preview", systemImage: "doc.text.magnifyingglass")
+                }
             }
             .help("Preview Assessment")
-            
-            // Share button - it is disabled by choice, we don't want to use it now since we have the upload button
-            // shareButton
-            
+
             // Delete button
             deleteButton
         }
@@ -315,14 +324,17 @@ struct PreviousAssessmentRow: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
 
-                    // Custom progress bar
                     ProgressView(value: uploadProgress, total: 1.0)
                         .progressViewStyle(LinearProgressViewStyle())
-                        .frame(width: 100)
+                        .frame(width: horizontalSizeClass == .compact ? 60 : 100)
                 }
                 .padding(.horizontal, 4)
             } else {
-                Label("Sync", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
+                if horizontalSizeClass == .compact {
+                    Image(systemName: "arrow.trianglehead.clockwise.icloud.fill")
+                } else {
+                    Label("Sync", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
+                }
             }
         }
         .disabled(isUploading)
@@ -379,7 +391,8 @@ struct PreviousAssessmentRow: View {
                     }
                 }
         }
-        .frame(minWidth: 600, minHeight: 800)
+        .frame(minWidth: horizontalSizeClass == .compact ? nil : 600,
+               minHeight: horizontalSizeClass == .compact ? nil : 800)
     }
 }
 
