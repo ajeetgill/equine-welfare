@@ -10,73 +10,71 @@ struct HorsesNavigationView: View {
     @State private var selectedHorseId: UUID? = nil
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                // Base layer - horse list
-                if currentView == .list {
-                    HorsesView(
-                        assessmentId: assessmentId,
-                        onSelectHorse: { horseId in
-                            withAnimation {
-                                selectedHorseId = horseId
-                                currentView = .horseInfo
-                            }
+        VStack {
+            // Base layer - horse list
+            if currentView == .list {
+                HorsesView(
+                    assessmentId: assessmentId,
+                    onSelectHorse: { horseId in
+                        withAnimation {
+                            selectedHorseId = horseId
+                            currentView = .horseInfo
                         }
-                    )
-                    .disabled(currentView != .list)
-                }
-                // Horse Detail view (Add)
-                if currentView == .addHorse {
-                    HorseDetailView(
-                        horseId: nil,
-                        assessmentId: assessmentId,
-                        onDismiss: {
-                            withAnimation {
-                                currentView = .list
-                            }
+                    }
+                )
+                .disabled(currentView != .list)
+            }
+            // Horse Detail view (Add)
+            if currentView == .addHorse {
+                HorseDetailView(
+                    horseId: nil,
+                    assessmentId: assessmentId,
+                    onDismiss: {
+                        withAnimation {
+                            currentView = .list
                         }
-                    )
-                    .transition(.move(edge: .trailing))
-                }
-                // Horse Detail view (Edit)
-                if currentView == .editHorse, let horseId = selectedHorseId {
-                    HorseDetailView(
-                        horseId: horseId,
-                        assessmentId: assessmentId,
-                        onDismiss: {
-                            withAnimation {
-                                currentView = .list
-                            }
+                    }
+                )
+                .transition(.move(edge: .trailing))
+            }
+            // Horse Detail view (Edit)
+            if currentView == .editHorse, let horseId = selectedHorseId {
+                HorseDetailView(
+                    horseId: horseId,
+                    assessmentId: assessmentId,
+                    onDismiss: {
+                        withAnimation {
+                            currentView = .list
                         }
-                    )
-                    .transition(.move(edge: .leading))
-                }
+                    }
+                )
+                .transition(.move(edge: .leading))
+            }
 
-                // Horse Info view
-                if currentView == .horseInfo, let horseId = selectedHorseId {
-                    HorseInfoView(
-                        horseId: horseId,
-                        onEdit: { horseId, _ in
-                            withAnimation {
-                                selectedHorseId = horseId
-                                currentView = .editHorse
-                            }
+            // Horse Info view
+            if currentView == .horseInfo, let horseId = selectedHorseId {
+                HorseInfoView(
+                    horseId: horseId,
+                    onEdit: { horseId, _ in
+                        withAnimation {
+                            selectedHorseId = horseId
+                            currentView = .editHorse
                         }
-                    )
-                    .transition(.move(edge: .trailing))
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button("Back") {
-                                withAnimation {
-                                    currentView = .list
-                                }
+                    }
+                )
+                .transition(.move(edge: .trailing))
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Back") {
+                            withAnimation {
+                                currentView = .list
                             }
                         }
                     }
                 }
             }
-            .navigationTitle(navTitle)
         }
+        .navigationTitle(navTitle)
         .toolbar {
             if currentView == .list {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -95,7 +93,6 @@ struct HorsesNavigationView: View {
                 }
             }
         }
-
     }
     private var navTitle: String {
         switch currentView {
