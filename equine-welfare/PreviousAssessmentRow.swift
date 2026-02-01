@@ -79,71 +79,33 @@ struct PreviousAssessmentRow: View {
         }
     }
     
-    // Upload the RTF file to Supabase
-    private func uploadRTFToSupabase() async {
-        // Always prepare/refresh the content first to ensure we have the latest version
-        prepareShareContent()
-        
-        guard let fileURL = shareURL, isShareReady else {
-            uploadError = "Failed to prepare the document for upload"
-            showUploadAlert = true
-            return
-        }
-        
-        // Small delay to ensure file is fully written
-        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-        
-        // Verify file exists before attempting upload
-        if !FileManager.default.fileExists(atPath: fileURL.path) {
-            uploadError = "RTF file not found at expected location"
-            showUploadAlert = true
-            return
-        }
-        
+    // Sync assessment to Convex
+    private func syncToConvex() async {
         // Start uploading - show progress
         isUploading = true
-        uploadProgress = 0.1 // Initial progress
-        
-        // Use the comprehensive upload method which handles all upload steps
-        let result = await SupabaseService.shared.uploadAssessmentComplete(
-            assessment: assessment,
-            modelContext: modelContext
-        ) { message, progress in
-            // Update UI with detailed progress message and value
-            self.uploadProgress = progress
-            
-            // Update the UI with detailed status messages
-            if message.contains("horse data") || message.contains("document") {
-                self.isUploadingMedia = false
-            } else if message.contains("media") {
-                self.isUploadingMedia = true
+        uploadProgress = 0.1
+
+        do {
+            try await ConvexService.shared.syncAssessment(assessment) { message, progress in
+                self.uploadProgress = progress
+                self.isUploadingMedia = message.contains("media")
             }
-        }
-        
-        // Handle the result
-        switch result {
-        case .success(let uploadResult):
-            // Create a success message based on upload result
-            uploadSuccessMessage = "Assessment uploaded successfully to cloud storage."
+
+            // Success
+            uploadSuccessMessage = "Assessment synced successfully!"
             showUploadSuccess = true
             uploadError = nil
             isUploadingMedia = false
-            
-            // Complete the upload process
             uploadProgress = 1.0
-            
-            // Reset state
-            isUploading = false
-            uploadProgress = 0.0
-            
-        case .failure(let error):
+
+        } catch {
             uploadError = error.localizedDescription
             showUploadAlert = true
-            
-            // Reset state
-            isUploading = false
-            uploadProgress = 0.0
         }
+
+        // Reset state
+        isUploading = false
+        uploadProgress = 0.0
     }
     
     // Generate RTF content that matches the preview
@@ -289,10 +251,8 @@ struct PreviousAssessmentRow: View {
     
     private var actionButtons: some View {
         HStack(spacing: 12) {
-            // Only show upload button if credentials are available
-            if SupabaseService.areCredentialsAvailable() {
-                uploadButton
-            }
+            // Sync button (always available when Convex is configured)
+            uploadButton
             
             Button(action: {
                 // Check permissions before allowing resume/edit
@@ -346,21 +306,15 @@ struct PreviousAssessmentRow: View {
     private var uploadButton: some View {
         Button {
             Task {
-                await uploadRTFToSupabase()
+                await syncToConvex()
             }
         } label: {
             if isUploading {
                 VStack(spacing: 4) {
-                    if isUploadingMedia {
-                        Text("Uploading media...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text("Uploading document...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
+                    Text("Syncing...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
                     // Custom progress bar
                     ProgressView(value: uploadProgress, total: 1.0)
                         .progressViewStyle(LinearProgressViewStyle())
@@ -368,15 +322,13 @@ struct PreviousAssessmentRow: View {
                 }
                 .padding(.horizontal, 4)
             } else {
-                Label("Upload", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
+                Label("Sync", systemImage: "arrow.trianglehead.clockwise.icloud.fill")
             }
         }
-        .disabled(isUploading || !SupabaseService.areCredentialsAvailable())
+        .disabled(isUploading)
         .tint(.blue)
-        .help(SupabaseService.areCredentialsAvailable() ? 
-              "Upload assessment to cloud storage" : 
-              "Upload disabled - Supabase credentials not configured")
-        .alert(uploadError?.contains("already been uploaded") ?? false ? "Assessment Already Exists" : "Upload Error", isPresented: $showUploadAlert) {
+        .help("Sync assessment to cloud")
+        .alert(uploadError?.contains("already synced") ?? false ? "Assessment Already Synced" : "Sync Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(uploadError ?? "An unknown error occurred")
