@@ -69,9 +69,9 @@ struct AssessmentOverviewView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
-                .background(Color.white)
+                .background(Color(.secondarySystemGroupedBackground))
                 .cornerRadius(8)
-                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                .shadow(color: Color.primary.opacity(0.05), radius: 2, x: 0, y: 1)
                 
                 // Non-Applicable Sections
                 DisclosureGroup(
@@ -93,14 +93,14 @@ struct AssessmentOverviewView: View {
                         }
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white)
+                        .background(Color(.secondarySystemGroupedBackground))
                         .cornerRadius(8)
                     },
                     label: {
                         Text("Non-Applicable Sections")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                             .padding(.vertical, 8)
                     }
                 )
@@ -186,7 +186,7 @@ struct AssessmentOverviewView: View {
                                             }
                                             .accentColor(.blue)
                                             .padding(12)
-                                            .background(Color.white)
+                                            .background(Color(.secondarySystemGroupedBackground))
                                             .cornerRadius(8)
                                         }
                                     }
@@ -231,7 +231,7 @@ struct AssessmentOverviewView: View {
                         Text("Applicable Sections")
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                 )
                 .accentColor(.blue)

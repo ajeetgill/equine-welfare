@@ -325,9 +325,9 @@ struct HorseInfoView: View {
             Spacer()
         }
         .padding()
-        .background(Color.white)
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(8)
-        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+        .shadow(color: Color.primary.opacity(0.1), radius: 2, x: 0, y: 1)
     }
     
     private func addAbnormalPhotoButton() -> some View {

@@ -419,7 +419,7 @@ struct SubsectionView: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(10)
     }
 }

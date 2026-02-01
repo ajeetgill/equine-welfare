@@ -299,7 +299,7 @@ struct HorseDetailView: View {
                                 Spacer()
                             }
                             .padding()
-                            .background(Color.white)
+                            .background(Color(.secondarySystemGroupedBackground))
                             .cornerRadius(8)
                     }
                     .padding()

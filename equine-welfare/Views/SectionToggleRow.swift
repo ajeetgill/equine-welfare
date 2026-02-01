@@ -28,7 +28,7 @@ struct SectionToggleRow: View {
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 16)
-        .background(Color.white)
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(10)
     }
 }
