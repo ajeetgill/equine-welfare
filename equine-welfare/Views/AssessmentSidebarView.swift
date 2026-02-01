@@ -4,6 +4,7 @@ import AVKit
 
 struct AssessmentSidebarView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     // Callbacks for navigation
     var onShowSectionSelection: () -> Void
     var viewModel: SectionSelectionViewModel
@@ -32,10 +33,6 @@ struct AssessmentSidebarView: View {
         self.galleryViewModel = galleryViewModel
         self._navigationPath = navigationPath
         self.assessmentId = assessmentId
-
-        print(
-            "DEBUG: AssessmentSidebarView initialized with assessmentId: \(assessmentId)"
-        )
     }
     
     // Update DetailView enum
@@ -61,42 +58,98 @@ struct AssessmentSidebarView: View {
         }
     }
 
-    var body: some View {
-        NavigationSplitView {
-            ScrollView {
-                // MARK: - Navigation Actions
-                navigationButtonsView
-                sectionsList
-                Spacer()
-            }
-            .padding()
-            .background(Color(.systemBackground))
-            .onDisappear {
-                viewModel.saveAssessment()
-            }
-        } detail: {
-            switch currentDetailView {
-            case .overview:
-                if let assessment = viewModel.assessment {
-                    AssessmentOverviewView(
-                        assessment: assessment,
-                        modelContext: modelContext  // Use the property declared with @Environment
-                    )
-                }
-            case .sectionSelection:
-                SectionSelectionView(viewModel: viewModel)
-            case .horses:
-                HorsesNavigationView(
-                    assessmentId: assessmentId
+    @ViewBuilder
+    private var detailContent: some View {
+        switch currentDetailView {
+        case .overview:
+            if let assessment = viewModel.assessment {
+                AssessmentOverviewView(
+                    assessment: assessment,
+                    modelContext: modelContext
                 )
-            case .gallery:
-                GalleryView(viewModel: galleryViewModel)
-            case .sideNotes:
-                if let assessment = viewModel.currentAssessment {
-                    SideNotesView(assessment: assessment)   
+            }
+        case .sectionSelection:
+            SectionSelectionView(viewModel: viewModel)
+        case .horses:
+            HorsesNavigationView(
+                assessmentId: assessmentId
+            )
+        case .gallery:
+            GalleryView(viewModel: galleryViewModel)
+        case .sideNotes:
+            if let assessment = viewModel.currentAssessment {
+                SideNotesView(assessment: assessment)
+            }
+        case .sectionDetail(let section):
+            SectionDetailView(section: section)
+        }
+    }
+
+    private var compactLayout: some View {
+        VStack(spacing: 0) {
+            // Navigation picker at the top
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    CompactNavButton(title: "Overview", icon: "doc.text.magnifyingglass",
+                                     isActive: currentDetailView == .overview) {
+                        selectedSection = nil
+                        currentDetailView = .overview
+                    }
+                    CompactNavButton(title: "Sections", icon: "checklist",
+                                     isActive: currentDetailView == .sectionSelection) {
+                        selectedSection = nil
+                        currentDetailView = .sectionSelection
+                    }
+                    CompactNavButton(title: "Horses", icon: "pawprint.fill",
+                                     isActive: currentDetailView == .horses) {
+                        selectedSection = nil
+                        currentDetailView = .horses
+                    }
+                    CompactNavButton(title: "Gallery", icon: "photo.on.rectangle",
+                                     isActive: currentDetailView == .gallery) {
+                        selectedSection = nil
+                        currentDetailView = .gallery
+                    }
+                    CompactNavButton(title: "Notes", icon: "note.text",
+                                     isActive: currentDetailView == .sideNotes) {
+                        selectedSection = nil
+                        currentDetailView = .sideNotes
+                    }
                 }
-            case .sectionDetail(let section):
-                SectionDetailView(section: section)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+            }
+            .background(Color(.systemBackground))
+
+            Divider()
+
+            // Detail content
+            detailContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onDisappear {
+            viewModel.saveAssessment()
+        }
+    }
+
+    var body: some View {
+        if horizontalSizeClass == .compact {
+            compactLayout
+        } else {
+            NavigationSplitView {
+                ScrollView {
+                    // MARK: - Navigation Actions
+                    navigationButtonsView
+                    sectionsList
+                    Spacer()
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                .onDisappear {
+                    viewModel.saveAssessment()
+                }
+            } detail: {
+                detailContent
             }
         }
     }
@@ -263,6 +316,30 @@ struct SidebarButton: View {
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .background(isActive ?? false ? Color.accentColor : Color.clear)
+            .cornerRadius(8)
+        }
+    }
+}
+
+/// Compact navigation button for iPhone layout
+struct CompactNavButton: View {
+    let title: String
+    let icon: String
+    let isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                Text(title)
+                    .font(.caption)
+            }
+            .foregroundColor(isActive ? .white : .accentColor)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isActive ? Color.accentColor : Color(.systemGray6))
             .cornerRadius(8)
         }
     }
