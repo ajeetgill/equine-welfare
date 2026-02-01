@@ -218,8 +218,10 @@ struct PreviousAssessmentRow: View {
             if horizontalSizeClass == .compact {
                 VStack(alignment: .leading, spacing: 10) {
                     assessmentInfo
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     actionButtons
                 }
+                .frame(maxWidth: .infinity)
             } else {
                 HStack {
                     assessmentInfo
