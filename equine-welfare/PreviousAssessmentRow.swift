@@ -100,7 +100,12 @@ struct PreviousAssessmentRow: View {
             uploadProgress = 1.0
 
         } catch {
-            uploadError = error.localizedDescription
+            let errorDesc = error.localizedDescription
+            if errorDesc.contains("already synced") || errorDesc.contains("Duplicate") {
+                uploadError = "This assessment has already been synced to the cloud. No action needed."
+            } else {
+                uploadError = errorDesc
+            }
             showUploadAlert = true
         }
 
