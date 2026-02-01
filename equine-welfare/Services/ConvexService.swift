@@ -99,6 +99,73 @@ class ConvexService {
             "sectionsJson": sectionsJson
         ])
 
+        // MARK: - Upload horse photos (progress 0.6 to 0.9)
+
+        let horses = assessment.horses
+        let totalHorses = horses.count
+
+        for (horseIndex, horse) in horses.enumerated() {
+            let horseId = horse.uuid.uuidString
+            let horseProgress = 0.6 + (0.3 * Double(horseIndex) / Double(max(totalHorses, 1)))
+            progressHandler?("Uploading photos for \(horse.name)...", horseProgress)
+
+            // Collect all (attachment, parentType) pairs for this horse
+            var photoUploads: [(MediaAttachment, String)] = []
+
+            if let photo = horse.photoData {
+                photoUploads.append((photo, "horse_photo"))
+            }
+            if let front = horse.frontPhotoData {
+                photoUploads.append((front, "horse_front"))
+            }
+            if let right = horse.rightPhotoData {
+                photoUploads.append((right, "horse_right"))
+            }
+            if let back = horse.backPhotoData {
+                photoUploads.append((back, "horse_back"))
+            }
+            if let left = horse.leftPhotoData {
+                photoUploads.append((left, "horse_left"))
+            }
+            for abnormal in horse.abnormalPhotosData {
+                photoUploads.append((abnormal, "horse_abnormal"))
+            }
+
+            for (attachment, parentType) in photoUploads {
+                try await uploadMedia(
+                    data: attachment.data,
+                    externalId: attachment.id.uuidString,
+                    parentType: parentType,
+                    parentId: horseId,
+                    mediaType: attachment.mediaType.rawValue
+                )
+            }
+        }
+
+        // MARK: - Upload requirement media (progress 0.9 to 0.95)
+
+        progressHandler?("Uploading requirement media...", 0.9)
+
+        for section in assessment.sections where section.isApplicable {
+            for (subIdx, subsection) in section.subsections.enumerated() {
+                for (reqIdx, requirement) in subsection.requirements.enumerated() {
+                    guard !requirement.mediaAttachments.isEmpty else { continue }
+
+                    let parentId = "\(assessment.id.uuidString)_\(section.id)_\(subIdx)_\(reqIdx)"
+
+                    for attachment in requirement.mediaAttachments {
+                        try await uploadMedia(
+                            data: attachment.data,
+                            externalId: attachment.id.uuidString,
+                            parentType: "requirement",
+                            parentId: parentId,
+                            mediaType: attachment.mediaType.rawValue
+                        )
+                    }
+                }
+            }
+        }
+
         progressHandler?("Sync complete!", 1.0)
     }
 
