@@ -103,8 +103,25 @@ struct PreviousAssessmentRow: View {
             let errorDesc = error.localizedDescription
             if errorDesc.contains("already synced") || errorDesc.contains("Duplicate") {
                 uploadError = "This assessment has already been synced to the cloud. No action needed."
+            } else if errorDesc.contains("not connected") || errorDesc.contains("offline") || errorDesc.contains("network") || errorDesc.contains("timed out") {
+                uploadError = "No internet connection. Please check your network and try again."
+            } else if errorDesc.contains("upload") || error is ConvexError {
+                uploadError = "Failed to upload media. Please try again."
             } else {
-                uploadError = errorDesc
+                // Strip server internals — show only the meaningful part
+                if let range = errorDesc.range(of: "Uncaught Error: ") {
+                    let message = String(errorDesc[range.upperBound...])
+                        .replacingOccurrences(of: "\\n", with: "")
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    // Remove anything after "\n  at handler" (stack trace)
+                    if let atHandler = message.range(of: "  at handler") {
+                        uploadError = String(message[..<atHandler.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+                    } else {
+                        uploadError = message
+                    }
+                } else {
+                    uploadError = "Sync failed. Please try again later."
+                }
             }
             showUploadAlert = true
         }
@@ -347,7 +364,7 @@ struct PreviousAssessmentRow: View {
         .disabled(isUploading)
         .tint(.blue)
         .help("Sync assessment to cloud")
-        .alert(uploadError?.contains("already synced") ?? false ? "Assessment Already Synced" : "Sync Error", isPresented: $showUploadAlert) {
+        .alert(uploadError?.contains("already been synced") ?? false ? "Already Synced" : "Sync Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(uploadError ?? "An unknown error occurred")
