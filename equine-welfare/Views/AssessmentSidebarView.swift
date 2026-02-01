@@ -115,6 +115,29 @@ struct AssessmentSidebarView: View {
                         selectedSection = nil
                         currentDetailView = .sideNotes
                     }
+
+                    // Applicable sections - separated by a divider
+                    if !viewModel.applicableSections.isEmpty {
+                        Divider()
+                            .frame(height: 30)
+
+                        ForEach(viewModel.applicableSections) { section in
+                            let isActive = {
+                                if case .sectionDetail(let s) = currentDetailView {
+                                    return s.id == section.id
+                                }
+                                return false
+                            }()
+                            CompactNavButton(
+                                title: "\(section.id). \(section.title)",
+                                icon: "doc.text",
+                                isActive: isActive
+                            ) {
+                                selectedSection = section
+                                currentDetailView = .sectionDetail(section)
+                            }
+                        }
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
