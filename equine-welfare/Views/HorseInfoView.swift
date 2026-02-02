@@ -456,8 +456,8 @@ struct HorseInfoView: View {
 }
 
 #Preview {
-    let modelContext = ModelContext(try! ModelContainer(for: Horse.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
-    
+    let _ = ModelContext(try! ModelContainer(for: Horse.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)))
+
     // Create a sample horse for preview
     let horse = Horse(
         name: "Red",
@@ -468,7 +468,6 @@ struct HorseInfoView: View {
         timeOnFarm: 4,
         bcsScore: 4.0
     )
-//    modelContext.insert(horse)
     
     NavigationStack {
         HorseInfoView(
