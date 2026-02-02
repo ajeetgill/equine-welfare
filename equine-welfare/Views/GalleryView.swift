@@ -142,19 +142,19 @@ struct GalleryImageView: View {
             try image.attachment.data.write(to: tempURL)
             
             // Create an asset and get thumbnail
-            let asset = AVAsset(url: tempURL)
-            
+            let asset = AVURLAsset(url: tempURL)
+
             Task {
                 do {
                     let generator = AVAssetImageGenerator(asset: asset)
                     generator.appliesPreferredTrackTransform = true
                     generator.maximumSize = CGSize(width: 360, height: 240) // 2x size for higher quality
-                    
+
                     // Try to get thumbnail at 1 second or at the start
                     let seconds = try await asset.load(.duration).seconds > 1.0 ? 1.0 : 0.0
                     let time = CMTime(seconds: seconds, preferredTimescale: 60)
-                    
-                    let cgImage = try generator.copyCGImage(at: time, actualTime: nil)
+
+                    let (cgImage, _) = try await generator.image(at: time)
                     let thumbnail = UIImage(cgImage: cgImage)
                     
                     DispatchQueue.main.async {
@@ -270,7 +270,7 @@ struct ImageDetailView: View {
             try image.attachment.data.write(to: tempURL)
             
             // Create asset and check if it's playable
-            let asset = AVAsset(url: tempURL)
+            let asset = AVURLAsset(url: tempURL)
             
             Task {
                 do {

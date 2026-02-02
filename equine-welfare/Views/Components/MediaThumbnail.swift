@@ -83,7 +83,7 @@ struct MediaThumbnail: View {
             try attachment.data.write(to: tempURL)
             
             // Create an asset and get thumbnail
-            let asset = AVAsset(url: tempURL)
+            let asset = AVURLAsset(url: tempURL)
             
             Task {
                 do {
@@ -95,7 +95,7 @@ struct MediaThumbnail: View {
                     let seconds = try await asset.load(.duration).seconds > 1.0 ? 1.0 : 0.0
                     let time = CMTime(seconds: seconds, preferredTimescale: 60)
                     
-                    let cgImage = try generator.copyCGImage(at: time, actualTime: nil)
+                    let (cgImage, _) = try await generator.image(at: time)
                     let thumbnail = UIImage(cgImage: cgImage)
                     
                     DispatchQueue.main.async {

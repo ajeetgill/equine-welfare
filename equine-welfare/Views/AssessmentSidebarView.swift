@@ -626,7 +626,7 @@ struct MediaPreviewView: View {
             try attachment.data.write(to: tempURL)
             
             // Create asset and check if it's playable
-            let asset = AVAsset(url: tempURL)
+            let asset = AVURLAsset(url: tempURL)
             
             Task {
                 do {

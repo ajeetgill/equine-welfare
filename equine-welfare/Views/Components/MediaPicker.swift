@@ -119,24 +119,17 @@ struct CameraButton: View{
                 return
             }
             
-            exportSession.outputURL = outputURL
-            exportSession.outputFileType = .mp4
             exportSession.shouldOptimizeForNetworkUse = true
-            
-            // Export the video
-            await exportSession.export()
-            
-            // Check export status
-            if exportSession.status == .completed {
-                // Read the converted video data
-                let videoData = try Data(contentsOf: outputURL)
-                onMediaSelected(videoData, .video)
-                
-                // Clean up temporary file
-                try? FileManager.default.removeItem(at: outputURL)
-            } else if let error = exportSession.error {
-                print("Video conversion failed: \(error.localizedDescription)")
-            }
+
+            // Export the video using modern async throws API
+            try await exportSession.export(to: outputURL, as: .mp4)
+
+            // Read the converted video data
+            let videoData = try Data(contentsOf: outputURL)
+            onMediaSelected(videoData, .video)
+
+            // Clean up temporary file
+            try? FileManager.default.removeItem(at: outputURL)
         } catch {
             print("Error processing video: \(error.localizedDescription)")
         }

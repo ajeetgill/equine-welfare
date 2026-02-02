@@ -27,10 +27,14 @@ class PermissionsManager: ObservableObject {
             newMicrophoneAuth = microphoneAuthStatus == .authorized
         }
         
+        // Capture as let for Swift 6 concurrency safety
+        let cameraResult = newCameraAuth
+        let microphoneResult = newMicrophoneAuth
+
         // Update all UI state on the main thread
         await MainActor.run {
-            self.isCameraAuthorized = newCameraAuth
-            self.isMicrophoneAuthorized = newMicrophoneAuth
+            self.isCameraAuthorized = cameraResult
+            self.isMicrophoneAuthorized = microphoneResult
             // Only show alert if permissions were explicitly denied
             self.showPermissionsAlert = (cameraAuthStatus == .denied || microphoneAuthStatus == .denied)
         }
