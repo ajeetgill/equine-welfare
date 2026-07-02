@@ -126,12 +126,6 @@ struct ContentView: View {
     }
 
     private func loadAssessment(id: UUID) {
-        // Only create a new view model if needed
-        //        if sectionViewModel == nil {
-        //            sectionViewModel = SectionSelectionViewModel(
-        //                modelContext: modelContext)
-        //        }
-
         // Save any pending changes first if we're switching assessments
         if let currentId = currentAssessmentId, currentId != id {
             sectionViewModel.saveAssessment()
@@ -140,11 +134,7 @@ struct ContentView: View {
         // Update the current assessment ID
         currentAssessmentId = id
 
-        // Load the assessment on a background task
         sectionViewModel.loadAssessment(id: id)
-        //        Task {
-        //            await sectionViewModel.loadAssessment(id: id)
-        //        }
     }
 }
 

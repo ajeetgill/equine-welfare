@@ -133,24 +133,9 @@ class BCSManager {
             return nil
         }
         
-        print("Found BCS data for score \(score)")
-        print("Body parts count: \(data.bodyParts.count)")
-        
-        // List all the body part keys to verify
-        print("Body parts: \(data.bodyParts.keys.joined(separator: ", "))")
-        
-        // Debug each body part's description data
-        for (name, desc) in data.bodyParts {
-            print("Body part: \(name), has \(desc.description.count) descriptions")
-            print("  - Descriptions: \(desc.description.joined(separator: ", "))")
-        }
-        
-        // Convert the dictionary to an array of BCSBodyPart 
+        // Convert the dictionary to an array of BCSBodyPart
         var bodyParts = data.bodyParts.map { name, description in
-            let part = BCSBodyPart(name: name, descriptions: description.description)
-            // Debug the created object
-            print("Created BCSBodyPart: \(part.name) with \(part.descriptions.count) descriptions")
-            return part
+            BCSBodyPart(name: name, descriptions: description.description)
         }
         
         // Sort the body parts according to the defined order

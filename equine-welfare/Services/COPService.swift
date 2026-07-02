@@ -1,62 +1,6 @@
 import Foundation
 import SwiftData
 
-/// Parses the COP.json data and returns an array of `Section` objects.
-func parseCOPJSON(data: Data) throws -> [Section] {
-    // Decode the JSON into a dictionary.
-    guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
-        throw NSError(domain: "Invalid JSON format", code: 0, userInfo: nil)
-    }
-    
-    var sections: [Section] = []
-    
-    // Iterate through each section in the JSON.
-    for (sectionKey, sectionContent) in json {
-        // Expected format: "Section X - Title"
-        let keyComponents = sectionKey.components(separatedBy: " - ")
-        guard keyComponents.count >= 2 else { continue }
-        
-        // Extract section ID (as an Int) and title.
-        let idString = keyComponents[0].replacingOccurrences(of: "Section", with: "").trimmingCharacters(in: .whitespaces)
-        guard let sectionID = Int(idString) else { continue }
-        let sectionTitle = keyComponents[1].trimmingCharacters(in: .whitespaces)
-        
-        let section = Section(id: sectionID, title: sectionTitle)
-        
-        // The section content is expected to be a dictionary.
-        guard let contentDict = sectionContent as? [String: Any] else { continue }
-        
-        // If there is a top-level "Requirements" key, create a default subsection.
-        if let requirementsDict = contentDict["Requirements"] as? [String: String] {
-            let subsection = Subsection( name: sectionTitle)
-            for (_, requirementText) in requirementsDict {
-                let requirement = Requirement(text: requirementText)
-                subsection.requirements.append(requirement)
-            }
-            section.subsections.append(subsection)
-        }
-        
-        // If there are "Subsections", iterate and create each one.
-        if let subsectionsDict = contentDict["Subsections"] as? [String: Any] {
-            for (subKey, subContent) in subsectionsDict {
-                let subsection = Subsection(name: subKey)
-                if let subContentDict = subContent as? [String: Any],
-                   let reqs = subContentDict["Requirements"] as? [String: String] {
-                    for (_, requirementText) in reqs {
-                        let requirement = Requirement(text: requirementText)
-                        subsection.requirements.append(requirement)
-                    }
-                }
-                section.subsections.append(subsection)
-            }
-        }
-        
-        sections.append(section)
-    }
-    
-    return sections
-}
-
 // Helper extension for sorting subsection numbers
  extension String {
     /// Extracts dot-separated numeric components (e.g. "2.1.4" -> [2,1,4]).

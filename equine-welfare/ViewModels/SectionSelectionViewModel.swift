@@ -132,12 +132,6 @@ import Observation
     func isSectionApplicable(_ id: Int) -> Bool {
         sections.first(where: { $0.id == id })?.isApplicable ?? false
     }
-    
-//    // Save when returning to home
-//    func prepareForReturn(completion: @escaping () -> Void) {
-//        saveAssessment()
-//        completion()
-//    }
 
     // MARK: - Section Status Management
     func getSectionStatus(_ section: Section) -> SectionCompletionStatus {
