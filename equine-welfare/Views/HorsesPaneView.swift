@@ -20,11 +20,20 @@ struct HorsesPaneView: View {
         case add
     }
 
+    /// The horse whose info/edit is showing, for highlighting its list row.
+    private var selectedHorseId: UUID? {
+        switch mode {
+        case .info(let id), .edit(let id): return id
+        case .add, nil: return nil
+        }
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             NavigationStack {
                 HorsesView(
                     assessmentId: assessmentId,
+                    selectedHorseId: selectedHorseId,
                     onSelectHorse: { mode = .info($0) }
                 )
                 .navigationTitle("Horses")

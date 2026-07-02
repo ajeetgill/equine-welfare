@@ -84,6 +84,64 @@ final class NavigationFlowUITests: XCTestCase {
                       "Add-horse form did not appear after tapping Add")
     }
 
+    /// Adds a named horse and verifies it appears in the master list, then
+    /// captures a screenshot of the redesigned list row.
+    @MainActor
+    func testAddedHorseAppearsInList() throws {
+        let app = XCUIApplication()
+        addUIInterruptionMonitor(withDescription: "System Dialog") { alert in
+            for label in ["Allow", "OK", "Allow While Using App"] {
+                if alert.buttons[label].exists { alert.buttons[label].tap(); return true }
+            }
+            return false
+        }
+        app.launch()
+        app.tap()
+
+        let vet = app.textFields["Veterinarian Name"]
+        XCTAssertTrue(vet.waitForExistence(timeout: 10))
+        vet.tap(); vet.typeText("Dr. Test")
+        let farm = app.textFields["Farm Name"]
+        farm.tap(); farm.typeText("Test Farm")
+        app.buttons["Start Assessment"].tap()
+
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10))
+        if app.buttons["Show Sidebar"].exists {
+            app.buttons["Show Sidebar"].tap()
+        } else if app.buttons["Assessment"].exists {
+            app.buttons["Assessment"].tap()
+        }
+        firstHittable(app, label: "Horses").tap()
+
+        // Open the Add form (retry to clear the iPad-portrait panes overlay).
+        let nameField = app.textFields["Horse name"]
+        for _ in 0..<3 {
+            if nameField.waitForExistence(timeout: 3) { break }
+            if app.buttons["Add"].exists { app.buttons["Add"].tap() }
+        }
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5), "Add form did not open")
+
+        // Fill in enough for a representative row.
+        nameField.tap(); nameField.typeText("Thunder")
+        let breed = app.textFields["Breed"]
+        if breed.exists { breed.tap(); breed.typeText("Standardbred") }
+        let color = app.textFields["Color"]
+        if color.exists { color.tap(); color.typeText("Bay") }
+        let sex = app.textFields["Sex"]
+        if sex.exists { sex.tap(); sex.typeText("Stallion") }
+
+        app.buttons["Save"].tap()
+
+        // The new horse should now appear in the master list.
+        XCTAssertTrue(app.staticTexts["Thunder"].waitForExistence(timeout: 10),
+                      "Added horse did not appear in the list")
+
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = "horse-list-row"
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     /// Returns the first hittable element matching `label`, trying buttons then
     /// static texts (List rows surface differently across layouts).
     @MainActor

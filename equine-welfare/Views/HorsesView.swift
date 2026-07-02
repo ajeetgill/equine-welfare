@@ -5,6 +5,8 @@ struct HorsesView: View {
     @Environment(\.modelContext) private var modelContext
 
     let assessmentId: UUID
+    /// The horse currently shown in the detail column (for row highlighting).
+    var selectedHorseId: UUID?
     var onSelectHorse: (UUID) -> Void
 
     // Get horses from the current assessment
@@ -12,9 +14,11 @@ struct HorsesView: View {
 
     init(
         assessmentId: UUID,
+        selectedHorseId: UUID? = nil,
         onSelectHorse: @escaping (UUID) -> Void = { _ in }
     ) {
         self.assessmentId = assessmentId
+        self.selectedHorseId = selectedHorseId
         self.onSelectHorse = onSelectHorse
 
         // Initialize the Query with proper descriptor and sorting for Swift 6
@@ -30,41 +34,34 @@ struct HorsesView: View {
     }
 
     var horses: [Horse] {
-        // More direct approach - just return the horses from the first assessment
-        let result = assessments.first?.horses ?? []
-        return result
+        assessments.first?.horses ?? []
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        Group {
             if horses.isEmpty {
-                Spacer()
-                Text("No horses added yet")
-                    .foregroundColor(.gray)
-                    .italic()
-                    .frame(maxWidth: .infinity, alignment: .center)
-                Spacer()
+                ContentUnavailableView(
+                    "No Horses Yet",
+                    systemImage: "pawprint",
+                    description: Text("Tap the + button to add the first horse.")
+                )
             } else {
                 List {
                     ForEach(horses) { horse in
-                        VStack(alignment: .leading, spacing: 12) {
-                            Button(action: {
-                                onSelectHorse(horse.uuid)
-                            }) {
-                                HStack {
-                                    HorseInfoRow(horse: horse)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                }
-                                .contentShape(Rectangle())
-
-                            }
-                            .buttonStyle(.plain)
-
-                            HorseNotesSection(horse: horse)
-                                .padding(.top, 8)
+                        Button {
+                            onSelectHorse(horse.uuid)
+                        } label: {
+                            HorseRow(
+                                horse: horse,
+                                isSelected: horse.uuid == selectedHorseId
+                            )
                         }
-                        .padding(.bottom, 20)
+                        .buttonStyle(.plain)
+                        .listRowBackground(
+                            horse.uuid == selectedHorseId
+                                ? Color.accentColor.opacity(0.12)
+                                : Color.clear
+                        )
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
@@ -72,6 +69,7 @@ struct HorsesView: View {
                         }
                     }
                 }
+                .listStyle(.plain)
             }
         }
         .frame(
@@ -96,121 +94,107 @@ struct HorsesView: View {
     }
 }
 
-// Horse info row - tappable to navigate to horse details
-struct HorseInfoRow: View {
+/// A compact, scannable row for the horses master list: thumbnail, name, a
+/// one-line summary, and a BCS badge.
+struct HorseRow: View {
     let horse: Horse
+    var isSelected: Bool = false
 
-    var body: some View {
-        HStack {
-            // Horse image
-            if let photoData = horse.photoData,
-               let uiImage = UIImage(data: photoData.data)
-            {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
-                Image("horse-icon")
-                    .resizable()
-                    .scaledToFill()
-                    .padding(10)
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(.gray)
-                    .background(Color(.systemGray5))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(
-                    "\(horse.name), \(horse.age) \(horse.ageUnit.rawValue) old  (\(horse.isHorse ? "Horse" : "Donkey"))"
-                )
-                .font(.headline)
-
-                HStack(spacing: 12) {
-                    Text("Breed: \(horse.breed)")
-                        .font(.caption)
-
-                    Text(
-                        "Time on Farm: \(horse.timeOnFarm) \(horse.timeUnit.rawValue)"
-                    )
-                    .font(.caption)
-
-                    Text("Color: \(horse.color)")
-                        .font(.caption)
-
-                    Text("Sex: \(horse.sex)")
-                        .font(.caption)
-
-                    Text("BCS: \(String(format: "%.1f", horse.bcsScore))/\(horse.isHorse ? "9" : "5")")
-                        .font(.caption)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    private var displayName: String {
+        horse.name.trimmingCharacters(in: .whitespaces).isEmpty
+            ? "Unnamed \(horse.isHorse ? "Horse" : "Donkey")"
+            : horse.name
     }
-}
 
-// Horse notes section - not tappable for navigation
-struct HorseNotesSection: View {
-    let horse: Horse
-    @Environment(\.modelContext) private var modelContext
-    @State private var isEditingNotes = false
-    @State private var notes: String
+    /// e.g. "Horse · 4 years · Stallion"
+    private var summary: String {
+        [
+            horse.isHorse ? "Horse" : "Donkey",
+            "\(horse.age) \(horse.ageUnit.rawValue)",
+            horse.sex,
+        ]
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty }
+        .joined(separator: " · ")
+    }
 
-    init(horse: Horse) {
-        self.horse = horse
-        self._notes = State(initialValue: horse.notes ?? "")
+    /// e.g. "Standardbred · Bay"
+    private var descriptors: String {
+        [horse.breed, horse.color]
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+    }
+
+    private var bcsText: String {
+        "\(String(format: "%.1f", horse.bcsScore))/\(horse.isHorse ? "9" : "5")"
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("Findings or Extra Details")
+        HStack(spacing: 12) {
+            thumbnail
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(displayName)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Text(summary)
                     .font(.subheadline)
-                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
 
-                Spacer()
-
-                if isEditingNotes {
-                    Button("Done") {
-                        isEditingNotes = false
-                        saveNotes(notes)
-                    }
-                    .font(.caption)
-                    .foregroundColor(.blue)
+                if !descriptors.isEmpty {
+                    Text(descriptors)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
             }
 
-            if isEditingNotes {
-                TextEditor(text: $notes)
-                    .frame(minHeight: 100)
-                    .padding(8)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .onChange(of: notes) { _, newValue in
-                        saveNotes(newValue)
-                    }
-            } else {
-                Text(notes.isEmpty ? "Tap to add notes" : notes)
-                    .font(.caption)
-                    .foregroundColor(notes.isEmpty ? .gray : .primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(8)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .onTapGesture {
-                        isEditingNotes = true
-                    }
-            }
+            Spacer(minLength: 4)
+
+            bcsBadge
         }
-        .padding(.top, 4)
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
     }
 
-    private func saveNotes(_ newNotes: String) {
-        horse.notes = newNotes
-        try? modelContext.save()
+    @ViewBuilder
+    private var thumbnail: some View {
+        if let photoData = horse.photoData,
+           let uiImage = UIImage(data: photoData.data) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 46, height: 46)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        } else {
+            Image("horse-icon")
+                .resizable()
+                .renderingMode(.template)
+                .scaledToFit()
+                .padding(9)
+                .frame(width: 46, height: 46)
+                .foregroundStyle(.secondary)
+                .background(Color(.systemGray5))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+    }
+
+    private var bcsBadge: some View {
+        VStack(spacing: 0) {
+            Text("BCS")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(bcsText)
+                .font(.footnote)
+                .fontWeight(.semibold)
+                .foregroundStyle(.tint)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color(.tintColor).opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
     }
 }
 
