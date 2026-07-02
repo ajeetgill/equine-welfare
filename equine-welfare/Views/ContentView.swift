@@ -45,8 +45,7 @@ struct ContentView: View {
             .navigationDestination(for: AppDestination.self) { destination in
                 switch destination {
                 case .assessment(let assessmentId):
-                    AssessmentSidebarView(
-                        onShowSectionSelection: {},
+                    AssessmentWorkspaceView(
                         viewModel: sectionViewModel,
                         galleryViewModel: GalleryViewModel(
                             sectionViewModel: sectionViewModel),

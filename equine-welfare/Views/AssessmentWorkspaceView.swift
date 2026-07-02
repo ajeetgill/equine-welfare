@@ -2,65 +2,68 @@ import SwiftData  // used in #Preview
 import SwiftUI
 import AVKit
 
-struct AssessmentSidebarView: View {
+/// The workspace for a single assessment: a `NavigationSplitView` whose
+/// sidebar selects which pane (overview / sections / horses / gallery / notes
+/// / a specific section) is shown in the detail column.
+///
+/// `NavigationSplitView` adapts to compact width on its own, so there is no
+/// separate hand-built iPhone layout.
+struct AssessmentWorkspaceView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    // Callbacks for navigation
-    var onShowSectionSelection: () -> Void
+
     var viewModel: SectionSelectionViewModel
     var galleryViewModel: GalleryViewModel
-
-    // Add NavigationPath binding for horse navigation
-    @Binding var navigationPath: NavigationPath
-
-    // Add current assessment ID
     var assessmentId: UUID
 
-    @State private var isApplicableSectionsExpanded: Bool = true
-    @State private var selectedSection: Section?
-    @State private var currentDetailView: DetailView = .sectionSelection
+    @State private var pane: WorkspacePane? = .sections
 
-    // Initializer with navigationPath
-    init(
-        onShowSectionSelection: @escaping () -> Void,
-        viewModel: SectionSelectionViewModel,
-        galleryViewModel: GalleryViewModel,
-        navigationPath: Binding<NavigationPath> = .constant(NavigationPath()),
-        assessmentId: UUID = UUID()
-    ) {
-        self.onShowSectionSelection = onShowSectionSelection
-        self.viewModel = viewModel
-        self.galleryViewModel = galleryViewModel
-        self._navigationPath = navigationPath
-        self.assessmentId = assessmentId
-    }
-    
-    // Update DetailView enum
-    private enum DetailView: Equatable {
-        case overview
-        case sectionSelection
-        case horses
-        case gallery
-        case sideNotes
-        case sectionDetail(Section)
+    var body: some View {
+        NavigationSplitView {
+            List(selection: $pane) {
+                Label("Overview", systemImage: "doc.text.magnifyingglass")
+                    .tag(WorkspacePane.overview)
+                Label("Section Selection", systemImage: "checklist")
+                    .tag(WorkspacePane.sections)
+                Label {
+                    Text("Horses")
+                } icon: {
+                    Image("horse-icon").renderingMode(.template)
+                }
+                .tag(WorkspacePane.horses)
+                Label("Gallery", systemImage: "photo.on.rectangle")
+                    .tag(WorkspacePane.gallery)
+                Label("Side Notes", systemImage: "note.text")
+                    .tag(WorkspacePane.notes)
 
-        static func == (lhs: DetailView, rhs: DetailView) -> Bool {
-            switch (lhs, rhs) {
-            case (.overview, .overview): return true
-            case (.sectionSelection, .sectionSelection): return true
-            case (.horses, .horses): return true
-            case (.gallery, .gallery): return true
-            case (.sideNotes, .sideNotes): return true
-            case (.sectionDetail(let lhs), .sectionDetail(let rhs)):
-                return lhs.id == rhs.id
-            default: return false
+                // `Section` here is the SwiftUI container; the model type of the
+                // same name shadows it (same-module wins), so qualify it.
+                SwiftUI.Section("Applicable Sections") {
+                    ForEach(viewModel.applicableSections) { section in
+                        HStack {
+                            SectionStatusIndicator(
+                                status: getSectionCompletionStatus(section),
+                                isSelected: pane == .section(id: section.id)
+                            )
+                            .padding(.trailing, 4)
+
+                            Text("\(section.id). \(section.title)")
+                        }
+                        .tag(WorkspacePane.section(id: section.id))
+                    }
+                }
             }
+            .navigationTitle("Assessment")
+        } detail: {
+            detailContent
+        }
+        .onDisappear {
+            viewModel.saveAssessment()
         }
     }
 
     @ViewBuilder
     private var detailContent: some View {
-        switch currentDetailView {
+        switch pane {
         case .overview:
             if let assessment = viewModel.assessment {
                 AssessmentOverviewView(
@@ -68,218 +71,23 @@ struct AssessmentSidebarView: View {
                     modelContext: modelContext
                 )
             }
-        case .sectionSelection:
+        case .sections, .none:
             SectionSelectionView(viewModel: viewModel)
         case .horses:
-            HorsesNavigationView(
-                assessmentId: assessmentId
-            )
+            HorsesNavigationView(assessmentId: assessmentId)
         case .gallery:
             GalleryView(viewModel: galleryViewModel)
-        case .sideNotes:
+        case .notes:
             if let assessment = viewModel.currentAssessment {
                 SideNotesView(assessment: assessment)
             }
-        case .sectionDetail(let section):
-            SectionDetailView(section: section)
-        }
-    }
-
-    private var compactLayout: some View {
-        VStack(spacing: 0) {
-            // Navigation picker at the top
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    CompactNavButton(title: "Overview", icon: "doc.text.magnifyingglass",
-                                     isActive: currentDetailView == .overview) {
-                        selectedSection = nil
-                        currentDetailView = .overview
-                    }
-                    CompactNavButton(title: "Sections", icon: "checklist",
-                                     isActive: currentDetailView == .sectionSelection) {
-                        selectedSection = nil
-                        currentDetailView = .sectionSelection
-                    }
-                    CompactNavButton(title: "Horses", icon: "pawprint.fill",
-                                     isActive: currentDetailView == .horses) {
-                        selectedSection = nil
-                        currentDetailView = .horses
-                    }
-                    CompactNavButton(title: "Gallery", icon: "photo.on.rectangle",
-                                     isActive: currentDetailView == .gallery) {
-                        selectedSection = nil
-                        currentDetailView = .gallery
-                    }
-                    CompactNavButton(title: "Notes", icon: "note.text",
-                                     isActive: currentDetailView == .sideNotes) {
-                        selectedSection = nil
-                        currentDetailView = .sideNotes
-                    }
-
-                    // Applicable sections - separated by a divider
-                    if !viewModel.applicableSections.isEmpty {
-                        Divider()
-                            .frame(height: 30)
-
-                        ForEach(viewModel.applicableSections) { section in
-                            let isActive = {
-                                if case .sectionDetail(let s) = currentDetailView {
-                                    return s.id == section.id
-                                }
-                                return false
-                            }()
-                            CompactNavButton(
-                                title: "\(section.id). \(section.title)",
-                                icon: "doc.text",
-                                isActive: isActive
-                            ) {
-                                selectedSection = section
-                                currentDetailView = .sectionDetail(section)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-            }
-            .background(Color(.systemBackground))
-
-            Divider()
-
-            // Detail content
-            detailContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .onDisappear {
-            viewModel.saveAssessment()
-        }
-    }
-
-    var body: some View {
-        if horizontalSizeClass == .compact {
-            compactLayout
-        } else {
-            NavigationSplitView {
-                ScrollView {
-                    // MARK: - Navigation Actions
-                    navigationButtonsView
-                    sectionsList
-                    Spacer()
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                .onDisappear {
-                    viewModel.saveAssessment()
-                }
-            } detail: {
-                detailContent
+        case .section(let id):
+            if let section = viewModel.applicableSections.first(where: { $0.id == id }) {
+                SectionDetailView(section: section)
+            } else {
+                Text("Section not found")
             }
         }
-    }
-
-    // MARK: - View Components
-
-    private var headerView: some View {
-        HStack {
-            Text("Assessment")
-                .font(.title)
-                .fontWeight(.bold)
-
-            Spacer()
-        }
-    }
-
-    private var navigationButtonsView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Overview Button
-            SidebarButton(
-                title: "Overview",
-                icon: "doc.text.magnifyingglass",
-                isActive: currentDetailView == .overview
-            )
-             {
-                selectedSection = nil
-                currentDetailView = .overview
-            }
-            
-            // Section Selection Button
-            SidebarButton(
-                title: "Section Selection",
-                icon: "checklist",
-                isActive: currentDetailView == .sectionSelection
-            ) {
-                selectedSection = nil
-                currentDetailView = .sectionSelection
-                onShowSectionSelection()
-            }
-
-            // Horses Button
-            SidebarButton(
-                title: "Horses",
-                icon: "pawprint.fill",
-                customImage: "horse-icon",
-                isActive: currentDetailView == .horses
-            ) {
-                selectedSection = nil
-                currentDetailView = .horses
-            }
-
-            // Gallery Button
-            SidebarButton(
-                title: "Gallery",
-                icon: "photo.on.rectangle",
-                isActive: currentDetailView == .gallery
-            ) {
-                selectedSection = nil
-                currentDetailView = .gallery
-            }
-            
-            // Side Notes Button
-            SidebarButton(
-                title: "Side Notes",
-                icon: "note.text",
-                isActive: currentDetailView == .sideNotes
-            ) {
-                selectedSection = nil
-                currentDetailView = .sideNotes
-            }
-        }
-    }
-
-    private var sectionsList: some View {
-        // Keep the DisclosureGroup with dropdown functionality
-        DisclosureGroup(
-            isExpanded: $isApplicableSectionsExpanded,
-            content: {
-                ForEach(viewModel.applicableSections) { section in
-                    Button(action: {
-                        selectedSection = section
-                        currentDetailView = .sectionDetail(section)
-                    }) {
-                        HStack {
-                            // Add the status indicator
-                            SectionStatusIndicator(
-                                status: getSectionCompletionStatus(section),
-                                isSelected: selectedSection?.id == section.id
-                            )
-                            .padding(.trailing, 4)
-
-                            Text("\(section.id). \(section.title)")
-                                .foregroundColor(selectedSection?.id == section.id ? .white : .primary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .padding(8)
-                        .background(selectedSection?.id == section.id ? Color.accentColor : Color.clear)
-                        .cornerRadius(8)
-                    }
-                }
-            },
-            label: {
-                Text("Applicable Sections")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-            }
-        )
     }
 
     // Helper method to determine section status
@@ -287,10 +95,8 @@ struct AssessmentSidebarView: View {
         -> SectionCompletionStatus
     {
         // Get all requirements for this section
-        guard
-            let requirements = section.subsections.flatMap({ $0.requirements })
-                as? [Requirement], !requirements.isEmpty
-        else {
+        let requirements = section.subsections.flatMap { $0.requirements }
+        guard !requirements.isEmpty else {
             return .notStarted
         }
 
@@ -305,65 +111,6 @@ struct AssessmentSidebarView: View {
             return .completed
         } else {
             return .inProgress
-        }
-    }
-}
-
-// MARK: - Helper Views
-
-/// Reusable sidebar button component
-struct SidebarButton: View {
-    let title: String
-    var icon: String = "questionmark.app.dashed"
-    var customImage: String?
-    var isActive: Bool? = false
-    var onAction: (() -> Void)?
-
-    var body: some View {
-        Button(action: onAction ?? { }) {
-            HStack {
-                if let img = customImage {
-                    Image(img)
-                        .renderingMode(.template)
-                        .foregroundColor(isActive ?? false ? .white : .accentColor)
-                }
-                else {
-                    Image(systemName: icon)
-                        .foregroundColor(isActive ?? false ? .white : .accentColor)
-                }
-                Text(title)
-                    .fontWeight(isActive ?? false ? .medium : .regular)
-                    .foregroundColor(isActive ?? false ? .white : .accentColor)
-                Spacer()
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
-            .background(isActive ?? false ? Color.accentColor : Color.clear)
-            .cornerRadius(8)
-        }
-    }
-}
-
-/// Compact navigation button for iPhone layout
-struct CompactNavButton: View {
-    let title: String
-    let icon: String
-    let isActive: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                Text(title)
-                    .font(.caption)
-            }
-            .foregroundColor(isActive ? .white : .accentColor)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(isActive ? Color.accentColor : Color(.systemGray6))
-            .cornerRadius(8)
         }
     }
 }
@@ -502,26 +249,6 @@ struct RequirementView: View {
                                                 "Delete", systemImage: "trash")
                                         }
                                     }
-//                                    .overlay(
-//                                        Button(action: {
-//                                            if let index = requirement
-//                                                .mediaAttachments.firstIndex(
-//                                                    where: {
-//                                                        $0.id == attachment.id
-//                                                    })
-//                                            {
-//                                                requirement.mediaAttachments
-//                                                    .remove(at: index)
-//                                            }
-//                                        }) {
-//                                            Image(systemName: "xmark.circle.fill")
-//                                                .foregroundColor(.white)
-//                                                .background(Color.black.opacity(0.7))
-//                                                .clipShape(Circle())
-//                                        }
-//                                        .padding(4)
-//                                        ,alignment: .topTrailing
-//                                    )
                                 }
                             }
                             .padding(.vertical, 4)
@@ -595,7 +322,7 @@ struct MediaPreviewView: View {
             }
         }
     }
-    
+
     private var videoPlayerView: some View {
         Group {
             if let player = videoPlayer {
@@ -613,21 +340,21 @@ struct MediaPreviewView: View {
             }
         }
     }
-    
+
     private func prepareVideoPlayer() {
         guard attachment.mediaType == .video else { return }
-        
+
         // Create a temporary file to play the video
         let tempDirectory = FileManager.default.temporaryDirectory
         let tempURL = tempDirectory.appendingPathComponent("temp_video_\(UUID().uuidString).mp4")
         self.tempVideoURL = tempURL
-        
+
         do {
             try attachment.data.write(to: tempURL)
-            
+
             // Create asset and check if it's playable
             let asset = AVURLAsset(url: tempURL)
-            
+
             Task {
                 do {
                     // Check if the asset is playable
@@ -662,18 +389,18 @@ struct MediaPreviewView: View {
             self.errorMessage = "Error creating video file: \(error.localizedDescription)"
         }
     }
-    
+
     private func cleanupResources() {
         // Stop and release player
         videoPlayer?.pause()
         videoPlayer = nil
-        
+
         // Clean up temporary file
         if let tempURL = tempVideoURL {
             try? FileManager.default.removeItem(at: tempURL)
             self.tempVideoURL = nil
         }
-        
+
         // Remove any observers
         NotificationCenter.default.removeObserver(self)
     }
@@ -707,10 +434,10 @@ struct ComplianceButton: View {
     let viewModel = SectionSelectionViewModel(
         modelContext: container.mainContext)
 
-    // Create the view with dummy callbacks
-    AssessmentSidebarView(
-        onShowSectionSelection: {},
+    // Create the view with dummy dependencies
+    AssessmentWorkspaceView(
         viewModel: viewModel,
-        galleryViewModel: GalleryViewModel(sectionViewModel: viewModel)
+        galleryViewModel: GalleryViewModel(sectionViewModel: viewModel),
+        assessmentId: UUID()
     )
 }
