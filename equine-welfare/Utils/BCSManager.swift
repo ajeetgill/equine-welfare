@@ -11,7 +11,7 @@ struct BCSBodyPart: Identifiable {
 // Codable structure to handle single-string and array descriptions
 struct BCSBodyPartDescription: Codable {
     let description: [String]
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let stringArray = try? container.decode([String].self) {
@@ -22,7 +22,7 @@ struct BCSBodyPartDescription: Codable {
             self.description = []
         }
     }
-    
+
     init(description: [String]) {
         self.description = description
     }
@@ -33,25 +33,25 @@ struct BCSData: Codable {
     let score: Int
     let photo: String
     let bodyParts: [String: BCSBodyPartDescription]
-    
+
     enum CodingKeys: String, CodingKey {
         case score, photo
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         score = try container.decode(Int.self, forKey: .score)
         photo = try container.decode(String.self, forKey: .photo)
-        
+
         // Decode dynamic body part keys
         let allKeys = try decoder.container(keyedBy: DynamicCodingKeys.self)
         var tempBodyParts = [String: BCSBodyPartDescription]()
-        
+
         for key in allKeys.allKeys {
             if key.stringValue == "score" || key.stringValue == "photo" {
                 continue
             }
-            
+
             // First get the nested container for this body part
             if let nestedContainer = try? allKeys.nestedContainer(keyedBy: DynamicCodingKeys.self, forKey: key) {
                 // Then get the description from within that container
@@ -64,7 +64,7 @@ struct BCSData: Codable {
                 }
             }
         }
-        
+
         self.bodyParts = tempBodyParts
     }
 }
@@ -77,96 +77,117 @@ struct DynamicCodingKeys: CodingKey {
     init?(intValue: Int) { return nil }
 }
 
-class BCSManager {
-    static let shared = BCSManager()
-    
-    // Add this constant for ordering body parts
-    private let bodyPartOrder = [
-        "WHOLE BODY",
-        "NECK",
-        "WITHERS", 
-        "BACK",
-        "TAIL HEAD",
-        "RIBS",
-        "SHOULDER"
-    ]
-    
+/// Loads and serves Body Condition Score reference data.
+///
+/// A single implementation backs both species: `BCSManager.shared` for horses
+/// and `BCSManager.donkey` for donkeys. They differ only in which JSON file
+/// they load and the display order of body parts.
+final class BCSManager {
+    /// Horse BCS reference data (`BCS.json`).
+    static let shared = BCSManager(
+        resource: "BCS",
+        bodyPartOrder: [
+            "WHOLE BODY",
+            "NECK",
+            "WITHERS",
+            "BACK",
+            "TAIL HEAD",
+            "RIBS",
+            "SHOULDER"
+        ]
+    )
+
+    /// Donkey BCS reference data (`BCS-Donkey.json`).
+    static let donkey = BCSManager(
+        resource: "BCS-Donkey",
+        bodyPartOrder: [
+            "NECK AND SHOULDERS",
+            "WITHERS",
+            "RIBS AND BELLY",
+            "BACK AND LOINS",
+            "HINDQUARTERS"
+        ]
+    )
+
+    private let resource: String
+    private let bodyPartOrder: [String]
     private var bcsScores: [String: BCSData] = [:]
-    
-    // Changed from private to internal (default) so it can be accessed
-    init() {
+
+    init(resource: String, bodyPartOrder: [String]) {
+        self.resource = resource
+        self.bodyPartOrder = bodyPartOrder
         loadBCSData()
     }
-    
+
     private func loadBCSData() {
-        guard let url = Bundle.main.url(forResource: "BCS", withExtension: "json"),
+        guard let url = Bundle.main.url(forResource: resource, withExtension: "json"),
               let data = try? Data(contentsOf: url) else {
-            print("⚠️ Failed to load BCS.json file")
+            print("⚠️ Failed to load \(resource).json file")
             return
         }
-        
+
         do {
             let decoder = JSONDecoder()
             bcsScores = try decoder.decode([String: BCSData].self, from: data)
         } catch {
-            print("❌ Error decoding BCS data: \(error)")
+            print("❌ Error decoding BCS data from \(resource).json: \(error)")
         }
     }
-    
+
     func getBCSImage(for score: Int) -> Image {
         let scoreKey = "BCS \(score)"
-        
+
         guard let data = bcsScores[scoreKey],
               let uiImage = UIImage(named: data.photo) else {
             print("⚠️ Failed to load image for BCS \(score), image name: \(bcsScores[scoreKey]?.photo ?? "unknown")")
             return Image(systemName: "photo")
         }
-        
+
         return Image(uiImage: uiImage)
     }
-    
+
     func getBCSData(for score: Int) -> [BCSBodyPart]? {
         let scoreKey = "BCS \(score)"
-        
+
         guard let data = bcsScores[scoreKey] else {
-            print("⚠️ No BCS data found for score: \(score)")
+            print("⚠️ No BCS data found for score \(score) in \(resource).json")
             return nil
         }
-        
+
         // Convert the dictionary to an array of BCSBodyPart
         var bodyParts = data.bodyParts.map { name, description in
             BCSBodyPart(name: name, descriptions: description.description)
         }
-        
+
         // Sort the body parts according to the defined order
         bodyParts.sort { part1, part2 in
             let index1 = bodyPartOrder.firstIndex(of: part1.name) ?? Int.max
             let index2 = bodyPartOrder.firstIndex(of: part2.name) ?? Int.max
             return index1 < index2
         }
-        
+
         return bodyParts
     }
-    
+
     func getDescription(for score: Int, bodyPart: String) -> [String] {
         let scoreKey = "BCS \(score)"
-        
+
         guard let data = bcsScores[scoreKey],
               let bodyPartDescription = data.bodyParts[bodyPart] else {
             return []
         }
-        
+
         return bodyPartDescription.description
     }
-    
+
     func getAllBodyParts(for score: Int) -> [String] {
         let scoreKey = "BCS \(score)"
-        
+
         guard let data = bcsScores[scoreKey] else {
             return []
         }
-        
+
         // Return body parts in the specified order
         return bodyPartOrder.filter { data.bodyParts.keys.contains($0) }
     }
-} 
+}

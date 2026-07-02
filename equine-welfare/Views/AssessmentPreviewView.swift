@@ -5,36 +5,9 @@ struct AssessmentPreviewView: View {
     let assessment: Assessment
     
     // MARK: - Helper Methods for Content Generation
-    
-//    Function to get non-compliant sections - used in multiple places
-    private func getNonCompliantSections() -> [Section] {
-        assessment.sections
-            .filter { section in
-                section.isApplicable && section.subsections.contains { subsection in
-                    subsection.requirements.contains { requirement in
-                        requirement.complianceStatus == .notCompliant
-                    }
-                }
-            }
-            .sorted(by: { $0.id < $1.id })
-    }
-    
-//    Function to get non-compliant subsections for a section
-    private func getNonCompliantSubsections(for section: Section) -> [Subsection] {
-        section.subsections.filter { subsection in
-            subsection.requirements.contains { requirement in
-                requirement.complianceStatus == .notCompliant
-            }
-        }
-    }
-    
-    // Function to get non-compliant requirements for a subsection
-    private func getNonCompliantRequirements(for subsection: Subsection) -> [Requirement] {
-        subsection.requirements.filter { requirement in
-            requirement.complianceStatus == .notCompliant
-        }
-    }
-    
+    // Non-compliant filtering lives on the models (see NonComplianceFilters.swift)
+    // so the preview and every export format share one definition.
+
     // Function to generate HTML content for sharing as a .doc file
     func generateDocContent() -> String {
         // Create HTML document with styling
@@ -70,7 +43,7 @@ struct AssessmentPreviewView: View {
         
         """
         
-        let relevantSections = getNonCompliantSections()
+        let relevantSections = assessment.nonCompliantSections
         
         var htmlContent = html
         
@@ -81,13 +54,13 @@ struct AssessmentPreviewView: View {
                 htmlContent += "<div class='section'>"
                 htmlContent += "<h2>Section \(section.id): \(section.title)</h2>"
                 
-                let nonCompliantSubsections = getNonCompliantSubsections(for: section)
+                let nonCompliantSubsections = section.nonCompliantSubsections
                 
                 for subsection in nonCompliantSubsections {
                     htmlContent += "<div class='subsection'>"
                     htmlContent += "<h3>\(subsection.name)</h3>"
                     
-                    let nonCompliantRequirements = getNonCompliantRequirements(for: subsection)
+                    let nonCompliantRequirements = subsection.nonCompliantRequirements
                     
                     for requirement in nonCompliantRequirements {
                         htmlContent += "<div class='requirement'>"
@@ -133,7 +106,7 @@ struct AssessmentPreviewView: View {
         content += "Farm Name: \(assessment.farmName)\n"
         content += "Date of Visit: \(assessment.formattedDate)\n\n"
         
-        let relevantSections = getNonCompliantSections()
+        let relevantSections = assessment.nonCompliantSections
         
         if relevantSections.isEmpty {
             content += "No non-compliant requirements found.\n"
@@ -141,12 +114,12 @@ struct AssessmentPreviewView: View {
             for section in relevantSections {
                 content += "Section \(section.id): \(section.title)\n"
                 
-                let nonCompliantSubsections = getNonCompliantSubsections(for: section)
+                let nonCompliantSubsections = section.nonCompliantSubsections
                 
                 for subsection in nonCompliantSubsections {
                     content += "\n\(subsection.name)\n"
                     
-                    let nonCompliantRequirements = getNonCompliantRequirements(for: subsection)
+                    let nonCompliantRequirements = subsection.nonCompliantRequirements
                     
                     for requirement in nonCompliantRequirements {
                         content += "\n\(requirement.text)\n"
@@ -178,7 +151,7 @@ struct AssessmentPreviewView: View {
                 AssessmentHeaderView(assessment: assessment)
                 
                 // Sections - only show sections that have non-compliant requirements
-                ForEach(getNonCompliantSections()) { section in
+                ForEach(assessment.nonCompliantSections) { section in
                     SectionPreviewView(section: section)
                 }
             }
@@ -235,23 +208,14 @@ struct DetailRow: View {
 // Helper view for section preview
 struct SectionPreviewView: View {
     let section: Section
-    
-    // Only get subsections that have non-compliant requirements
-    private var nonCompliantSubsections: [Subsection] {
-        section.subsections.filter { subsection in
-            subsection.requirements.contains { requirement in
-                requirement.complianceStatus == .notCompliant
-            }
-        }
-    }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Section \(section.id): \(section.title)")
                 .font(.title2)
                 .fontWeight(.bold)
-            
-            ForEach(nonCompliantSubsections, id: \.name) { subsection in
+
+            ForEach(section.nonCompliantSubsections, id: \.name) { subsection in
                 SubsectionPreviewView(subsection: subsection)
             }
             
@@ -263,21 +227,14 @@ struct SectionPreviewView: View {
 // Helper view for subsection preview
 struct SubsectionPreviewView: View {
     let subsection: Subsection
-    
-    // Only get non-compliant requirements
-    private var nonCompliantRequirements: [Requirement] {
-        subsection.requirements.filter { requirement in
-            requirement.complianceStatus == .notCompliant
-        }
-    }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(subsection.name)
                 .font(.title3)
                 .fontWeight(.semibold)
-            
-            ForEach(nonCompliantRequirements, id: \.text) { requirement in
+
+            ForEach(subsection.nonCompliantRequirements, id: \.text) { requirement in
                 RequirementPreviewView(requirement: requirement)
             }
         }

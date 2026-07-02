@@ -55,11 +55,8 @@ struct PreviousAssessmentRow: View {
     
     // MARK: - Helper Methods
     private func prepareShareContent() {
-        // Create a preview view to generate content that matches what's shown in preview
-        let previewView = AssessmentPreviewView(assessment: assessment)
-        
-        // Generate RTF content instead of HTML
-        let attributedString = generateRTFContent(from: previewView)
+        // Generate RTF content that matches what's shown in the preview
+        let attributedString = generateRTFContent()
         
         // Create a temporary file with a sanitized filename
         let tempDir = FileManager.default.temporaryDirectory
@@ -132,7 +129,7 @@ struct PreviousAssessmentRow: View {
     }
     
     // Generate RTF content that matches the preview
-    private func generateRTFContent(from previewView: AssessmentPreviewView) -> NSAttributedString {
+    private func generateRTFContent() -> NSAttributedString {
         let attributedString = NSMutableAttributedString()
         
         // Title
@@ -161,17 +158,9 @@ struct PreviousAssessmentRow: View {
         attributedString.append(NSAttributedString(string: "Date of Visit: ", attributes: boldAttributes))
         attributedString.append(NSAttributedString(string: "\(assessment.formattedDate)\n\n", attributes: headerAttributes))
         
-        // Get non-compliant sections (reusing the same logic from AssessmentPreviewView)
-        let nonCompliantSections = assessment.sections
-            .filter { section in
-                section.isApplicable && section.subsections.contains { subsection in
-                    subsection.requirements.contains { requirement in
-                        requirement.complianceStatus == .notCompliant
-                    }
-                }
-            }
-            .sorted(by: { $0.id < $1.id })
-        
+        // Non-compliant filtering is shared with the preview (see NonComplianceFilters.swift)
+        let nonCompliantSections = assessment.nonCompliantSections
+
         if nonCompliantSections.isEmpty {
             attributedString.append(NSAttributedString(string: "No non-compliant requirements found.\n", attributes: headerAttributes))
         } else {
@@ -183,13 +172,8 @@ struct PreviousAssessmentRow: View {
                 ]
                 attributedString.append(NSAttributedString(string: "Section \(section.id): \(section.title)\n\n", attributes: sectionAttributes))
                 
-                // Get non-compliant subsections
-                let nonCompliantSubsections = section.subsections.filter { subsection in
-                    subsection.requirements.contains { requirement in
-                        requirement.complianceStatus == .notCompliant
-                    }
-                }
-                
+                let nonCompliantSubsections = section.nonCompliantSubsections
+
                 for subsection in nonCompliantSubsections {
                     // Subsection name
                     let subsectionAttributes: [NSAttributedString.Key: Any] = [
@@ -198,11 +182,8 @@ struct PreviousAssessmentRow: View {
                     ]
                     attributedString.append(NSAttributedString(string: "\(subsection.name)\n\n", attributes: subsectionAttributes))
                     
-                    // Get non-compliant requirements
-                    let nonCompliantRequirements = subsection.requirements.filter { requirement in
-                        requirement.complianceStatus == .notCompliant
-                    }
-                    
+                    let nonCompliantRequirements = subsection.nonCompliantRequirements
+
                     for requirement in nonCompliantRequirements {
                         // Requirement text
                         attributedString.append(NSAttributedString(string: "\(requirement.text)\n", attributes: headerAttributes))
