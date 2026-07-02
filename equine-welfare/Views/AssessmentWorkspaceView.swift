@@ -10,6 +10,7 @@ import AVKit
 /// separate hand-built iPhone layout.
 struct AssessmentWorkspaceView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
 
     var viewModel: SectionSelectionViewModel
     var galleryViewModel: GalleryViewModel
@@ -53,6 +54,14 @@ struct AssessmentWorkspaceView: View {
                 }
             }
             .navigationTitle("Assessment")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Done") {
+                        viewModel.saveAssessment()
+                        dismiss()
+                    }
+                }
+            }
         } detail: {
             detailContent
         }
@@ -74,7 +83,7 @@ struct AssessmentWorkspaceView: View {
         case .sections, .none:
             SectionSelectionView(viewModel: viewModel)
         case .horses:
-            HorsesNavigationView(assessmentId: assessmentId)
+            HorsesPaneView(assessmentId: assessmentId)
         case .gallery:
             GalleryView(viewModel: galleryViewModel)
         case .notes:

@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import equine_welfare
+@testable import Horse_C_O_P
 
 struct equine_welfareTests {
 

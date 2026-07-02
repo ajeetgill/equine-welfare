@@ -266,3 +266,45 @@ remove the inconsistency.
 | 2 | Workspace → `NavigationSplitView` + `List(selection:)` | AssessmentWorkspaceView (renamed) | `DetailView` enum, `compactLayout`, button-bar helpers |
 | 3 | Horses → `NavigationStack` + `navigationDestination` | HorsesNavigationView, HorsesView, HorseInfoView, HorseDetailView | `HorseViewState`, manual Back button, `onSelectHorse`/`onEdit`/`onDismiss` callbacks |
 | 4 | (Stretch) `@Observable AppRouter` for deep-linking | new router | binding threading |
+
+---
+
+## Implementation outcome (2026-07-01)
+
+Phases 0–2 landed as planned. Phase 3 required two deviations, both forced by a
+SwiftUI limitation confirmed via an automated UI test
+(`equine-welfareUITests/NavigationFlowUITests`):
+
+**Push navigation does not work inside a `NavigationSplitView` detail column.**
+Tested exhaustively — inner `NavigationStack`, a single detail-column
+`NavigationStack` + `navigationDestination`, programmatic `path.append`, and
+declarative `NavigationLink(value:)` all failed to push, even after making the
+workspace a navigation root. So:
+
+1. **Workspace is presented as a `fullScreenCover`, not a stack push.** A
+   `NavigationSplitView` must be a navigation root; pushing it onto the root
+   `NavigationStack` breaks its detail-column navigation. `ContentView` now
+   presents `AssessmentWorkspaceView` via `.fullScreenCover(item:)` with a
+   "Done" button to dismiss. `AppDestination` was removed (no longer needed).
+
+2. **The horses pane is a selection-based master-detail, not a push stack.**
+   `HorsesPaneView` lays out `[ Horses list | Horse detail ]` and swaps the
+   detail via a `@State` mode (info / add / edit) — no push. Combined with the
+   workspace sidebar this gives the `[ Panes | Horses list | Horse detail ]`
+   layout. `HorseRoute` / `HorsesNavigationView` were removed.
+
+Verified: `NavigationFlowUITests` passes on both iPad and iPhone (Home → Start
+→ workspace → Horses → Add shows the horse form).
+
+### Known follow-ups (not blocking)
+- The two side-by-side `NavigationStack`s in `HorsesPaneView` merge their titles
+  into one bar (shows "Horses" rather than a distinct "Add Horse"/"Edit Horse"
+  title). Cosmetic.
+- On iPad portrait the panes sidebar shows as an overlay that stays open after
+  selecting a pane; the user taps away to dismiss it. Standard NavigationSplitView
+  behavior; could be polished with explicit `columnVisibility` management.
+- `HorsesPaneView`'s fixed 340pt list column is cramped on iPhone compact
+  (iPad-primary app); consider an adaptive width or a compact-specific layout.
+- Fixed a pre-existing break in the unit-test target (`TEST_HOST` and
+  `@testable import` still referenced the old `equine-welfare` product name
+  after the rename to `Horse C.O.P`) so the test action runs again.

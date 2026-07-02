@@ -8,8 +8,13 @@ struct ContentView: View {
     @State private var vetName = ""
     @State private var farmName = ""
     @State private var visitDate = Date()
-    @State private var path: [AppDestination] = []
+    @State private var openAssessment: OpenAssessment?
     @State private var sectionViewModel: SectionSelectionViewModel
+
+    /// Identifiable wrapper so an assessment can drive `fullScreenCover(item:)`.
+    struct OpenAssessment: Identifiable {
+        let id: UUID
+    }
 
     // MARK: - Initialization
 
@@ -29,44 +34,43 @@ struct ContentView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             VStack(alignment: .leading, spacing: 24) {
                 MainScreen(
                     vetName: $vetName,
                     farmName: $farmName,
                     visitDate: $visitDate,
-                    onStartNewAssessment: startNewAssessment
+                    onStartNewAssessment: openAssessmentWorkspace
                 )
 
                 ScrollView {
-                    PreviousAssessments(path: $path)
-                }
-            }
-            .navigationDestination(for: AppDestination.self) { destination in
-                switch destination {
-                case .assessment(let assessmentId):
-                    AssessmentWorkspaceView(
-                        viewModel: sectionViewModel,
-                        galleryViewModel: GalleryViewModel(
-                            sectionViewModel: sectionViewModel),
-                        assessmentId: assessmentId
-                    )
-                    .onAppear {
-                        // The workspace owns loading; saving happens on its
-                        // onDisappear, so switching assessments persists the
-                        // previous one before the next loads.
-                        sectionViewModel.loadAssessment(id: assessmentId)
-                    }
+                    PreviousAssessments(onOpen: openAssessmentWorkspace)
                 }
             }
             .padding()
+        }
+        // The assessment workspace is a NavigationSplitView, which must be a
+        // navigation root — pushing it onto a NavigationStack breaks its
+        // detail-column navigation. Present it as a full-screen root instead.
+        .fullScreenCover(item: $openAssessment) { open in
+            AssessmentWorkspaceView(
+                viewModel: sectionViewModel,
+                galleryViewModel: GalleryViewModel(
+                    sectionViewModel: sectionViewModel),
+                assessmentId: open.id
+            )
+            .onAppear {
+                // The workspace owns loading; saving happens on its
+                // onDisappear, so reopening persists the previous one first.
+                sectionViewModel.loadAssessment(id: open.id)
+            }
         }
     }
 
     // MARK: - Navigation Methods
 
-    private func startNewAssessment(assessmentId: UUID) {
-        path.append(.assessment(id: assessmentId))
+    private func openAssessmentWorkspace(assessmentId: UUID) {
+        openAssessment = OpenAssessment(id: assessmentId)
     }
 }
 

@@ -2,11 +2,13 @@ import Foundation
 
 // Central navigation route types.
 //
-// The app has three distinct navigation containers, each with a single
-// source of truth:
-//   1. Root NavigationStack        -> [AppDestination]   (app-level flow)
-//   2. Workspace NavigationSplitView -> WorkspacePane    (pane selection)
-//   3. Horses NavigationStack      -> [HorseRoute]       (horse sub-flow)
+// The app's navigation:
+//   - Home (NavigationStack) presents the assessment workspace as a
+//     full-screen cover (a NavigationSplitView must be a navigation root).
+//   - Workspace NavigationSplitView -> WorkspacePane (sidebar selection).
+//   - The horses pane is a selection-based master-detail (see HorsesPaneView);
+//     push navigation inside a NavigationSplitView detail column does not fire
+//     reliably, so horse info/add/edit are driven by selection, not a stack.
 //
 // See docs/plans/2026-07-01-navigation-unification.md.
 
@@ -22,11 +24,4 @@ enum WorkspacePane: Hashable {
     case gallery
     case notes
     case horses
-}
-
-/// A screen in the horses sub-flow, pushed onto the horses `NavigationStack`.
-enum HorseRoute: Hashable {
-    case info(horseId: UUID)
-    case add
-    case edit(horseId: UUID)
 }

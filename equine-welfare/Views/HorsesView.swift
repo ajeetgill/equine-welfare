@@ -252,7 +252,7 @@ struct HorseNotesSection: View {
 
     modelContext.insert(assessment)
 
-    return HorsesNavigationView(
+    return HorsesPaneView(
         assessmentId: assessment.id
     )
     .modelContainer(container)

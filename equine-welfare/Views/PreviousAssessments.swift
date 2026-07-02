@@ -13,10 +13,11 @@ struct PreviousAssessments: View {
     @Query(sort: \Assessment.visitDate, order: .reverse) var assessments:
         [Assessment]
     
-    @Binding var path: [AppDestination]
+    /// Called with the tapped assessment's id to open its workspace.
+    var onOpen: (UUID) -> Void
 
-    init(path: Binding<[AppDestination]>) {
-        self._path = path
+    init(onOpen: @escaping (UUID) -> Void) {
+        self.onOpen = onOpen
     }
 
     var body: some View {
@@ -56,7 +57,7 @@ struct PreviousAssessments: View {
                         assessment: assessment, 
                         modelContext: modelContext,
                         onSelectAssessment: { assessmentId in
-                            path.append(.assessment(id: assessmentId))
+                            onOpen(assessmentId)
                         }
                     )
                 }
@@ -66,6 +67,6 @@ struct PreviousAssessments: View {
 }
 
 #Preview {
-    PreviousAssessments(path: .constant([]))
+    PreviousAssessments(onOpen: { _ in })
         .modelContainer(for: Assessment.self, inMemory: true)
 }
