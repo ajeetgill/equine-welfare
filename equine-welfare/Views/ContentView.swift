@@ -8,9 +8,7 @@ struct ContentView: View {
     @State private var vetName = ""
     @State private var farmName = ""
     @State private var visitDate = Date()
-    @State private var currentAssessmentId: UUID?
-    @State private var selectedSectionId: Int?
-    @State private var navigationPath = NavigationPath()
+    @State private var path: [AppDestination] = []
     @State private var sectionViewModel: SectionSelectionViewModel
 
     // MARK: - Initialization
@@ -31,7 +29,7 @@ struct ContentView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack(path: $path) {
             VStack(alignment: .leading, spacing: 24) {
                 MainScreen(
                     vetName: $vetName,
@@ -41,43 +39,24 @@ struct ContentView: View {
                 )
 
                 ScrollView {
-                    PreviousAssessments(navigationPath: $navigationPath)
+                    PreviousAssessments(path: $path)
                 }
             }
             .navigationDestination(for: AppDestination.self) { destination in
                 switch destination {
-                case .overview(let assessmentId):
-                    AssessmentOverviewView(
-                        assessment: assessments.first { $0.id == assessmentId } ?? Assessment(vetName: "", farmName: "", visitDate: Date()),
-                        modelContext: modelContext
-                    )
-                    .onAppear {
-                        currentAssessmentId = assessmentId
-                        loadAssessment(id: assessmentId)
-                    }
-                    
-                case .sectionSelection(let assessmentId):
+                case .assessment(let assessmentId):
                     AssessmentSidebarView(
                         onShowSectionSelection: {},
                         viewModel: sectionViewModel,
                         galleryViewModel: GalleryViewModel(
                             sectionViewModel: sectionViewModel),
-                        navigationPath: $navigationPath,
                         assessmentId: assessmentId
                     )
                     .onAppear {
-                        currentAssessmentId = assessmentId
-                        selectedSectionId = nil
-                        loadAssessment(id: assessmentId)
-                    }
-
-                case .sectionDetail(let sectionId):
-                    if let section = sectionViewModel.sections.first(
-                        where: { $0.id == sectionId })
-                    {
-                        SectionDetailView(section: section)
-                    } else {
-                        Text("Section not found")
+                        // The workspace owns loading; saving happens on its
+                        // onDisappear, so switching assessments persists the
+                        // previous one before the next loads.
+                        sectionViewModel.loadAssessment(id: assessmentId)
                     }
                 }
             }
@@ -88,53 +67,7 @@ struct ContentView: View {
     // MARK: - Navigation Methods
 
     private func startNewAssessment(assessmentId: UUID) {
-        currentAssessmentId = assessmentId
-        navigationPath.append(
-            AppDestination.sectionSelection(assessmentId: assessmentId))
-    }
-
-    private func editAssessment(assessmentId: UUID) {
-        currentAssessmentId = assessmentId
-        navigationPath.append(
-            AppDestination.sectionSelection(assessmentId: assessmentId))
-    }
-
-    private func returnToMain() {
-        // Save any pending changes
-        sectionViewModel.saveAssessment()
-
-        // Clear state and navigation
-        currentAssessmentId = nil
-        selectedSectionId = nil
-        navigationPath = NavigationPath()
-
-        // Reset form fields to prevent previous assessment data from appearing in new form
-        vetName = ""
-        farmName = ""
-        visitDate = Date()
-    }
-
-    private func showSectionSelection() {
-        selectedSectionId = nil
-        if navigationPath.count > 0 {
-            navigationPath.removeLast(navigationPath.count)
-        }
-        if let assessmentId = currentAssessmentId {
-            navigationPath.append(
-                AppDestination.sectionSelection(assessmentId: assessmentId))
-        }
-    }
-
-    private func loadAssessment(id: UUID) {
-        // Save any pending changes first if we're switching assessments
-        if let currentId = currentAssessmentId, currentId != id {
-            sectionViewModel.saveAssessment()
-        }
-
-        // Update the current assessment ID
-        currentAssessmentId = id
-
-        sectionViewModel.loadAssessment(id: id)
+        path.append(.assessment(id: assessmentId))
     }
 }
 

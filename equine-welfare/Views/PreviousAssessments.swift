@@ -13,10 +13,10 @@ struct PreviousAssessments: View {
     @Query(sort: \Assessment.visitDate, order: .reverse) var assessments:
         [Assessment]
     
-    @Binding var navigationPath: NavigationPath
+    @Binding var path: [AppDestination]
 
-    init(navigationPath: Binding<NavigationPath>) {
-        self._navigationPath = navigationPath
+    init(path: Binding<[AppDestination]>) {
+        self._path = path
     }
 
     var body: some View {
@@ -56,8 +56,7 @@ struct PreviousAssessments: View {
                         assessment: assessment, 
                         modelContext: modelContext,
                         onSelectAssessment: { assessmentId in
-                            navigationPath.append(
-                                AppDestination.sectionSelection(assessmentId: assessmentId))
+                            path.append(.assessment(id: assessmentId))
                         }
                     )
                 }
@@ -67,6 +66,6 @@ struct PreviousAssessments: View {
 }
 
 #Preview {
-    PreviousAssessments(navigationPath: .constant(NavigationPath()))
+    PreviousAssessments(path: .constant([]))
         .modelContainer(for: Assessment.self, inMemory: true)
 }
