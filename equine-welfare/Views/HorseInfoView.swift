@@ -350,7 +350,6 @@ struct HorseInfoView: View {
                 // Try to save immediately
                 do {
                     try modelContext.save()
-                    print("DEBUG: Successfully saved \(mediaType) attachment to model context")
                 } catch {
                     print("ERROR: Failed to save \(mediaType) attachment: \(error.localizedDescription)")
                 }
@@ -414,12 +413,6 @@ struct HorseInfoView: View {
             if let loadedHorse = try modelContext.fetch(descriptor).first {
                 self.horse = loadedHorse
                 self.findings = loadedHorse.notes ?? ""
-                
-                // TODO: check if i need the below code block about repairing relationship
-                // Debug output to check the assessment relationship
-                if let assessment = loadedHorse.assessment {
-                    print("DEBUG: Horse belongs to assessment: \(assessment.id)")
-                }
             } else {
                 print("ERROR: Horse with ID \(horseId) not found")
             }
