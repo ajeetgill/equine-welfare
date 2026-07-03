@@ -1,30 +1,35 @@
 import SwiftUI
 
-/// The horses pane, laid out as two columns (list | detail). Combined with the
-/// workspace sidebar this gives an overall `[ Panes | Horses list | Horse
-/// detail ]` layout.
+/// The horses pane: a two-column master/detail (list | selected-horse info).
+/// Combined with the workspace sidebar this reads as `[ Panes | Horses list |
+/// Horse info ]`.
 ///
-/// Navigation between list / info / add / edit is selection-based (a `@State`
-/// mode drives the detail column) rather than push-based, because push
-/// navigation inside a `NavigationSplitView` detail column does not fire
-/// reliably. Each column has its own non-pushing `NavigationStack` purely to
-/// host a title and toolbar.
+/// Adding and editing a horse are modal *tasks* (discrete, cancelable,
+/// committed), so they present as a sheet with Cancel / Save rather than taking
+/// over the detail column. Viewing a horse stays inline in the detail column.
 struct HorsesPaneView: View {
     let assessmentId: UUID
 
-    @State private var mode: Mode?
+    /// The horse shown in the detail column.
+    @State private var selectedHorseId: UUID?
+    /// Non-nil while the add/edit sheet is presented.
+    @State private var editing: EditTarget?
 
-    enum Mode: Equatable {
-        case info(UUID)
-        case edit(UUID)
+    enum EditTarget: Identifiable {
         case add
-    }
+        case edit(UUID)
 
-    /// The horse whose info/edit is showing, for highlighting its list row.
-    private var selectedHorseId: UUID? {
-        switch mode {
-        case .info(let id), .edit(let id): return id
-        case .add, nil: return nil
+        var id: String {
+            switch self {
+            case .add: return "add"
+            case .edit(let uuid): return uuid.uuidString
+            }
+        }
+
+        /// The horse being edited, or nil when adding.
+        var horseId: UUID? {
+            if case .edit(let id) = self { return id }
+            return nil
         }
     }
 
@@ -34,13 +39,13 @@ struct HorsesPaneView: View {
                 HorsesView(
                     assessmentId: assessmentId,
                     selectedHorseId: selectedHorseId,
-                    onSelectHorse: { mode = .info($0) }
+                    onSelectHorse: { selectedHorseId = $0 }
                 )
                 .navigationTitle("Horses")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            mode = .add
+                            editing = .add
                         } label: {
                             Label("Add", systemImage: "plus")
                         }
@@ -57,32 +62,36 @@ struct HorsesPaneView: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .sheet(item: $editing) { target in
+            NavigationStack {
+                HorseDetailView(
+                    horseId: target.horseId,
+                    assessmentId: assessmentId,
+                    onSaved: { savedId in
+                        selectedHorseId = savedId
+                        editing = nil
+                    }
+                )
+                .navigationTitle(target.horseId == nil ? "Add Horse" : "Edit Horse")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { editing = nil }
+                    }
+                }
+            }
+        }
     }
 
     @ViewBuilder
     private var detailColumn: some View {
-        switch mode {
-        case .info(let id):
+        if let selectedHorseId {
             HorseInfoView(
-                horseId: id,
-                onEdit: { id, _ in mode = .edit(id) }
+                horseId: selectedHorseId,
+                onEdit: { id, _ in editing = .edit(id) }
             )
             .navigationTitle("Horse Details")
-        case .edit(let id):
-            HorseDetailView(
-                horseId: id,
-                assessmentId: assessmentId,
-                onDismiss: { mode = .info(id) }
-            )
-            .navigationTitle("Edit Horse")
-        case .add:
-            HorseDetailView(
-                horseId: nil,
-                assessmentId: assessmentId,
-                onDismiss: { mode = nil }
-            )
-            .navigationTitle("Add Horse")
-        case nil:
+        } else {
             ContentUnavailableView(
                 "No Horse Selected",
                 systemImage: "pawprint",

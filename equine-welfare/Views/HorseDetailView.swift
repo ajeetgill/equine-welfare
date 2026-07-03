@@ -5,11 +5,12 @@ import MijickCamera
 
 struct HorseDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-    
+
     let horseId: UUID?
     let assessmentId: UUID
-    var onDismiss: (() -> Void)?
+    /// Called after a successful save with the saved horse's id. Cancelling the
+    /// enclosing sheet never calls this, so the working copy is simply discarded.
+    var onSaved: (UUID) -> Void = { _ in }
     
     @State private var horse: Horse
     @State private var isNewHorse: Bool
@@ -36,13 +37,13 @@ struct HorseDetailView: View {
     private let breedOptions = ["Quarter Horse", "Appendix Quarter Horse", "Quarter Horse cross", "Standardbred", "Pony", "Halflinger", "Paint", "Appaloosa", "Miniature Horse", "Percheron", "Belgian", "Clydesdale", "Hannoverian", "Warmblood", "Warmblood cross", "Draft cross", "Arabian", "Arabian cross", "Thoroughbred", "Thoroughbred cross", "Saddlebred", "Morgan", "Cross", "Donkey", "Unknown"]
     
     init(
-        horseId: UUID?, 
+        horseId: UUID?,
         assessmentId: UUID,
-        onDismiss: (() -> Void)? = nil
+        onSaved: @escaping (UUID) -> Void = { _ in }
     ) {
         self.horseId = horseId
         self.assessmentId = assessmentId
-        self.onDismiss = onDismiss
+        self.onSaved = onSaved
         
         // Initialize default horse
         let initialHorse = Horse(
@@ -125,7 +126,7 @@ struct HorseDetailView: View {
             bcsSection
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .confirmationAction) {
                 Button("Save", action: saveHorse)
                     .disabled(horse.name.isEmpty)
             }
@@ -254,118 +255,96 @@ struct HorseDetailView: View {
     }
     
     private func saveHorse() {
-        print("DEBUG: Starting saveHorse() in HorseDetailView")
-        
-        Task { @MainActor in
-            do {
-                // Create a fresh descriptor for fetch with a more specific predicate
-                let assessmentDescriptor = FetchDescriptor<Assessment>(
-                    predicate: #Predicate { $0.id == assessmentId }
-                )
-                
-                // Fetch the assessment with that exact ID
-                let assessments = try modelContext.fetch(assessmentDescriptor)
-                
-                if assessments.isEmpty {
-                    print("ERROR: No assessment found with ID \(assessmentId)")
-                    
-                    // Create a placeholder assessment with the expected ID
-                    let placeholderAssessment = Assessment(
-                        vetName: "Placeholder", 
-                        farmName: "Placeholder", 
-                        visitDate: Date()
-                    )
-                    placeholderAssessment.id = assessmentId  // Use the expected ID
-                    modelContext.insert(placeholderAssessment)
-                    
-                    // Configure and insert the horse
-                    if isNewHorse {
-                        horse.uuid = UUID()
-                        modelContext.insert(horse)
-                    }
-                    
-                    // Set up BOTH sides of the relationship
-                    horse.assessment = placeholderAssessment  // This is crucial!
-                    placeholderAssessment.horses.append(horse)
-                    
-                    try modelContext.save()
-                    print("DEBUG: Created placeholder assessment and saved horse with relationship")
-                } else {
-                    let assessment = assessments[0]
-                    print("DEBUG: Found assessment: \(assessment.displayName) with ID: \(assessment.id)")
-                    
-                    if isNewHorse {
-                        // Ensure we have a new UUID
-                        horse.uuid = UUID()
-                        
-                        // Insert the horse into the context
-                        modelContext.insert(horse)
-                        
-                        // Set up BOTH sides of the relationship
-                        horse.assessment = assessment  // This is crucial!
-                        assessment.horses.append(horse)
-                        
-                        print("DEBUG: Added to assessment, now has \(assessment.horses.count) horses")
-                    } else {
-                        print("DEBUG: Updating existing horse: \(horse.name)")
-                        
-                        // Ensure relationship is still correct for existing horse
-                        if horse.assessment == nil || horse.assessment?.id != assessment.id {
-                            horse.assessment = assessment
-                            print("DEBUG: Fixed missing assessment relationship")
-                        }
-                    }
-                    
-                    // Save all changes
-                    try modelContext.save()
-                    print("DEBUG: Changes saved to database")
-                }
-                
-                // Dismiss the view after saving
-                dismissView()
-                
-            } catch {
-                print("ERROR: Failed to save horse: \(error.localizedDescription)")
+        do {
+            let assessmentDescriptor = FetchDescriptor<Assessment>(
+                predicate: #Predicate { $0.id == assessmentId }
+            )
+            guard let assessment = try modelContext.fetch(assessmentDescriptor).first else {
+                print("ERROR: No assessment found with ID \(assessmentId)")
+                return
             }
-        }
-    }
-    
-    private func dismissView() {
-        // Try both the environment dismiss and the onDismiss callback
-        // First try the onDismiss callback
-        if let onDismiss = onDismiss {
-            onDismiss()
-        } else {
-            // Fallback to environment dismiss
-            dismiss()
-        }
-    }
-    
-    private func loadHorse() {
-        if let horseId = horseId {
-            // Load the horse from the database
-            do {
+
+            if isNewHorse {
+                // `horse` is a fresh detached instance — insert and link it.
+                modelContext.insert(horse)
+                horse.assessment = assessment
+                assessment.horses.append(horse)
+            } else {
+                // `horse` is a working copy; apply its edited fields to the
+                // persisted horse. (Cancel never reaches here, so its edits are
+                // discarded along with the working copy.)
+                let id = horse.uuid
                 let horseDescriptor = FetchDescriptor<Horse>(
-                    predicate: #Predicate<Horse> { horse in
-                        horse.uuid == horseId
-                    }
+                    predicate: #Predicate<Horse> { $0.uuid == id }
                 )
-                
-                if let loadedHorse = try modelContext.fetch(horseDescriptor).first {
-                    horse = loadedHorse
-                    isNewHorse = false
-                    // Set the input values from the loaded horse
-                    ageInput = loadedHorse.age > 0 ? loadedHorse.age : nil
-                    timeOnFarmInput = loadedHorse.timeOnFarm > 0 ? loadedHorse.timeOnFarm : nil
-                    
-                    // Set the animal type based on the isHorse property
-                    animalType = loadedHorse.isHorse ? .horse : .donkey
-                } else {
-                    print("ERROR: Could not find horse with ID: \(horseId)")
+                guard let persisted = try modelContext.fetch(horseDescriptor).first else {
+                    print("ERROR: Could not find horse to update: \(id)")
+                    return
                 }
-            } catch {
-                print("ERROR: Loading horse failed: \(error)")
+                apply(horse, to: persisted)
             }
+
+            try modelContext.save()
+            onSaved(horse.uuid)
+        } catch {
+            print("ERROR: Failed to save horse: \(error.localizedDescription)")
+        }
+    }
+
+    /// Copies the form-editable fields from a working copy onto the persisted
+    /// horse. Fields the form doesn't touch (notes, directional photos, …) are
+    /// left untouched.
+    private func apply(_ source: Horse, to target: Horse) {
+        target.name = source.name
+        target.age = source.age
+        target.color = source.color
+        target.sex = source.sex
+        target.breed = source.breed
+        target.otherBreed = source.otherBreed
+        target.timeOnFarm = source.timeOnFarm
+        target.bcsScore = source.bcsScore
+        target.ageUnit = source.ageUnit
+        target.timeUnit = source.timeUnit
+        target.isHorse = source.isHorse
+        target.photoData = source.photoData
+    }
+
+    private func loadHorse() {
+        guard let horseId else { return }
+        do {
+            let horseDescriptor = FetchDescriptor<Horse>(
+                predicate: #Predicate<Horse> { $0.uuid == horseId }
+            )
+            guard let loaded = try modelContext.fetch(horseDescriptor).first else {
+                print("ERROR: Could not find horse with ID: \(horseId)")
+                return
+            }
+
+            // Edit against a detached working copy so the persisted horse is
+            // untouched until Save. Keep the same uuid so Save can re-fetch it.
+            let working = Horse(
+                name: loaded.name,
+                age: loaded.age,
+                color: loaded.color,
+                sex: loaded.sex,
+                breed: loaded.breed,
+                otherBreed: loaded.otherBreed,
+                timeOnFarm: loaded.timeOnFarm,
+                bcsScore: loaded.bcsScore,
+                photoData: loaded.photoData,
+                notes: loaded.notes,
+                ageUnit: loaded.ageUnit,
+                timeUnit: loaded.timeUnit,
+                isHorse: loaded.isHorse
+            )
+            working.uuid = loaded.uuid
+            horse = working
+            isNewHorse = false
+            ageInput = loaded.age > 0 ? loaded.age : nil
+            timeOnFarmInput = loaded.timeOnFarm > 0 ? loaded.timeOnFarm : nil
+            animalType = loaded.isHorse ? .horse : .donkey
+        } catch {
+            print("ERROR: Loading horse failed: \(error)")
         }
     }
     

@@ -142,6 +142,65 @@ final class NavigationFlowUITests: XCTestCase {
         add(shot)
     }
 
+    /// Edits a horse, appends to its name, then taps Cancel — the change must be
+    /// discarded (guards the working-copy behaviour behind the edit sheet).
+    @MainActor
+    func testEditHorseCancelDiscardsChanges() throws {
+        let app = XCUIApplication()
+        addUIInterruptionMonitor(withDescription: "System Dialog") { alert in
+            for label in ["Allow", "OK", "Allow While Using App"] {
+                if alert.buttons[label].exists { alert.buttons[label].tap(); return true }
+            }
+            return false
+        }
+        app.launch()
+        app.tap()
+
+        let vet = app.textFields["Veterinarian Name"]
+        XCTAssertTrue(vet.waitForExistence(timeout: 10))
+        vet.tap(); vet.typeText("Dr. Test")
+        let farm = app.textFields["Farm Name"]
+        farm.tap(); farm.typeText("Test Farm")
+        app.buttons["Start Assessment"].tap()
+
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10))
+        if app.buttons["Show Sidebar"].exists {
+            app.buttons["Show Sidebar"].tap()
+        } else if app.buttons["Assessment"].exists {
+            app.buttons["Assessment"].tap()
+        }
+        firstHittable(app, label: "Horses").tap()
+
+        // Add a horse named "Rowan".
+        let nameField = app.textFields["Horse name"]
+        for _ in 0..<3 {
+            if nameField.waitForExistence(timeout: 3) { break }
+            if app.buttons["Add"].exists { app.buttons["Add"].tap() }
+        }
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5), "Add form did not open")
+        nameField.tap(); nameField.typeText("Rowan")
+        app.buttons["Save"].tap()
+
+        // The saved horse is auto-selected; its info view exposes an Edit button.
+        XCTAssertTrue(app.staticTexts["Rowan"].waitForExistence(timeout: 10),
+                      "Added horse did not appear")
+        let editButton = app.buttons["Edit"]
+        XCTAssertTrue(editButton.waitForExistence(timeout: 10),
+                      "Edit button not found in horse info")
+        editButton.tap()
+
+        // Edit sheet opens pre-filled; change the name, then Cancel.
+        let editName = app.textFields["Horse name"]
+        XCTAssertTrue(editName.waitForExistence(timeout: 5), "Edit sheet did not open")
+        editName.tap(); editName.typeText("XYZ")
+
+        app.buttons["Cancel"].tap()
+
+        // Cancel must discard the edit: the list still shows the original name.
+        XCTAssertTrue(app.staticTexts["Rowan"].waitForExistence(timeout: 5),
+                      "Original horse name was lost after Cancel — edit was not discarded")
+    }
+
     /// Returns the first hittable element matching `label`, trying buttons then
     /// static texts (List rows surface differently across layouts).
     @MainActor
