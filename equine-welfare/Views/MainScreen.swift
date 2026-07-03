@@ -45,11 +45,9 @@ struct MainScreen: View {
                 Button(action: startNewAssessment) {
                     Text("Start Assessment")
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isFormValid ? Color.blue : Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
                 }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
                 .disabled(!isFormValid)
             }
             .padding()

@@ -65,23 +65,21 @@ final class NavigationFlowUITests: XCTestCase {
                       "Workspace sidebar 'Horses' entry not found")
         horses.tap()
 
-        // Horses pane should present with its Add button.
-        let addButton = app.buttons["Add"]
+        // Horses pane should present with its "Add Horse" entry point.
+        let addButton = app.buttons["Add Horse"].firstMatch
         XCTAssertTrue(addButton.waitForExistence(timeout: 10),
-                      "'Add' button not found — horses pane did not present")
+                      "'Add Horse' button not found — horses pane did not present")
 
-        // Tapping Add shows the horse form in the detail column (selection-based,
-        // not a push). The form's Save button is unique to the add/edit detail,
-        // so use it as the proof the detail appeared. On iPad portrait the panes
-        // overlay may still be open, in which case the first tap only dismisses
-        // it — so retry until the form appears.
-        let saveButton = app.buttons["Save"]
+        // Tapping it opens the add sheet, whose confirm button is "Add" (add
+        // mode). On iPad portrait the panes overlay may still be open, in which
+        // case the first tap only dismisses it — so retry until the form appears.
+        let confirmButton = app.buttons["Add"]
         for _ in 0..<3 {
-            if saveButton.waitForExistence(timeout: 3) { break }
+            if confirmButton.waitForExistence(timeout: 3) { break }
             if addButton.exists { addButton.tap() }
         }
-        XCTAssertTrue(saveButton.waitForExistence(timeout: 5),
-                      "Add-horse form did not appear after tapping Add")
+        XCTAssertTrue(confirmButton.waitForExistence(timeout: 5),
+                      "Add-horse form did not appear after tapping Add Horse")
     }
 
     /// Adds a named horse and verifies it appears in the master list, then
@@ -117,7 +115,8 @@ final class NavigationFlowUITests: XCTestCase {
         let nameField = app.textFields["Horse name"]
         for _ in 0..<3 {
             if nameField.waitForExistence(timeout: 3) { break }
-            if app.buttons["Add"].exists { app.buttons["Add"].tap() }
+            let add = app.buttons["Add Horse"].firstMatch
+            if add.exists { add.tap() }
         }
         XCTAssertTrue(nameField.waitForExistence(timeout: 5), "Add form did not open")
 
@@ -130,7 +129,7 @@ final class NavigationFlowUITests: XCTestCase {
         let sex = app.textFields["Sex"]
         if sex.exists { sex.tap(); sex.typeText("Stallion") }
 
-        app.buttons["Save"].tap()
+        app.buttons["Add"].tap()
 
         // The new horse should now appear in the master list.
         XCTAssertTrue(app.staticTexts["Thunder"].waitForExistence(timeout: 10),
@@ -175,11 +174,12 @@ final class NavigationFlowUITests: XCTestCase {
         let nameField = app.textFields["Horse name"]
         for _ in 0..<3 {
             if nameField.waitForExistence(timeout: 3) { break }
-            if app.buttons["Add"].exists { app.buttons["Add"].tap() }
+            let add = app.buttons["Add Horse"].firstMatch
+            if add.exists { add.tap() }
         }
         XCTAssertTrue(nameField.waitForExistence(timeout: 5), "Add form did not open")
         nameField.tap(); nameField.typeText("Rowan")
-        app.buttons["Save"].tap()
+        app.buttons["Add"].tap()
 
         // The saved horse is auto-selected; its info view exposes an Edit button.
         XCTAssertTrue(app.staticTexts["Rowan"].waitForExistence(timeout: 10),

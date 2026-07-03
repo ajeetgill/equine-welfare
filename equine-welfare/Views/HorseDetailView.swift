@@ -127,7 +127,7 @@ struct HorseDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save", action: saveHorse)
+                Button(isNewHorse ? "Add" : "Save", action: saveHorse)
                     .disabled(horse.name.isEmpty)
             }
         }

@@ -47,7 +47,7 @@ struct HorsesPaneView: View {
                         Button {
                             editing = .add
                         } label: {
-                            Label("Add", systemImage: "plus")
+                            Label("Add Horse", systemImage: "plus")
                         }
                         .buttonStyle(.borderedProminent)
                     }
@@ -97,11 +97,18 @@ struct HorsesPaneView: View {
             )
             .navigationTitle("Horse Details")
         } else {
-            ContentUnavailableView(
-                "No Horse Selected",
-                systemImage: "pawprint",
-                description: Text("Select a horse from the list, or add a new one.")
-            )
+            ContentUnavailableView {
+                Label("No Horse Selected", systemImage: "pawprint")
+            } description: {
+                Text("Select a horse from the list, or add a new one.")
+            } actions: {
+                Button {
+                    editing = .add
+                } label: {
+                    Label("Add Horse", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent)
+            }
         }
     }
 }
