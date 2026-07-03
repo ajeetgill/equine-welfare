@@ -80,6 +80,11 @@ struct HorsesPaneView: View {
                     }
                 }
             }
+            // A large "page" sheet gives the BCS slider + reference room to
+            // coexist; disabling interactive dismissal prevents an accidental
+            // tap-outside (or swipe-down) from discarding an in-progress edit.
+            .presentationSizing(.page)
+            .interactiveDismissDisabled()
         }
     }
 

@@ -193,11 +193,17 @@ struct HorseDetailView: View {
                 Label("View BCS Reference Chart", systemImage: "info.circle")
             }
 
+            // Image and description sit side-by-side so they stay compact
+            // enough to remain on screen together with the slider above — the
+            // reviewer can drag the slider and watch the description update.
             let bcsScore = Int(horse.bcsScore)
-            VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 16) {
                 getBCSImage(for: bcsScore)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                bcsDescriptionContent(for: bcsScore)
+                    .frame(width: 180)
+                VStack(alignment: .leading, spacing: 12) {
+                    bcsDescriptionContent(for: bcsScore)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 4)
         }
