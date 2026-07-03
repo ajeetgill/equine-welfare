@@ -199,7 +199,7 @@ struct HorseDetailView: View {
             let bcsScore = Int(horse.bcsScore)
             HStack(alignment: .top, spacing: 16) {
                 getBCSImage(for: bcsScore)
-                    .frame(width: 180)
+                    .frame(width: 360)
                 VStack(alignment: .leading, spacing: 12) {
                     bcsDescriptionContent(for: bcsScore)
                 }
