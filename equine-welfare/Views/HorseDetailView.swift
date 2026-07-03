@@ -65,263 +65,158 @@ struct HorseDetailView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .center, spacing: 24) {
-                // Photo section at top
+        Form {
+            SwiftUI.Section {
                 HStack {
                     Spacer()
                     photoSection
                     Spacer()
                 }
-                
-                // Form-style layout with simplified design
-                VStack(alignment: .center, spacing: 16) {
-                    // ALL FIELDS USING IDENTICAL STRUCTURE
-                    
-                    // Name field
-                    HStack {
-                        Text("Name")
-                        
-                        TextField("Horse name", text: $horse.name)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    
-                    
-                    // Age field
-                    HStack {
-                        Text("Age")
-                        
-                        Spacer()
-                        
-                        // Number input field with fixed width
-                        TextField("Age", value: $ageInput, format: .number)
+                .listRowBackground(Color.clear)
+            }
+
+            SwiftUI.Section("Identity") {
+                LabeledContent("Name") {
+                    TextField("Horse name", text: $horse.name)
+                        .multilineTextAlignment(.trailing)
+                }
+                PickerOrCustomField(label: "Breed", options: breedOptions, value: $horse.breed)
+                PickerOrCustomField(label: "Color", options: colorOptions, value: $horse.color)
+                PickerOrCustomField(label: "Sex", options: sexOptions, value: $horse.sex)
+            }
+
+            SwiftUI.Section("Age & Tenure") {
+                LabeledContent("Age") {
+                    HStack(spacing: 12) {
+                        TextField("0", value: $ageInput, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 50)
-                            .padding(8)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                            .onChange(of: ageInput) { oldValue, newValue in
+                            .frame(width: 60)
+                            .onChange(of: ageInput) { _, newValue in
                                 horse.age = newValue ?? 0
                             }
-                        
-                        // Unit selection dropdown
-                        Menu {
+                        Picker("Age unit", selection: $horse.ageUnit) {
                             ForEach(AgeUnit.allCases, id: \.self) { unit in
-                                Button(unit.rawValue) {
-                                    horse.ageUnit = unit
-                                }
+                                Text(unit.rawValue).tag(unit)
                             }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(horse.ageUnit.rawValue)
-                                Image(systemName: "chevron.down")
-                            }
-                            .padding(.horizontal, 8)
                         }
+                        .labelsHidden()
                     }
-                    
-                    // Color field
-                    HStack {
-                        Text("Color")
-                        
-                        TextField("Color", text: $horse.color)
-                            .multilineTextAlignment(.trailing)
-                        
-                        Menu {
-                            ForEach(colorOptions, id: \.self) { color in
-                                Button(color) {
-                                    horse.color = color
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                                .padding(.horizontal, 8)
-                        }
-                    }
-                    
-                    // Sex field
-                    HStack {
-                        Text("Sex")
-                        
-                        TextField("Sex", text: $horse.sex)
-                            .multilineTextAlignment(.trailing)
-                        
-                        Menu {
-                            ForEach(sexOptions, id: \.self) { sex in
-                                Button(sex) {
-                                    horse.sex = sex
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                                .padding(.horizontal, 8)
-                        }
-                    }
-                    
-                    // Breed field
-                    HStack {
-                        Text("Breed")
-                        
-                        TextField("Breed", text: $horse.breed)
-                            .multilineTextAlignment(.trailing)
-                        
-                        Menu {
-                            ForEach(breedOptions, id: \.self) { breed in
-                                Button(breed) {
-                                    horse.breed = breed
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                                .padding(.horizontal, 8)
-                        }
-                    }
-                    
-                    // Time on Farm field
-                    HStack {
-                        Text("Time on Farm")
-                        
-                        Spacer()
-                        
-                        // Number input field with fixed width
-                        TextField("Time", value: $timeOnFarmInput, format: .number)
+                }
+                LabeledContent("Time on Farm") {
+                    HStack(spacing: 12) {
+                        TextField("0", value: $timeOnFarmInput, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
-                            .frame(width: 50)
-                            .padding(8)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                            .onChange(of: timeOnFarmInput) { oldValue, newValue in
+                            .frame(width: 60)
+                            .onChange(of: timeOnFarmInput) { _, newValue in
                                 horse.timeOnFarm = newValue ?? 0
                             }
-                        
-                        // Unit selection dropdown
-                        Menu {
+                        Picker("Time unit", selection: $horse.timeUnit) {
                             ForEach(TimeUnit.allCases, id: \.self) { unit in
-                                Button(unit.rawValue) {
-                                    horse.timeUnit = unit
-                                }
+                                Text(unit.rawValue).tag(unit)
                             }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(horse.timeUnit.rawValue)
-                                Image(systemName: "chevron.down")
-                            }
-                            .padding(.horizontal, 8)
                         }
+                        .labelsHidden()
                     }
-                    // BCS Section with modern styling
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Header
-                        HStack {
-                            Button(action: {
-                                // Show the BCS score reference image
-                                showBCSReferenceImage.toggle()
-                            }) {
-                                Image(systemName: "info.circle")
-                                    .foregroundColor(.blue)
-                            }
-                            Text("BCS")
-                            Spacer()
-                            Text("\(String(format: "%.1f", horse.bcsScore))")
-                                .frame(width: 50)
-                                
-                            
-                            
-                        }
-                        .sheet(isPresented: $showBCSReferenceImage) {
-                            VStack {
-                                Text("Body Condition Score Reference")
-                                    .font(.headline)
-                                    .padding()
-                                Spacer()
-                                Image(animalType == .horse ? "labelled-horse" : "labelled-donkey")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .padding()
-                                
-                                Spacer()
-                                Button("Close") {
-                                    showBCSReferenceImage = false
-                                }
-                                .padding()
-                            }
-                        }
-                        
-                        // Segmented control for animal type
-                        Picker("Animal Type", selection: $animalType) {
-                            ForEach(AnimalType.allCases, id: \.self) { type in
-                                Text(type.rawValue).tag(type)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .padding(.vertical, 8)
-                        .onChange(of: animalType) { oldValue, newValue in
-                            // If switching to donkey and BCS score is above 5, cap it at 5
-                            if newValue == .donkey && horse.bcsScore > 5 {
-                                horse.bcsScore = 5
-                            }
-                            
-                            // Update the isHorse property based on the selected animal type
-                            horse.isHorse = (newValue == .horse)
-                        }
-                        
-                        // Slider for BCS score
-                        HStack {
-                            Text("1")
-                            Slider(
-                                value: $horse.bcsScore,
-                                in: 1...(animalType == .horse ? 9 : 5),
-                                step: 0.5
-                            )
-                            Text(animalType == .horse ? "9" : "5")
-                        }
-                        // BCS Image and Description
-                            HStack(alignment: .top, spacing: 20) {
-                                // Left side: BCS image with fixed width and centered
-                                let bcsScore = Int(horse.bcsScore)
-                                
-                                VStack {
-                                    Text("BCS \(String(format: "%.1f", horse.bcsScore)) Description")
-                                        .padding(.bottom, 4)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    
-                                    getBCSImage(for: bcsScore)
-                                }
-                                .frame(maxWidth: 250, alignment: .center)
-                                
-                                // Right side: BCS description
-                                VStack(alignment: .leading, spacing: 12){
-                                    bcsDescriptionContent(for: bcsScore)
-                                }
-                                
-                                Spacer()
-                            }
-                            .padding()
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .cornerRadius(8)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
                 }
-                .frame(maxWidth: 750)
             }
-            .padding(.horizontal, 20)
+
+            bcsSection
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(action: saveHorse) {
-                    Text("Save")
-                }
-                .disabled(horse.name.isEmpty)
+                Button("Save", action: saveHorse)
+                    .disabled(horse.name.isEmpty)
             }
-        
+        }
+        .sheet(isPresented: $showBCSReferenceImage) {
+            bcsReferenceSheet
         }
         .onAppear {
             // If we have a horse ID, load the existing horse
             loadHorse()
+        }
+    }
+
+    /// Body Condition Score — the core of the assessment, so it gets its own
+    /// section with a large live readout, the animal-type toggle, and the
+    /// per-score reference description.
+    @ViewBuilder
+    private var bcsSection: some View {
+        SwiftUI.Section("Body Condition Score") {
+            Picker("Animal Type", selection: $animalType) {
+                ForEach(AnimalType.allCases, id: \.self) { type in
+                    Text(type.rawValue).tag(type)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: animalType) { _, newValue in
+                // Donkeys use a 1–5 scale; cap an over-range score when switching.
+                if newValue == .donkey && horse.bcsScore > 5 {
+                    horse.bcsScore = 5
+                }
+                horse.isHorse = (newValue == .horse)
+            }
+
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Score")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(String(format: "%.1f", horse.bcsScore))
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .monospacedDigit()
+                        .foregroundStyle(.tint)
+                }
+                HStack {
+                    Text("1")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Slider(
+                        value: $horse.bcsScore,
+                        in: 1...(animalType == .horse ? 9 : 5),
+                        step: 0.5
+                    )
+                    Text(animalType == .horse ? "9" : "5")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+
+            Button {
+                showBCSReferenceImage.toggle()
+            } label: {
+                Label("View BCS Reference Chart", systemImage: "info.circle")
+            }
+
+            let bcsScore = Int(horse.bcsScore)
+            VStack(alignment: .leading, spacing: 12) {
+                getBCSImage(for: bcsScore)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                bcsDescriptionContent(for: bcsScore)
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private var bcsReferenceSheet: some View {
+        NavigationStack {
+            ScrollView {
+                Image(animalType == .horse ? "labelled-horse" : "labelled-donkey")
+                    .resizable()
+                    .scaledToFit()
+                    .padding()
+            }
+            .navigationTitle("BCS Reference")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showBCSReferenceImage = false }
+                }
+            }
         }
     }
     
@@ -564,6 +459,61 @@ struct BCSPartView: View {
             }
         }
         .padding(.bottom, 2)
+    }
+}
+
+/// A form row that lets the user pick a value from a known list *or* type a
+/// custom one. Choosing "Other…" reveals a free-text field pre-filled with any
+/// existing custom value. Used for fields (Color, Sex, Breed) that have a
+/// canonical list but must still accept anything the field vet enters.
+private struct PickerOrCustomField: View {
+    let label: String
+    let options: [String]
+    @Binding var value: String
+
+    /// Sentinel tag for the "Other…" menu entry (won't collide with real data).
+    private static let customTag = "\u{2063}__other__"
+
+    /// The stored value is custom when it's non-empty and not a known option.
+    private var valueIsCustom: Bool {
+        !value.isEmpty && !options.contains(value)
+    }
+
+    /// Set once the user explicitly picks "Other…", so the text field appears
+    /// even before they've typed anything.
+    @State private var choseOther = false
+
+    private var showsCustomField: Bool { choseOther || valueIsCustom }
+
+    var body: some View {
+        Picker(label, selection: selection) {
+            Text("None").tag("")
+            ForEach(options, id: \.self) { option in
+                Text(option).tag(option)
+            }
+            Text("Other…").tag(Self.customTag)
+        }
+
+        if showsCustomField {
+            TextField("Enter \(label.lowercased())", text: $value)
+                .multilineTextAlignment(.trailing)
+        }
+    }
+
+    /// Maps the stored string to/from the picker's selection: a custom value (or
+    /// an explicit "Other…" pick) resolves to the sentinel tag.
+    private var selection: Binding<String> {
+        Binding(
+            get: { showsCustomField ? Self.customTag : value },
+            set: { newValue in
+                if newValue == Self.customTag {
+                    choseOther = true
+                } else {
+                    choseOther = false
+                    value = newValue
+                }
+            }
+        )
     }
 }
 
