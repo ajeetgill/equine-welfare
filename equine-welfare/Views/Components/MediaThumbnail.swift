@@ -97,11 +97,11 @@ struct MediaThumbnail: View {
                     
                     let (cgImage, _) = try await generator.image(at: time)
                     let thumbnail = UIImage(cgImage: cgImage)
-                    
-                    DispatchQueue.main.async {
+
+                    await MainActor.run {
                         self.videoThumbnail = thumbnail
                     }
-                    
+
                     // Clean up the temp file
                     try? FileManager.default.removeItem(at: tempURL)
                 } catch {

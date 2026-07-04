@@ -156,11 +156,11 @@ struct GalleryImageView: View {
 
                     let (cgImage, _) = try await generator.image(at: time)
                     let thumbnail = UIImage(cgImage: cgImage)
-                    
-                    DispatchQueue.main.async {
+
+                    await MainActor.run {
                         self.videoThumbnail = thumbnail
                     }
-                    
+
                     // Clean up the temp file
                     try? FileManager.default.removeItem(at: tempURL)
                 } catch {
@@ -277,7 +277,7 @@ struct ImageDetailView: View {
                     // Check if the asset is playable
                     let playable = try await asset.load(.isPlayable)
                     if playable {
-                        DispatchQueue.main.async {
+                        await MainActor.run {
                             self.videoPlayer = AVPlayer(url: tempURL)
                             // Add observer for item status
                             NotificationCenter.default.addObserver(
@@ -289,13 +289,13 @@ struct ImageDetailView: View {
                                 }
                         }
                     } else {
-                        DispatchQueue.main.async {
+                        await MainActor.run {
                             self.showError = true
                             self.errorMessage = "This video format is not supported"
                         }
                     }
                 } catch {
-                    DispatchQueue.main.async {
+                    await MainActor.run {
                         self.showError = true
                         self.errorMessage = "Error loading video: \(error.localizedDescription)"
                     }

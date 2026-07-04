@@ -244,25 +244,6 @@ struct HorseInfoView: View {
         }
     }
     
-    private func processPhotoItem(_ item: PhotosPickerItem?, completion: @escaping (Data?) -> Void) {
-        guard let item = item else {
-            completion(nil)
-            return
-        }
-        
-        item.loadTransferable(type: Data.self) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let data):
-                    completion(data)
-                case .failure(let error):
-                    print("Photo loading error: \(error)")
-                    completion(nil)
-                }
-            }
-        }
-    }
-    
     private func saveFindings(_ newFindings: String) {
         guard let horse = horse else { return }
         
