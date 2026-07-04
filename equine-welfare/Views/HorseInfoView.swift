@@ -15,11 +15,6 @@ struct HorseInfoView: View {
     @State private var horse: Horse?
     @State private var findings: String = ""
     
-    // Photo pickers for each side, separate state variables for each picker
-    @State private var showingFrontPicker = false
-    @State private var showingRightPicker = false
-    @State private var showingBackPicker = false
-    @State private var showingLeftPicker = false
     @State private var showingAbnormalFindings = false
     @State private var selectedMedia: MediaAttachment?
     
@@ -62,142 +57,23 @@ struct HorseInfoView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Body Photos")
                         .font(.headline)
-                    
+
                     HStack(spacing: 20) {
-                        VStack{
-                            if let data = horse?.frontPhotoData?.data, let uiImage = UIImage(data: data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 70, height: 70)
-                                    .clipShape(Circle())
-                            } else {
-                                Circle()
-                                    .fill(Color(.systemGray5))
-                                    .frame(width: 70, height: 70)
-                                    .overlay(
-                                        Image("horse-icon")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .grayscale(1)
-                                            .padding(12)
-                                            .foregroundColor(.gray)
-                                    )
-                            }
-                            Text("Front")
-                            MediaPicker(isPresented: $showingFrontPicker, cameraText: "", galleryText: "") {
-                                mediaData, mediaType in
-                                let attachment =
-                                mediaType == .image
-                                ? MediaAttachment(imageData: mediaData)
-                                : MediaAttachment(videoData: mediaData)
-                                horse?.frontPhotoData = attachment
-                                try? modelContext.save()
-                            }
-                            .cornerRadius(30)
-                            .background(Color(.systemGray6).opacity(0.2))
+                        BodyPhotoWell(title: "Front", imageData: horse?.frontPhotoData?.data) {
+                            horse?.frontPhotoData = $0
+                            modelContext.saveOrLog("front photo")
                         }
-                        
-                        VStack {
-                            if let data = horse?.rightPhotoData?.data, let uiImage = UIImage(data: data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 70, height: 70)
-                                    .clipShape(Circle())
-                            } else {
-                                Circle()
-                                    .fill(Color(.systemGray5))
-                                    .frame(width: 70, height: 70)
-                                    .overlay(
-                                        Image("horse-icon")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .grayscale(1)
-                                            .padding(12)
-                                            .foregroundColor(.gray)
-                                    )
-                            }
-                            Text("Right")
-                            MediaPicker(isPresented: $showingRightPicker, cameraText: "", galleryText: "") {
-                                mediaData, mediaType in
-                                let attachment =
-                                mediaType == .image
-                                ? MediaAttachment(imageData: mediaData)
-                                : MediaAttachment(videoData: mediaData)
-                                horse?.rightPhotoData = attachment
-                                try? modelContext.save()
-                            }
-                            .cornerRadius(30)
-                            .background(Color(.systemGray6).opacity(0.2))
+                        BodyPhotoWell(title: "Right", imageData: horse?.rightPhotoData?.data) {
+                            horse?.rightPhotoData = $0
+                            modelContext.saveOrLog("right photo")
                         }
-                        
-                        VStack {
-                            if let data = horse?.backPhotoData?.data, let uiImage = UIImage(data: data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 70, height: 70)
-                                    .clipShape(Circle())
-                            } else {
-                                Circle()
-                                    .fill(Color(.systemGray5))
-                                    .frame(width: 70, height: 70)
-                                    .overlay(
-                                        Image("horse-icon")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .grayscale(1)
-                                            .padding(12)
-                                            .foregroundColor(.gray)
-                                    )
-                            }
-                            Text("Back")
-                            MediaPicker(isPresented: $showingBackPicker, cameraText: "", galleryText: "") {
-                                mediaData, mediaType in
-                                let attachment =
-                                mediaType == .image
-                                ? MediaAttachment(imageData: mediaData)
-                                : MediaAttachment(videoData: mediaData)
-                                horse?.backPhotoData = attachment
-                                try? modelContext.save()
-                            }
-                            .cornerRadius(30)
-                            .background(Color(.systemGray6).opacity(0.2))
+                        BodyPhotoWell(title: "Back", imageData: horse?.backPhotoData?.data) {
+                            horse?.backPhotoData = $0
+                            modelContext.saveOrLog("back photo")
                         }
-                        
-                        VStack {
-                            if let data = horse?.leftPhotoData?.data, let uiImage = UIImage(data: data) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 70, height: 70)
-                                    .clipShape(Circle())
-                            } else {
-                                Circle()
-                                    .fill(Color(.systemGray5))
-                                    .frame(width: 70, height: 70)
-                                    .overlay(
-                                        Image("horse-icon")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .grayscale(1)
-                                            .padding(12)
-                                            .foregroundColor(.gray)
-                                    )
-                            }
-                            Text("Left")
-                            MediaPicker(isPresented: $showingLeftPicker, cameraText: "", galleryText: "") {
-                                mediaData, mediaType in
-                                let attachment =
-                                mediaType == .image
-                                ? MediaAttachment(imageData: mediaData)
-                                : MediaAttachment(videoData: mediaData)
-                                horse?.leftPhotoData = attachment
-                                try? modelContext.save()
-                            }
-                            .cornerRadius(30)
-                            .background(Color(.systemGray6).opacity(0.2))
+                        BodyPhotoWell(title: "Left", imageData: horse?.leftPhotoData?.data) {
+                            horse?.leftPhotoData = $0
+                            modelContext.saveOrLog("left photo")
                         }
                     }
                     .fontWeight(.semibold)
@@ -348,11 +224,7 @@ struct HorseInfoView: View {
                 horse.abnormalPhotosData.append(attachment)
                 
                 // Try to save immediately
-                do {
-                    try modelContext.save()
-                } catch {
-                    print("ERROR: Failed to save \(mediaType) attachment: \(error.localizedDescription)")
-                }
+                modelContext.saveOrLog("abnormal photo")
             }
             .cornerRadius(30)
             .background(Color(.systemGray6).opacity(0.2))
@@ -368,7 +240,7 @@ struct HorseInfoView: View {
             
             // Delete it from the model context, & save changes
             modelContext.delete(photo)
-            try? modelContext.save()
+            modelContext.saveOrLog("remove abnormal photo")
         }
     }
     
@@ -395,7 +267,7 @@ struct HorseInfoView: View {
         guard let horse = horse else { return }
         
         horse.notes = newFindings
-        try? modelContext.save()
+        modelContext.saveOrLog("findings")
     }
     
     private func loadHorse() {
@@ -444,6 +316,50 @@ struct HorseInfoView: View {
                     continuation.resume(returning: nil)
                 }
             }
+        }
+    }
+}
+
+/// One circular body-photo well (front/right/back/left): shows the captured
+/// image or a placeholder, a caption, and a `MediaPicker` that hands back a new
+/// attachment. Extracted from four identical inline copies.
+private struct BodyPhotoWell: View {
+    let title: String
+    let imageData: Data?
+    let onCapture: (MediaAttachment) -> Void
+
+    @State private var showingPicker = false
+
+    var body: some View {
+        VStack {
+            Group {
+                if let imageData, let uiImage = UIImage(data: imageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Image("horse-icon")
+                        .resizable()
+                        .scaledToFit()
+                        .grayscale(1)
+                        .padding(12)
+                        .foregroundColor(.gray)
+                        .background(Color(.systemGray5))
+                }
+            }
+            .frame(width: 70, height: 70)
+            .clipShape(Circle())
+
+            Text(title)
+
+            MediaPicker(isPresented: $showingPicker, cameraText: "", galleryText: "") { mediaData, mediaType in
+                let attachment = mediaType == .image
+                    ? MediaAttachment(imageData: mediaData)
+                    : MediaAttachment(videoData: mediaData)
+                onCapture(attachment)
+            }
+            .cornerRadius(30)
+            .background(Color(.systemGray6).opacity(0.2))
         }
     }
 }
