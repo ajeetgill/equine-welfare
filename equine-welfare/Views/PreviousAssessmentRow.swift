@@ -35,7 +35,7 @@ struct PreviousAssessmentRow: View {
     @State private var uploadProgress: Double = 0.0
     @State private var isUploadingMedia: Bool = false
     @State private var sectionViewModel: SectionSelectionViewModel
-    @StateObject private var permissionsManager = PermissionsManager()
+    @Environment(PermissionsManager.self) private var permissionsManager
     @State private var showPermissionsAlert = false
     @AppStorage("isPermissionsGranted") private var isPermissionsGranted = false
     
@@ -408,5 +408,6 @@ struct PreviousAssessmentRow: View {
     let assessment = Assessment(vetName: "Dr. Smith", farmName: "Green Acres", visitDate: Date())
     
     PreviousAssessmentRow(assessment: assessment, modelContext: modelContext)
+        .environment(PermissionsManager())
         .modelContainer(for: Assessment.self)
 }

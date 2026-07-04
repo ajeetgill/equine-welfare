@@ -20,7 +20,7 @@ struct MainScreen: View {
     
     @State private var assessmentHelper: AssessmentHelper?
     @State private var sectionViewModel: SectionSelectionViewModel?
-    @StateObject private var permissionsManager = PermissionsManager()
+    @Environment(PermissionsManager.self) private var permissionsManager
     @State private var showPermissionsAlert = false
     
     var body: some View {
@@ -149,5 +149,6 @@ struct MainScreen: View {
         visitDate: $visitDate,
         onStartNewAssessment: { _ in }
     )
+    .environment(PermissionsManager())
     .modelContainer(for: Assessment.self, inMemory: true)
 }

@@ -10,6 +10,9 @@ struct ContentView: View {
     @State private var visitDate = Date()
     @State private var openAssessment: OpenAssessment?
     @State private var sectionViewModel: SectionSelectionViewModel
+    /// A single shared permissions manager for the whole app (previously two
+    /// independent instances that could disagree).
+    @State private var permissionsManager = PermissionsManager()
 
     /// Identifiable wrapper so an assessment can drive `fullScreenCover(item:)`.
     struct OpenAssessment: Identifiable {
@@ -49,6 +52,7 @@ struct ContentView: View {
             }
             .padding()
         }
+        .environment(permissionsManager)
         // The assessment workspace is a NavigationSplitView, which must be a
         // navigation root — pushing it onto a NavigationStack breaks its
         // detail-column navigation. Present it as a full-screen root instead.
