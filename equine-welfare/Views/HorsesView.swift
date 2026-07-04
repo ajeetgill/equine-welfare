@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import os
 
 struct HorsesView: View {
     @Environment(\.modelContext) private var modelContext
@@ -78,19 +79,14 @@ struct HorsesView: View {
     }
 
     private func deleteHorse(_ horse: Horse) {
-        // Remove the horse from the current assessment
-        if let assessment = assessments.first(where: { $0.id == assessmentId })
-        {
-            if let index = assessment.horses.firstIndex(where: {
-                $0.uuid == horse.uuid
-            }) {
-                assessment.horses.remove(at: index)
-            }
+        do {
+            try HorseStore(modelContext: modelContext)
+                .delete(horse, fromAssessment: assessmentId)
+        } catch {
+            Logger.persistence.error(
+                "Failed to delete horse: \(error.localizedDescription, privacy: .public)"
+            )
         }
-
-        // Delete the horse from the database
-        modelContext.delete(horse)
-        try? modelContext.save()
     }
 }
 

@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 import MijickCamera
+import os
 
 struct HorseDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -20,6 +21,7 @@ struct HorseDetailView: View {
     @State private var timeOnFarmInput: Int?
     @State private var showingMediaPicker = false
     @State private var animalType: AnimalType = .horse
+    @State private var saveError: Error?
     
     // Animal type enum for segmented control
     enum AnimalType: String, CaseIterable {
@@ -133,6 +135,18 @@ struct HorseDetailView: View {
         }
         .sheet(isPresented: $showBCSReferenceImage) {
             bcsReferenceSheet
+        }
+        .alert(
+            "Couldn't Save Horse",
+            isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            ),
+            presenting: saveError
+        ) { _ in
+            Button("OK", role: .cancel) { saveError = nil }
+        } message: { error in
+            Text(error.localizedDescription)
         }
         .onAppear {
             // If we have a horse ID, load the existing horse
@@ -261,70 +275,26 @@ struct HorseDetailView: View {
     }
     
     private func saveHorse() {
+        let store = HorseStore(modelContext: modelContext)
         do {
-            let assessmentDescriptor = FetchDescriptor<Assessment>(
-                predicate: #Predicate { $0.id == assessmentId }
-            )
-            guard let assessment = try modelContext.fetch(assessmentDescriptor).first else {
-                print("ERROR: No assessment found with ID \(assessmentId)")
-                return
-            }
-
             if isNewHorse {
-                // `horse` is a fresh detached instance — insert and link it.
-                modelContext.insert(horse)
-                horse.assessment = assessment
-                assessment.horses.append(horse)
+                try store.add(horse, toAssessment: assessmentId)
             } else {
-                // `horse` is a working copy; apply its edited fields to the
-                // persisted horse. (Cancel never reaches here, so its edits are
-                // discarded along with the working copy.)
-                let id = horse.uuid
-                let horseDescriptor = FetchDescriptor<Horse>(
-                    predicate: #Predicate<Horse> { $0.uuid == id }
-                )
-                guard let persisted = try modelContext.fetch(horseDescriptor).first else {
-                    print("ERROR: Could not find horse to update: \(id)")
-                    return
-                }
-                apply(horse, to: persisted)
+                try store.update(from: horse)
             }
-
-            try modelContext.save()
             onSaved(horse.uuid)
         } catch {
-            print("ERROR: Failed to save horse: \(error.localizedDescription)")
+            Logger.persistence.error(
+                "Failed to save horse: \(error.localizedDescription, privacy: .public)"
+            )
+            saveError = error
         }
-    }
-
-    /// Copies the form-editable fields from a working copy onto the persisted
-    /// horse. Fields the form doesn't touch (notes, directional photos, …) are
-    /// left untouched.
-    private func apply(_ source: Horse, to target: Horse) {
-        target.name = source.name
-        target.age = source.age
-        target.color = source.color
-        target.sex = source.sex
-        target.breed = source.breed
-        target.otherBreed = source.otherBreed
-        target.timeOnFarm = source.timeOnFarm
-        target.bcsScore = source.bcsScore
-        target.ageUnit = source.ageUnit
-        target.timeUnit = source.timeUnit
-        target.isHorse = source.isHorse
-        target.photoData = source.photoData
     }
 
     private func loadHorse() {
         guard let horseId else { return }
         do {
-            let horseDescriptor = FetchDescriptor<Horse>(
-                predicate: #Predicate<Horse> { $0.uuid == horseId }
-            )
-            guard let loaded = try modelContext.fetch(horseDescriptor).first else {
-                print("ERROR: Could not find horse with ID: \(horseId)")
-                return
-            }
+            let loaded = try HorseStore(modelContext: modelContext).horse(horseId)
 
             // Edit against a detached working copy so the persisted horse is
             // untouched until Save. Keep the same uuid so Save can re-fetch it.
@@ -350,7 +320,7 @@ struct HorseDetailView: View {
             timeOnFarmInput = loaded.timeOnFarm > 0 ? loaded.timeOnFarm : nil
             animalType = loaded.isHorse ? .horse : .donkey
         } catch {
-            print("ERROR: Loading horse failed: \(error)")
+            Logger.persistence.error("Loading horse failed: \(error.localizedDescription, privacy: .public)")
         }
     }
     

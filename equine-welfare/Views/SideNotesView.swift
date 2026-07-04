@@ -35,7 +35,7 @@ struct SideNotesView: View {
                     .onChange(of: notes) { _, newValue in
                         // Save notes as user types
                         assessment.sideNotes = newValue.isEmpty ? nil : newValue
-                        try? modelContext.save()
+                        modelContext.saveOrLog("side notes")
                     }
             }
             .padding()

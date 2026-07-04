@@ -28,7 +28,7 @@ class AssessmentHelper {
         }
         
         modelContext.insert(newAssessment)
-        try? modelContext.save()
+        modelContext.saveOrLog("create assessment")
         return newAssessment
     }
     
@@ -58,12 +58,12 @@ class AssessmentHelper {
             assessment.horses.append(horse)
             modelContext.insert(horse)
         }
-        
-        try? modelContext.save()
+
+        modelContext.saveOrLog("update assessment")
     }
-    
+
     func deleteAssessment(assessment: Assessment) {
         modelContext.delete(assessment)
-        try? modelContext.save()
+        modelContext.saveOrLog("delete assessment")
     }
 } 
