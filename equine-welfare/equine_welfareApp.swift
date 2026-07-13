@@ -7,9 +7,16 @@
 
 import SwiftUI
 import SwiftData
+import ClerkKit
 
 @main
 struct equine_welfareApp: App {
+    init() {
+        // Auth is only needed for cloud sync — the app itself (assessment
+        // creation, editing, export) works fully offline and signed out.
+        Clerk.configure(publishableKey: ConvexConfig.clerkPublishableKey)
+    }
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Assessment.self,

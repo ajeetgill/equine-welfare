@@ -4,5 +4,7 @@
 <dict>
 	<key>CONVEX_URL</key>
 	<string>$(CONVEX_URL)</string>
+	<key>CLERK_PUBLISHABLE_KEY</key>
+	<string>$(CLERK_PUBLISHABLE_KEY)</string>
 </dict>
 </plist>

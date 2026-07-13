@@ -5,15 +5,30 @@ import ConvexMobile
 class ConvexService {
     static let shared = ConvexService()
 
-    private let client: ConvexClient
+    private let client: ConvexClientWithAuth<String>
 
     private init() {
-        self.client = ConvexClient(deploymentUrl: ConvexConfig.deploymentURL)
+        self.client = ConvexClientWithAuth(
+            deploymentUrl: ConvexConfig.deploymentURL,
+            authProvider: ClerkAuthProvider()
+        )
+    }
+
+    /// Mints a fresh Convex JWT from the Clerk session and hands it to the
+    /// client. Clerk template tokens are short-lived, so this is called at
+    /// sync start and again between upload batches; the token is cached by
+    /// Clerk, so refreshes are cheap unless it's actually near expiry.
+    private func refreshAuth() async throws {
+        if case .failure(let error) = await client.loginFromCache() {
+            throw error
+        }
     }
 
     // MARK: - Sync Assessment
 
     func syncAssessment(_ assessment: Assessment, progressHandler: ((String, Double) -> Void)? = nil) async throws {
+        try await refreshAuth()
+
         progressHandler?("Preparing assessment data...", 0.1)
 
         // Prepare assessment data as JSON string
@@ -105,6 +120,8 @@ class ConvexService {
         let totalHorses = horses.count
 
         for (horseIndex, horse) in horses.enumerated() {
+            try await refreshAuth()
+
             let horseId = horse.uuid.uuidString
             let horseProgress = 0.6 + (0.3 * Double(horseIndex) / Double(max(totalHorses, 1)))
             progressHandler?("Uploading photos for \(horse.name)...", horseProgress)
@@ -145,6 +162,7 @@ class ConvexService {
         // MARK: - Upload requirement media (progress 0.9 to 0.95)
 
         progressHandler?("Uploading requirement media...", 0.9)
+        try await refreshAuth()
 
         for section in assessment.sections where section.isApplicable {
             for (subIdx, subsection) in section.subsections.enumerated() {

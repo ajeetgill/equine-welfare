@@ -10,6 +10,8 @@ import SwiftData
 import UniformTypeIdentifiers
 import UIKit
 import AVFoundation
+import ClerkKit
+import ClerkKitUI
 
 // MARK: - UIFont Extension
 extension UIFont {
@@ -34,6 +36,7 @@ struct PreviousAssessmentRow: View {
     @State private var uploadSuccessMessage: String?
     @State private var uploadProgress: Double = 0.0
     @State private var isUploadingMedia: Bool = false
+    @State private var showSignIn = false
     @State private var sectionViewModel: SectionSelectionViewModel
     @Environment(PermissionsManager.self) private var permissionsManager
     @State private var showPermissionsAlert = false
@@ -317,8 +320,14 @@ struct PreviousAssessmentRow: View {
     
     private var uploadButton: some View {
         Button {
-            Task {
-                await syncToConvex()
+            // Sync is the only feature that needs an account — everything
+            // else works offline. Prompt for sign-in just-in-time.
+            if Clerk.shared.user == nil {
+                showSignIn = true
+            } else {
+                Task {
+                    await syncToConvex()
+                }
             }
         } label: {
             if isUploading {
@@ -343,6 +352,16 @@ struct PreviousAssessmentRow: View {
         .disabled(isUploading)
         .tint(.blue)
         .help("Sync assessment to cloud")
+        .sheet(isPresented: $showSignIn, onDismiss: {
+            // Continue the sync the user asked for once they're signed in.
+            if Clerk.shared.user != nil {
+                Task {
+                    await syncToConvex()
+                }
+            }
+        }) {
+            AuthView()
+        }
         .alert("Sync Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
         } message: {
