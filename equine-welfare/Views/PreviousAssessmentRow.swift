@@ -98,9 +98,7 @@ struct PreviousAssessmentRow: View {
 
         } catch {
             let errorDesc = error.localizedDescription
-            if errorDesc.contains("already synced") || errorDesc.contains("Duplicate") {
-                uploadError = "This assessment has already been synced to the cloud. No action needed."
-            } else if errorDesc.contains("not connected") || errorDesc.contains("offline") || errorDesc.contains("network") || errorDesc.contains("timed out") {
+            if errorDesc.contains("not connected") || errorDesc.contains("offline") || errorDesc.contains("network") || errorDesc.contains("timed out") {
                 uploadError = "No internet connection. Please check your network and try again."
             } else if errorDesc.contains("upload") || error is ConvexError {
                 uploadError = "Failed to upload media. Please try again."
@@ -345,7 +343,7 @@ struct PreviousAssessmentRow: View {
         .disabled(isUploading)
         .tint(.blue)
         .help("Sync assessment to cloud")
-        .alert(uploadError?.contains("already been synced") ?? false ? "Already Synced" : "Sync Error", isPresented: $showUploadAlert) {
+        .alert("Sync Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(uploadError ?? "An unknown error occurred")
