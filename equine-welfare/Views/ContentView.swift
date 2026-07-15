@@ -51,6 +51,11 @@ struct ContentView: View {
                 }
             }
             .padding()
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    AccountMenu()
+                }
+            }
         }
         .environment(permissionsManager)
         // The assessment workspace is a NavigationSplitView, which must be a
