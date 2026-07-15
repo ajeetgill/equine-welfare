@@ -16,7 +16,13 @@ struct AssessmentWorkspaceView: View {
     var galleryViewModel: GalleryViewModel
     var assessmentId: UUID
 
-    @State private var pane: WorkspacePane? = .sections
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    // Start with no selection so iPhone (compact) lands on the sidebar menu
+    // rather than jumping straight into a detail pane. On iPad the two columns
+    // are always visible, so `onAppear` selects Section Selection to fill the
+    // detail column.
+    @State private var pane: WorkspacePane?
 
     var body: some View {
         NavigationSplitView {
@@ -64,6 +70,13 @@ struct AssessmentWorkspaceView: View {
             }
         } detail: {
             detailContent
+        }
+        .onAppear {
+            // Only iPad's always-visible detail column needs a default pane;
+            // iPhone stays on the menu until the user picks one.
+            if horizontalSizeClass != .compact, pane == nil {
+                pane = .sections
+            }
         }
         .onDisappear {
             viewModel.saveAssessment()

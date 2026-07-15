@@ -53,6 +53,15 @@ final class NavigationFlowUITests: XCTestCase {
         //  - iPhone compact: detail shows first with an "Assessment" back button.
         XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10),
                       "Workspace did not present")
+
+        // On compact (iPhone) the workspace should land on the sidebar menu, so
+        // the pane entries (e.g. "Horses") are directly reachable without first
+        // backing out of a detail pane. Capture the landing screen.
+        let landing = XCTAttachment(screenshot: app.screenshot())
+        landing.name = "workspace-landing"
+        landing.lifetime = .keepAlways
+        add(landing)
+
         if app.buttons["Show Sidebar"].exists {
             app.buttons["Show Sidebar"].tap()
         } else if app.buttons["Assessment"].exists {
