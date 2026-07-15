@@ -1,16 +1,23 @@
 import SwiftUI
 
-/// The horses pane: a two-column master/detail (list | selected-horse info).
-/// Combined with the workspace sidebar this reads as `[ Panes | Horses list |
-/// Horse info ]`.
+/// The horses pane.
+///
+/// - On **regular** width (iPad) it's a two-column master/detail (list |
+///   selected-horse info). Combined with the workspace sidebar this reads as
+///   `[ Panes | Horses list | Horse info ]`.
+/// - On **compact** width (iPhone) two side-by-side columns would be crushed to
+///   ~50pt each and wrap character-by-character, so it collapses to a single
+///   full-width list and presents the selected horse's info as a sheet.
 ///
 /// Adding and editing a horse are modal *tasks* (discrete, cancelable,
-/// committed), so they present as a sheet with Cancel / Save rather than taking
-/// over the detail column. Viewing a horse stays inline in the detail column.
+/// committed), so they always present as a sheet with Cancel / Save regardless
+/// of width.
 struct HorsesPaneView: View {
     let assessmentId: UUID
 
-    /// The horse shown in the detail column.
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// The horse shown in the detail column (iPad) or info sheet (iPhone).
     @State private var selectedHorseId: UUID?
     /// Non-nil while the add/edit sheet is presented.
     @State private var editing: EditTarget?
@@ -34,68 +41,103 @@ struct HorsesPaneView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            NavigationStack {
-                HorsesView(
-                    assessmentId: assessmentId,
-                    selectedHorseId: selectedHorseId,
-                    onSelectHorse: { selectedHorseId = $0 }
-                )
-                .navigationTitle("Horses")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            editing = .add
-                        } label: {
-                            Label("Add Horse", systemImage: "plus")
+        layout
+            .sheet(item: $editing) { target in
+                NavigationStack {
+                    HorseDetailView(
+                        horseId: target.horseId,
+                        assessmentId: assessmentId,
+                        onSaved: { savedId in
+                            selectedHorseId = savedId
+                            editing = nil
                         }
-                        .buttonStyle(.borderedProminent)
+                    )
+                    .navigationTitle(target.horseId == nil ? "Add Horse" : "Edit Horse")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { editing = nil }
+                        }
                     }
                 }
+                // A large "page" sheet gives the BCS slider + reference room to
+                // coexist; disabling interactive dismissal prevents an accidental
+                // tap-outside (or swipe-down) from discarding an in-progress edit.
+                .presentationSizing(.page)
+                .interactiveDismissDisabled()
             }
-            .frame(width: 340)
+    }
 
-            Divider()
+    // MARK: - Layout
 
-            NavigationStack {
-                detailColumn
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .sheet(item: $editing) { target in
-            NavigationStack {
-                HorseDetailView(
-                    horseId: target.horseId,
-                    assessmentId: assessmentId,
-                    onSaved: { savedId in
-                        selectedHorseId = savedId
-                        editing = nil
-                    }
-                )
-                .navigationTitle(target.horseId == nil ? "Add Horse" : "Edit Horse")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { editing = nil }
+    @ViewBuilder
+    private var layout: some View {
+        if horizontalSizeClass == .compact {
+            listColumn
+                .sheet(isPresented: infoSheetPresented) {
+                    NavigationStack {
+                        if let selectedHorseId {
+                            horseInfoView(id: selectedHorseId)
+                                .navigationBarTitleDisplayMode(.inline)
+                                .toolbar {
+                                    ToolbarItem(placement: .confirmationAction) {
+                                        Button("Done") { self.selectedHorseId = nil }
+                                    }
+                                }
+                        }
                     }
                 }
+        } else {
+            HStack(spacing: 0) {
+                listColumn
+                    .frame(width: 340)
+
+                Divider()
+
+                NavigationStack {
+                    detailColumn
+                }
+                .frame(maxWidth: .infinity)
             }
-            // A large "page" sheet gives the BCS slider + reference room to
-            // coexist; disabling interactive dismissal prevents an accidental
-            // tap-outside (or swipe-down) from discarding an in-progress edit.
-            .presentationSizing(.page)
-            .interactiveDismissDisabled()
         }
     }
+
+    /// The horses list with its title and Add button, shared by both layouts.
+    private var listColumn: some View {
+        NavigationStack {
+            HorsesView(
+                assessmentId: assessmentId,
+                selectedHorseId: selectedHorseId,
+                onSelectHorse: { selectedHorseId = $0 }
+            )
+            .navigationTitle("Horses")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        editing = .add
+                    } label: {
+                        Label("Add Horse", systemImage: "plus")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+        }
+    }
+
+    /// Drives the compact info sheet: presented whenever a horse is selected.
+    private var infoSheetPresented: Binding<Bool> {
+        Binding(
+            get: { selectedHorseId != nil },
+            set: { if !$0 { selectedHorseId = nil } }
+        )
+    }
+
+    // MARK: - Detail
 
     @ViewBuilder
     private var detailColumn: some View {
         if let selectedHorseId {
-            HorseInfoView(
-                horseId: selectedHorseId,
-                onEdit: { id, _ in editing = .edit(id) }
-            )
-            .navigationTitle("Horse Details")
+            horseInfoView(id: selectedHorseId)
         } else {
             ContentUnavailableView {
                 Label("No Horse Selected", systemImage: "pawprint")
@@ -110,5 +152,13 @@ struct HorsesPaneView: View {
                 .buttonStyle(.borderedProminent)
             }
         }
+    }
+
+    private func horseInfoView(id: UUID) -> some View {
+        HorseInfoView(
+            horseId: id,
+            onEdit: { editId, _ in editing = .edit(editId) }
+        )
+        .navigationTitle("Horse Details")
     }
 }

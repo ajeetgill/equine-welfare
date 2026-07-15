@@ -58,7 +58,13 @@ struct HorseInfoView: View {
                     Text("Body Photos")
                         .font(.headline)
 
-                    HStack(spacing: 20) {
+                    // Adaptive grid so the four wells stay in one row on iPad's
+                    // wide detail column but wrap to 2×2 on a compact iPhone
+                    // instead of overflowing the screen.
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 110, maximum: 180), spacing: 16)],
+                        spacing: 16
+                    ) {
                         BodyPhotoWell(title: "Front", imageData: horse?.frontPhotoData?.data) {
                             horse?.frontPhotoData = $0
                             modelContext.saveOrLog("front photo")
