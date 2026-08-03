@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CONVEX_URL</key>
-	<string>$(CONVEX_URL)</string>
-	<key>CLERK_PUBLISHABLE_KEY</key>
-	<string>$(CLERK_PUBLISHABLE_KEY)</string>
 	<key>POCKETBASE_URL</key>
 	<string>$(POCKETBASE_URL)</string>
 	<key>NSAppTransportSecurity</key>

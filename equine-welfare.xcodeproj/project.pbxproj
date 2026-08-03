@@ -7,10 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		39BCCE602D9B700000B06BA5 /* ConvexMobile in Frameworks */ = {isa = PBXBuildFile; productRef = 39BCCE5F2D9B700000B06BA5 /* ConvexMobile */; };
 		5F9D95A72D7EA6D100F9934A /* MijickCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 5F9D95A62D7EA6D100F9934A /* MijickCamera */; };
-		C1E8C1E42E230000000000A4 /* ClerkKit in Frameworks */ = {isa = PBXBuildFile; productRef = C1E8C1E42E230000000000A2 /* ClerkKit */; };
-		C1E8C1E42E230000000000A5 /* ClerkKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = C1E8C1E42E230000000000A3 /* ClerkKitUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,9 +71,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				39BCCE602D9B700000B06BA5 /* ConvexMobile in Frameworks */,
-				C1E8C1E42E230000000000A4 /* ClerkKit in Frameworks */,
-				C1E8C1E42E230000000000A5 /* ClerkKitUI in Frameworks */,
 				5F9D95A72D7EA6D100F9934A /* MijickCamera in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -139,9 +133,6 @@
 			name = "equine-welfare";
 			packageProductDependencies = (
 				5F9D95A62D7EA6D100F9934A /* MijickCamera */,
-				39BCCE5F2D9B700000B06BA5 /* ConvexMobile */,
-				C1E8C1E42E230000000000A2 /* ClerkKit */,
-				C1E8C1E42E230000000000A3 /* ClerkKitUI */,
 			);
 			productName = "equine-welfare";
 			productReference = 5F3AF8612D666FB1005349B4 /* Horse C.O.P.app */;
@@ -227,8 +218,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */,
-				39BCCE5E2D9B700000B06BA5 /* XCRemoteSwiftPackageReference "convex-swift" */,
-				C1E8C1E42E230000000000A1 /* XCRemoteSwiftPackageReference "clerk-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5F3AF8622D666FB1005349B4 /* Products */;
@@ -619,14 +608,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		39BCCE5E2D9B700000B06BA5 /* XCRemoteSwiftPackageReference "convex-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/get-convex/convex-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.0;
-			};
-		};
 		5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Mijick/Camera.git";
@@ -635,36 +616,13 @@
 				version = 3.0.3;
 			};
 		};
-		C1E8C1E42E230000000000A1 /* XCRemoteSwiftPackageReference "clerk-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/clerk/clerk-ios";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.3.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		39BCCE5F2D9B700000B06BA5 /* ConvexMobile */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 39BCCE5E2D9B700000B06BA5 /* XCRemoteSwiftPackageReference "convex-swift" */;
-			productName = ConvexMobile;
-		};
 		5F9D95A62D7EA6D100F9934A /* MijickCamera */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5F9D95A52D7EA6D100F9934A /* XCRemoteSwiftPackageReference "Camera" */;
 			productName = MijickCamera;
-		};
-		C1E8C1E42E230000000000A2 /* ClerkKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1E8C1E42E230000000000A1 /* XCRemoteSwiftPackageReference "clerk-ios" */;
-			productName = ClerkKit;
-		};
-		C1E8C1E42E230000000000A3 /* ClerkKitUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1E8C1E42E230000000000A1 /* XCRemoteSwiftPackageReference "clerk-ios" */;
-			productName = ClerkKitUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
