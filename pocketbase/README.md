@@ -18,6 +18,24 @@ cd pocketbase
 - Schema lives in `pb_migrations/` (applied automatically on serve).
 - The iOS sync endpoint lives in `pb_hooks/main.pb.js`.
 
+## Dashboard (web UI)
+
+The web dashboard is a Vite + React app in `../dashboard/`, served by
+PocketBase itself from `pb_public/` (gitignored build artifact).
+
+```bash
+# build (emits into pocketbase/pb_public/)
+cd ../dashboard && nvm use node && npm install && npm run build
+
+# then (re)start PocketBase and open http://localhost:8090/
+```
+
+For dashboard development with hot reload:
+
+```bash
+cd ../dashboard && npm run dev   # Vite on :5173, talks to PocketBase on :8090
+```
+
 ## First-time setup
 
 ```bash
