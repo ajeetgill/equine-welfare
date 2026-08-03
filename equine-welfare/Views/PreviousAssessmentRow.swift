@@ -10,8 +10,6 @@ import SwiftData
 import UniformTypeIdentifiers
 import UIKit
 import AVFoundation
-import ClerkKit
-import ClerkKitUI
 
 // MARK: - UIFont Extension
 extension UIFont {
@@ -80,51 +78,41 @@ struct PreviousAssessmentRow: View {
         }
     }
     
-    // Sync assessment to Convex
-    private func syncToConvex() async {
-        // Start uploading - show progress
+    // Sync assessment to PocketBase
+    private func syncToCloud() async {
         isUploading = true
         uploadProgress = 0.1
 
         do {
-            try await ConvexService.shared.syncAssessment(assessment) { message, progress in
+            try await PocketBaseService.shared.syncAssessment(assessment) { message, progress in
                 self.uploadProgress = progress
                 self.isUploadingMedia = message.contains("media")
             }
 
-            // Success
             uploadSuccessMessage = "Assessment synced successfully!"
             showUploadSuccess = true
             uploadError = nil
             isUploadingMedia = false
             uploadProgress = 1.0
 
-        } catch {
-            let errorDesc = error.localizedDescription
-            if errorDesc.contains("not connected") || errorDesc.contains("offline") || errorDesc.contains("network") || errorDesc.contains("timed out") {
-                uploadError = "No internet connection. Please check your network and try again."
-            } else if errorDesc.contains("upload") || error is ConvexError {
-                uploadError = "Failed to upload media. Please try again."
-            } else {
-                // Strip server internals — show only the meaningful part
-                if let range = errorDesc.range(of: "Uncaught Error: ") {
-                    let message = String(errorDesc[range.upperBound...])
-                        .replacingOccurrences(of: "\\n", with: "")
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                    // Remove anything after "\n  at handler" (stack trace)
-                    if let atHandler = message.range(of: "  at handler") {
-                        uploadError = String(message[..<atHandler.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-                    } else {
-                        uploadError = message
-                    }
-                } else {
-                    uploadError = "Sync failed. Please try again later."
-                }
+        } catch let error as PocketBaseError {
+            // PocketBase errors are structured — no string matching needed.
+            uploadError = error.localizedDescription
+            showUploadAlert = true
+        } catch let error as URLError {
+            switch error.code {
+            case .notConnectedToInternet, .networkConnectionLost, .timedOut,
+                 .cannotConnectToHost, .cannotFindHost:
+                uploadError = "Could not reach the sync server. Check that you're on the same network and PocketBase is running."
+            default:
+                uploadError = "Sync failed. Please try again later."
             }
+            showUploadAlert = true
+        } catch {
+            uploadError = "Sync failed. Please try again later."
             showUploadAlert = true
         }
 
-        // Reset state
         isUploading = false
         uploadProgress = 0.0
     }
@@ -322,11 +310,11 @@ struct PreviousAssessmentRow: View {
         Button {
             // Sync is the only feature that needs an account — everything
             // else works offline. Prompt for sign-in just-in-time.
-            if Clerk.shared.user == nil {
+            if !PocketBaseService.shared.isSignedIn {
                 showSignIn = true
             } else {
                 Task {
-                    await syncToConvex()
+                    await syncToCloud()
                 }
             }
         } label: {
@@ -354,13 +342,13 @@ struct PreviousAssessmentRow: View {
         .help("Sync assessment to cloud")
         .sheet(isPresented: $showSignIn, onDismiss: {
             // Continue the sync the user asked for once they're signed in.
-            if Clerk.shared.user != nil {
+            if PocketBaseService.shared.isSignedIn {
                 Task {
-                    await syncToConvex()
+                    await syncToCloud()
                 }
             }
         }) {
-            AuthView()
+            SignInSheet()
         }
         .alert("Sync Error", isPresented: $showUploadAlert) {
             Button("OK", role: .cancel) { }
