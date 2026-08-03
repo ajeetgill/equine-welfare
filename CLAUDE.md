@@ -96,6 +96,5 @@ Branch `pocketbase-served-dashboard` moved the dashboard into `dashboard/` (buil
 
 ### Web
 - TypeScript strict mode enabled
-- Component-based with Radix UI primitives
-- Tailwind CSS for styling
-- Server actions for mutations
+- Plain React function components styled with Tailwind CSS (no Radix, no server actions)
+- All backend access goes through the PocketBase JS SDK via `src/lib/pocketbase.ts`
