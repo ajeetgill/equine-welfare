@@ -59,14 +59,14 @@ Assessment
 - `Models/` - SwiftData models (Assessment, Horse, Section, Subsection, Requirement, MediaAttachment)
 - `ViewModels/` - Observable view models
 - `Views/` - SwiftUI views
-- `Services/` - Business logic (ConvexService cloud sync, COPService reference-data loading)
+- `Services/` - Business logic (PocketBaseService cloud sync, COPService reference-data loading)
 - `Utils/` - Helpers (BCS managers, assessment export/formatting)
 - `Static-Data/` - JSON reference data (COP.json, BCS.json)
 
 **Web (`equine-frontend/`):**
 - `app/` - Next.js app directory with routes
 - `components/` - React components (Radix UI + Tailwind)
-- `actions/` - Server actions for Supabase queries
+- `actions/` - Client-side docx/report generators (no backend calls)
 
 ## Configuration
 
