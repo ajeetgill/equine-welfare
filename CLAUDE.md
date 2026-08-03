@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Dual-platform equine (horse/donkey) welfare assessment application:
 - **iOS App** (`equine-welfare/`): Swift 6.1, SwiftUI, SwiftData (local-first)
-- **Web App** (`equine-frontend/`): Next.js 15, React 19, TypeScript (git submodule)
+- **Web Dashboard** (`dashboard/`): Vite + React 19, TypeScript — built into `pocketbase/pb_public/` and served by PocketBase
 - **Current Backend**: PocketBase (self-hosted — auth, database, file storage) in pocketbase/
 
 ## Build & Run Commands
@@ -22,13 +22,13 @@ open equine-welfare.xcodeproj
 - Requires Xcode 16.2+, Swift 6.1
 - Primary target: iPad
 
-### Web App
+### Web Dashboard
 ```bash
-cd equine-frontend
+cd dashboard
 nvm use node              # Switch to latest Node.js first
 npm install
-npm run dev               # Development server on localhost:3000
-npm run build             # Production build
+npm run dev               # Vite dev server on localhost:5173 (PocketBase must run on :8090)
+npm run build             # Builds into pocketbase/pb_public/ (served by PocketBase at :8090)
 ```
 
 ### PocketBase
@@ -63,10 +63,10 @@ Assessment
 - `Utils/` - Helpers (BCS managers, assessment export/formatting)
 - `Static-Data/` - JSON reference data (COP.json, BCS.json)
 
-**Web (`equine-frontend/`):**
-- `app/` - Next.js app directory with routes
-- `components/` - React components (Radix UI + Tailwind)
-- `actions/` - Client-side docx/report generators (no backend calls)
+**Web (`dashboard/`):**
+- `src/components/` - Login, Dashboard, BackendError
+- `src/lib/` - PocketBase client, assessments data layer, theme hook
+- `src/actions/` - Client-side docx/report generators (no backend calls)
 
 ## Configuration
 
@@ -75,12 +75,15 @@ Copy `equine-welfare/Config/Secrets.example.xcconfig` to `Secrets.xcconfig` and 
 - `POCKETBASE_URL` (typically `http://localhost:8090` for development)
 
 ### Web
-Copy `equine-frontend/.env.example` to `.env.local` and configure:
-- `NEXT_PUBLIC_POCKETBASE_URL` (typically `http://localhost:8090`)
+No configuration needed for production (served same-origin by PocketBase).
+For the Vite dev server, copy `dashboard/.env.example` to `dashboard/.env`:
+- `VITE_POCKETBASE_URL` (typically `http://localhost:8090`)
 
 ## Current Migration Context
 
-Branch `pocketbase-migration` is migrating from Convex + Clerk to PocketBase (self-hosted auth, database, and file storage). See `docs/superpowers/plans/2026-08-02-pocketbase-migration.md` for the full plan and `docs/superpowers/specs/2026-08-02-pocketbase-migration-design.md` for technical specification.
+Branch `pocketbase-migration` migrated from Convex + Clerk to PocketBase (self-hosted auth, database, and file storage). See `docs/superpowers/plans/2026-08-02-pocketbase-migration.md` for the full plan and `docs/superpowers/specs/2026-08-02-pocketbase-migration-design.md` for technical specification.
+
+Branch `pocketbase-served-dashboard` moved the dashboard into `dashboard/` (built into `pocketbase/pb_public/` and served by PocketBase) and retired the `equine-frontend` submodule. See `docs/superpowers/specs/2026-08-02-pocketbase-served-dashboard-design.md` for the technical specification and `docs/superpowers/plans/2026-08-02-pocketbase-served-dashboard.md` for the full plan.
 
 ## Coding Guidelines
 
