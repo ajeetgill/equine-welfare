@@ -49,10 +49,16 @@ jobs:
           cd bundle && zip -r ../equine-backend-linux-amd64.zip . && cd ..
           unzip -l equine-backend-linux-amd64.zip | tail -5
 
-      - name: Create release
+      - name: Create release or upload to existing
         env:
           GH_TOKEN: ${{ github.token }}
+        # `gh release create vX` from a terminal pre-creates the release before
+        # this workflow runs, so upload into it when it already exists.
         run: |
-          gh release create "${GITHUB_REF_NAME}" equine-backend-linux-amd64.zip \
-            --title "Equine backend ${GITHUB_REF_NAME}" \
-            --generate-notes
+          if gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" equine-backend-linux-amd64.zip --clobber --repo "${GITHUB_REPOSITORY}"
+          else
+            gh release create "${GITHUB_REF_NAME}" equine-backend-linux-amd64.zip \
+              --title "Equine backend ${GITHUB_REF_NAME}" \
+              --generate-notes --repo "${GITHUB_REPOSITORY}"
+          fi
