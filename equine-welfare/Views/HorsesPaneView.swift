@@ -7,11 +7,14 @@ import SwiftUI
 ///   `[ Panes | Horses list | Horse info ]`.
 /// - On **compact** width (iPhone) two side-by-side columns would be crushed to
 ///   ~50pt each and wrap character-by-character, so it collapses to a single
-///   full-width list and presents the selected horse's info as a sheet.
+///   full-width list and *pushes* the selected horse's info onto the stack
+///   (list → detail, Contacts-style).
 ///
 /// Adding and editing a horse are modal *tasks* (discrete, cancelable,
 /// committed), so they always present as a sheet with Cancel / Save regardless
-/// of width.
+/// of width. Details must NOT be a sheet on compact: a sheet-within-a-sheet
+/// blocks the edit sheet's presentation until the first one dismisses, which
+/// made Edit appear to do nothing until Done was tapped.
 struct HorsesPaneView: View {
     let assessmentId: UUID
 
@@ -73,24 +76,19 @@ struct HorsesPaneView: View {
     @ViewBuilder
     private var layout: some View {
         if horizontalSizeClass == .compact {
-            listColumn
-                .sheet(isPresented: infoSheetPresented) {
-                    NavigationStack {
-                        if let selectedHorseId {
-                            horseInfoView(id: selectedHorseId)
-                                .navigationBarTitleDisplayMode(.inline)
-                                .toolbar {
-                                    ToolbarItem(placement: .confirmationAction) {
-                                        Button("Done") { self.selectedHorseId = nil }
-                                    }
-                                }
-                        }
+            NavigationStack {
+                listContent
+                    .navigationDestination(item: $selectedHorseId) { id in
+                        horseInfoView(id: id)
+                            .navigationBarTitleDisplayMode(.inline)
                     }
-                }
+            }
         } else {
             HStack(spacing: 0) {
-                listColumn
-                    .frame(width: 340)
+                NavigationStack {
+                    listContent
+                }
+                .frame(width: 340)
 
                 Divider()
 
@@ -103,33 +101,23 @@ struct HorsesPaneView: View {
     }
 
     /// The horses list with its title and Add button, shared by both layouts.
-    private var listColumn: some View {
-        NavigationStack {
-            HorsesView(
-                assessmentId: assessmentId,
-                selectedHorseId: selectedHorseId,
-                onSelectHorse: { selectedHorseId = $0 }
-            )
-            .navigationTitle("Horses")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        editing = .add
-                    } label: {
-                        Label("Add Horse", systemImage: "plus")
-                    }
-                    .buttonStyle(.borderedProminent)
+    private var listContent: some View {
+        HorsesView(
+            assessmentId: assessmentId,
+            selectedHorseId: selectedHorseId,
+            onSelectHorse: { selectedHorseId = $0 }
+        )
+        .navigationTitle("Horses")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    editing = .add
+                } label: {
+                    Label("Add Horse", systemImage: "plus")
                 }
+                .buttonStyle(.borderedProminent)
             }
         }
-    }
-
-    /// Drives the compact info sheet: presented whenever a horse is selected.
-    private var infoSheetPresented: Binding<Bool> {
-        Binding(
-            get: { selectedHorseId != nil },
-            set: { if !$0 { selectedHorseId = nil } }
-        )
     }
 
     // MARK: - Detail
