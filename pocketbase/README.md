@@ -52,3 +52,24 @@ self-registration.
 ```bash
 ./scripts/test_sync.sh tester@example.com <password>
 ```
+
+## Releases & server deployment
+
+Tagging a version packages everything (PocketBase linux binary + `pb_hooks/`
++ `pb_migrations/` + freshly built dashboard) into a GitHub Release via
+`.github/workflows/release.yml`:
+
+```bash
+gh release create v1.0.0        # or: git tag v1.0.0 && git push --tags
+```
+
+On the droplet (first run bootstraps user + systemd service, later runs
+update in place; `pb_data/` is never touched):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ajeetgill/equine-welfare/main/deploy/deploy.sh -o deploy.sh
+chmod +x deploy.sh && sudo ./deploy.sh          # latest release
+sudo ./deploy.sh v1.0.0                         # or pin a version / roll back
+```
+
+See `deploy/` for the script and systemd unit.
