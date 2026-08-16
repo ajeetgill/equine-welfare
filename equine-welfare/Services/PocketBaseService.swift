@@ -100,7 +100,8 @@ final class PocketBaseService {
             "farmName": assessment.farmName,
             "visitDate": assessment.visitDate.timeIntervalSince1970 * 1000,
             "isComplete": assessment.isComplete,
-            "sideNotes": assessment.sideNotes ?? ""
+            "sideNotes": assessment.sideNotes ?? "",
+            "copVersion": assessment.copVersion ?? ""
         ]
 
         progressHandler?("Preparing horse data...", 0.2)

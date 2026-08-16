@@ -19,6 +19,14 @@ import SwiftData
     }
 }
 
+/// The edition of the Code of Practice bundled in Static-Data/COP.json.
+/// Bump this alongside the JSON when a new edition is transcribed — every
+/// assessment is stamped with it at creation and carries it through sync,
+/// the dashboard, and the docx report.
+enum COPEdition {
+    static let current = "2013"
+}
+
 class COPService {
     /// Loads and parses the COP.json file, returning an array of Section models.
     /// If there's an error loading or parsing the file, returns an empty array.

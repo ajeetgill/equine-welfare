@@ -42,6 +42,7 @@ routerAdd("POST", "/api/equine/sync-assessment", (e) => {
     record.set("visitDate", new Date(assessment.visitDate).toISOString());
     record.set("isComplete", !!assessment.isComplete);
     record.set("sideNotes", assessment.sideNotes || "");
+    record.set("copVersion", assessment.copVersion || "");
     record.set("syncedAt", new Date().toISOString());
     record.set("uploadedBy", e.auth.id);
     txApp.save(record);
