@@ -120,6 +120,7 @@ struct PreviousAssessmentRow: View {
                 }
             }
             .help(assessment.isComplete ? "Edit Assessment" : "Resume Assessment")
+            .accessibilityIdentifier("assessmentRow.edit")
 
             // Preview button
             Button(action: { showingPreview.toggle() }) {
@@ -130,6 +131,7 @@ struct PreviousAssessmentRow: View {
                 }
             }
             .help("Preview Assessment")
+            .accessibilityIdentifier("assessmentRow.preview")
 
             // Delete button
             deleteButton
@@ -180,6 +182,7 @@ struct PreviousAssessmentRow: View {
         .disabled(syncModel.isUploading)
         .tint(.blue)
         .help("Sync assessment to cloud")
+        .accessibilityIdentifier("assessmentRow.sync")
         .sheet(isPresented: $showSignIn, onDismiss: {
             // Continue the sync the user asked for once they're signed in.
             if PocketBaseService.shared.isSignedIn {
@@ -213,6 +216,7 @@ struct PreviousAssessmentRow: View {
             Label("", systemImage: "trash")
         }
         .help("Delete Assessment")
+        .accessibilityIdentifier("assessmentRow.delete")
         .foregroundColor(.red)
         .confirmationDialog(
             "Delete Assessment",
