@@ -21,11 +21,13 @@ see `client-and-billing.md`). "The client" below = the veterinarian customer.
 ## Ask Ajeet for these at session start (blockers)
 
 1. Confirmation the payment landed.
-2. **DigitalOcean account** access (created under the client's name) —
-   login or team invite.
-3. **Apple Developer account** access (client's; Program enrollment $99/yr
-   must be completed — enrollment itself can take a day or two, prompt early).
-   Ajeet will be publishing from this account.
+2. **DigitalOcean account** — Ajeet creates it under the client's name/email
+   with HIS card (first-year costs are included in the invoice; billing
+   switches to the client at renewal, ~Aug 2027). Get the client's preferred
+   email for the account.
+3. **Apple Developer account** — same arrangement: enrolled under the
+   client's name/email, Ajeet's card for year one ($99 USD). Enrollment can
+   take a day or two — start it early. Ajeet publishes from this account.
 4. **Domain name**: which one, and where it was bought (~$15/yr; registrar
    DNS must be pointable to the droplet). If none yet, help pick/buy one.
 5. Email addresses for app accounts: the client + any team members.
@@ -89,7 +91,9 @@ One-page, very plain language (client is non-technical), covering:
   zip (Word report, horse table, photos), delete.
 - How new team accounts get created (admin asks Ajeet / admin UI at
   `https://<domain>/_/` — superuser only).
-- Who pays what: Apple $99/yr, droplet $6/mo, domain ~$15/yr.
+- Who pays what: first year of Apple/$99, droplet/$6-mo, domain/~$15 is
+  included in the invoice (Ajeet's card); from year two the client pays
+  ~$260 CAD/yr directly (billing switches at renewal).
 
 ### 7. Wrap up
 - Update memory: invoice paid, deployed (domain, droplet region), TestFlight
