@@ -15,7 +15,8 @@ see `client-and-billing.md`). "The client" below = the veterinarian customer.
   edition stamping (iOS + server + dashboard + docx). The `copVersion`
   migration/hook/dashboard changes are ONLY on this branch — production must
   ship a release cut *after* this merges.
-- Payment: invoice INV-001 sent; this session starts once it's paid.
+- Payment: quote Q-001 sent (valid until Sep 30, 2026); this session starts
+  once it's accepted and paid.
 
 ## Ask Ajeet for these at session start (blockers)
 
