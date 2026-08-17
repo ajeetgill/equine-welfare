@@ -45,6 +45,13 @@ struct ModelContractTests {
         #expect(name.hasSuffix("-Dr.-Jane-Smith-Green-Acres"))
     }
 
+    @Test func newAssessmentIsStampedWithCurrentCOPEdition() {
+        let assessment = Assessment(vetName: "V", farmName: "F", visitDate: .now)
+        context.insert(assessment)
+        #expect(COPEdition.current == "2013")
+        #expect(assessment.copVersion == COPEdition.current)
+    }
+
     @Test func complianceStatusRawValuesAreTheWireContract() {
         // The dashboard's docx generator and the sync payload both carry these
         // exact strings — changing them is a breaking, cross-platform change.

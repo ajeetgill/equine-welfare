@@ -8,6 +8,7 @@ export interface AssessmentRecord extends RecordModel {
   visitDate: string; // ISO date string from PocketBase
   isComplete: boolean;
   sideNotes: string;
+  copVersion: string; // COP edition, e.g. "2013"; "" on pre-stamp records
   syncedAt: string;
 }
 

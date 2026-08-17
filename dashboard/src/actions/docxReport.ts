@@ -25,6 +25,7 @@ interface ReportData {
     id: string;
     vetName: string;
     visitDate: string;
+    copVersion?: string;
     averageHorseBCS: string;
     averageDonkeyBCS: string;
   };
@@ -83,10 +84,30 @@ function generateDocument(reportData: any) {
           size: 24,
         }),
       ],
-      spacing: { after: 400 },
+      // The edition line (when present) closes the header block instead.
+      spacing: { after: data.metadata.copVersion ? 100 : 400 },
       alignment: AlignmentType.CENTER,
     })
   );
+
+  // Which edition of the Code this assessment was conducted against. Absent
+  // on assessments synced before edition stamping (all 2013) — the report
+  // then renders exactly as it always has.
+  if (data.metadata.copVersion) {
+    paragraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Code of Practice edition: ${data.metadata.copVersion}`,
+            color: "0000FF", // Blue
+            size: 24,
+          }),
+        ],
+        spacing: { after: 400 },
+        alignment: AlignmentType.CENTER,
+      })
+    );
+  }
 
   paragraphs.push(
     new Paragraph({
