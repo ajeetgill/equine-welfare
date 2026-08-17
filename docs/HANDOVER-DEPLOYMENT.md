@@ -21,13 +21,20 @@ see `client-and-billing.md`). "The client" below = the veterinarian customer.
 ## Ask Ajeet for these at session start (blockers)
 
 1. Confirmation the payment landed.
-2. **DigitalOcean account** — Ajeet creates it under the client's name/email
-   with HIS card (first-year costs are included in the invoice; billing
-   switches to the client at renewal, ~Aug 2027). Get the client's preferred
-   email for the account.
-3. **Apple Developer account** — same arrangement: enrolled under the
-   client's name/email, Ajeet's card for year one ($99 USD). Enrollment can
-   take a day or two — start it early. Ajeet publishes from this account.
+2. **DigitalOcean account** — Ajeet creates it under the client's
+   name/email. First-year costs are included in the invoice, but do NOT
+   store Ajeet's card: fund it with a **one-time PayPal top-up (~$85 USD
+   prepaid credit)** covering year one. Client adds her card when credit
+   runs low (~Aug 2027) — that's the billing handoff.
+3. **Apple Developer account** — enrolled under the client's name/email;
+   pay the $99 USD with Ajeet's card, then REMOVE the card immediately
+   (renewal just fails until the client adds hers; Apple gives a grace
+   window). Enrollment can take a day or two — start it early. Ajeet
+   publishes from this account.
+   **Account email is a UPEI-controlled mailbox** (institutional): on
+   every account (Apple, DO, registrar) set 2FA/recovery to the client's
+   personal cell so a locked/decommissioned mailbox can't brick access.
+   Domain: pay once, remove card, leave auto-renew off + set a reminder.
 4. **Domain name**: which one, and where it was bought (~$15/yr; registrar
    DNS must be pointable to the droplet). If none yet, help pick/buy one.
 5. Email addresses for app accounts: the client + any team members.
