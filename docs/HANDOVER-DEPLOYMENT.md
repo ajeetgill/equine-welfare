@@ -22,10 +22,13 @@ see `client-and-billing.md`). "The client" below = the veterinarian customer.
 
 1. Confirmation the payment landed.
 2. **DigitalOcean account** — Ajeet creates it under the client's
-   name/email. First-year costs are included in the invoice, but do NOT
-   store Ajeet's card: fund it with a **one-time PayPal top-up (~$85 USD
-   prepaid credit)** covering year one. Client adds her card when credit
-   runs low (~Aug 2027) — that's the billing handoff.
+   name/email. First-year costs are included in the invoice. No PayPal
+   (Ajeet doesn't have/want one). Payment: a **prepaid/virtual card
+   (Wealthsimple / KOHO / Wise, free) loaded with ~$120 CAD** so exposure
+   is capped and his real card is never stored. Fallback: his real card —
+   acceptable since he holds the DO password + 2FA authenticator and can
+   always remove it. Client adds her card ~Aug 2027 — that's the billing
+   handoff.
 3. **Apple Developer account** — enrolled under the client's name/email;
    pay the $99 USD with Ajeet's card, then REMOVE the card immediately
    (renewal just fails until the client adds hers; Apple gives a grace
