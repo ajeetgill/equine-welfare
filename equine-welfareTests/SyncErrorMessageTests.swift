@@ -18,7 +18,7 @@ struct SyncErrorMessageTests {
         for code in [URLError.notConnectedToInternet, .networkConnectionLost, .timedOut,
                      .cannotConnectToHost, .cannotFindHost] {
             #expect(AssessmentSyncViewModel.errorMessage(for: URLError(code))
-                    == "Could not reach the sync server. Check that you're on the same network and PocketBase is running.")
+                    == "Could not reach the server. Check your internet connection and try again.")
         }
     }
 

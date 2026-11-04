@@ -51,7 +51,7 @@ final class AssessmentSyncViewModel {
             switch error.code {
             case .notConnectedToInternet, .networkConnectionLost, .timedOut,
                  .cannotConnectToHost, .cannotFindHost:
-                return "Could not reach the sync server. Check that you're on the same network and PocketBase is running."
+                return "Could not reach the server. Check your internet connection and try again."
             default:
                 return "Sync failed. Please try again later."
             }
