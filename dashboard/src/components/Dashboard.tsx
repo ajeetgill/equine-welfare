@@ -130,6 +130,7 @@ export default function Dashboard({ email }: { email: string | null }) {
           id: details.externalId,
           vetName: details.vetName,
           visitDate: new Date(details.visitDate).toLocaleDateString(),
+          copVersion: details.copVersion || "",
           averageHorseBCS: avgHorseBCS,
           averageDonkeyBCS: avgDonkeyBCS,
         },
@@ -242,6 +243,7 @@ export default function Dashboard({ email }: { email: string | null }) {
                 </p>
                 <p className="text-xs text-gray-400">
                   {assessment.isComplete ? "Complete" : "In Progress"}
+                  {assessment.copVersion ? ` · COP ${assessment.copVersion}` : ""}
                 </p>
               </div>
               <div className="flex gap-2 items-start">

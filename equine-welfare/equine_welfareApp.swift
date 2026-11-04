@@ -30,6 +30,18 @@ struct equine_welfareApp: App {
         }
     }()
 
+    init() {
+        // UI-test hooks: launch arguments (set only by the UI test runner)
+        // that reset state so visual tests are deterministic. No effect on
+        // normal launches.
+        if CommandLine.arguments.contains("--uitest-reset-auth") {
+            PocketBaseService.shared.signOut()
+        }
+        if CommandLine.arguments.contains("--uitest-wipe-data") {
+            try? ModelContext(sharedModelContainer).delete(model: Assessment.self)
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

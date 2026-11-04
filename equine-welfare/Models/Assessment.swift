@@ -12,7 +12,12 @@ class Assessment {
     @Relationship(deleteRule: .cascade) var horses: [Horse]
     
     var sideNotes: String?
-    
+
+    /// Code of Practice edition this assessment was created against
+    /// (COPEdition.current at creation). Nil on assessments that predate
+    /// the stamp — they were all created under the 2013 edition.
+    var copVersion: String?
+
     init(vetName: String, farmName: String, visitDate: Date) {
         self.id = UUID()
         self.vetName = vetName.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: " ", with: "-")
@@ -22,6 +27,7 @@ class Assessment {
         self.sections = []
         self.horses = []
         self.sideNotes = nil
+        self.copVersion = COPEdition.current
     }
 
     var formattedDate: String {

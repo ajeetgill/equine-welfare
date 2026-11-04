@@ -10,7 +10,7 @@ TOKEN=$(curl -s -X POST "$PB_URL/api/collections/users/auth-with-password" \
   | python3 -c 'import sys, json; print(json.load(sys.stdin)["token"])')
 
 PAYLOAD='{
-  "assessment": {"externalId": "11111111-2222-3333-4444-555555555555", "vetName": "Dr. Test", "farmName": "Test Farm", "visitDate": 1754100000000, "isComplete": true, "sideNotes": "test note"},
+  "assessment": {"externalId": "11111111-2222-3333-4444-555555555555", "vetName": "Dr. Test", "farmName": "Test Farm", "visitDate": 1754100000000, "isComplete": true, "sideNotes": "test note", "copVersion": "2013"},
   "horses": [{"externalId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", "name": "Testy", "age": 5, "ageUnit": "years", "color": "bay", "sex": "mare", "breed": "Arabian", "otherBreed": "", "timeOnFarm": 2, "timeUnit": "years", "bcsScore": 5, "notes": "", "isHorse": true}],
   "sections": [{"sectionNumber": 1, "title": "Nutrition", "isApplicable": true, "infoIconClicks": 3, "subsections": [{"name": "Feed", "requirements": [{"text": "Adequate feed", "complianceStatus": "Compliant", "nonComplianceReason": ""}]}]}]
 }'
@@ -35,6 +35,10 @@ echo "assessmentId: $ID2"
 echo "-- horse count after re-sync (expect 1):"
 curl -s "$PB_URL/api/collections/horses/records?filter=(assessment='$ID1')" -H "Authorization: $TOKEN" \
   | python3 -c 'import sys, json; d = json.load(sys.stdin); print(d["totalItems"]); sys.exit(0 if d["totalItems"] == 1 else 1)'
+
+echo "-- copVersion stored (expect 2013):"
+curl -s "$PB_URL/api/collections/assessments/records/$ID1" -H "Authorization: $TOKEN" \
+  | python3 -c 'import sys, json; d = json.load(sys.stdin); print(d["copVersion"]); sys.exit(0 if d["copVersion"] == "2013" else 1)'
 
 echo "-- bad payload (expect 400):"
 curl -s -o /dev/null -w "%{http_code}\n" -X POST "$PB_URL/api/equine/sync-assessment" \

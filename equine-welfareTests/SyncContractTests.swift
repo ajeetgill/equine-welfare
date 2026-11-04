@@ -128,6 +128,7 @@ final class SyncContractTests {
         #expect(a["visitDate"] as? Double == 1_750_000_000_000)
         #expect(a["isComplete"] as? Bool == false)
         #expect(a["sideNotes"] as? String == "")
+        #expect(a["copVersion"] as? String == "2013")
 
         let horses = try #require(payload["horses"] as? [[String: Any]])
         #expect(horses.count == 1)
