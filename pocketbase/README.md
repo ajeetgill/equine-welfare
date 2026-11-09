@@ -63,13 +63,41 @@ Tagging a version packages everything (PocketBase linux binary + `pb_hooks/`
 gh release create v1.0.0        # or: git tag v1.0.0 && git push --tags
 ```
 
-On the droplet (first run bootstraps user + systemd service, later runs
-update in place; `pb_data/` is never touched):
+One droplet runs two separate copies, each with its own data, behind Caddy
+(automatic HTTPS):
+
+| env  | folder            | service                  | local port |
+|------|-------------------|--------------------------|------------|
+| prod | `/opt/equine`      | `equine-pocketbase`      | 8090 |
+| test | `/opt/equine-test` | `equine-pocketbase-test` | 8091 |
+
+On the droplet (first run of an env installs Caddy, the service and the
+Caddy site, and asks for the domain; later runs update in place; `pb_data/`
+is never touched):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ajeetgill/equine-welfare/main/deploy/deploy.sh -o deploy.sh
-chmod +x deploy.sh && sudo ./deploy.sh          # latest release
-sudo ./deploy.sh v1.0.0                         # or pin a version / roll back
+chmod +x deploy.sh
+sudo ./deploy.sh test            # latest release to test first
+sudo ./deploy.sh prod            # then to production
+sudo ./deploy.sh prod v1.0.0     # pin a version / roll back
 ```
 
-See `deploy/` for the script and systemd unit.
+After the first run of an env:
+
+```bash
+# superuser (store the password in the password manager)
+sudo -u pocketbase /opt/equine/pocketbase superuser upsert EMAIL PASSWORD --dir /opt/equine/pb_data
+# PocketBase sits behind Caddy, so trust its X-Forwarded-For header
+# (otherwise every client looks like 127.0.0.1 in logs and rate limits):
+# Dashboard -> Settings -> Application -> "User IP proxy headers" = X-Forwarded-For
+```
+
+Backup (DigitalOcean weekly droplet backups are on; for a manual copy):
+
+```bash
+ssh root@DROPLET 'systemctl stop equine-pocketbase && tar czf /root/pb_data.tgz -C /opt/equine pb_data; systemctl start equine-pocketbase'
+scp root@DROPLET:/root/pb_data.tgz .
+```
+
+See `deploy/deploy.sh`.
