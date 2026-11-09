@@ -64,3 +64,16 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Secrets — never commit (server passwords, keys, env files)
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.p12
+*.p8
+*.mobileprovision
+id_rsa*
+id_ed25519*
